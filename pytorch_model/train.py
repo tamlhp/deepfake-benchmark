@@ -31,10 +31,15 @@ def make_weights_for_balanced_classes(images, nclasses):
     return weight
 
 
-def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_set,val_set,batch_size,num_workers,epochs,dropout ):
-    vgg_ext = VggExtractor()
-    capnet = CapsuleNet(2, gpu_id)
-    capsule_loss = CapsuleLoss(gpu_id)
+def train_capsule(manualSeed=0,resume=0,beta1=0.9,dropout=0.05,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20, ):
+    if not os.path.exists(checkpoint):
+        os.makedirs(checkpoint)
+
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    vgg_ext = VggExtractor().to(device)
+    capnet = CapsuleNet(2).to(device)
+    capsule_loss = CapsuleLoss().to(device)
 
 
     if manualSeed is None:
@@ -43,9 +48,9 @@ def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_s
     random.seed(manualSeed)
     torch.manual_seed(manualSeed)
 
-    if gpu_id >= 0:
-        torch.cuda.manual_seed_all(manualSeed)
-        cudnn.benchmark = True
+    # if gpu_id >= 0:
+    #     torch.cuda.manual_seed_all(manualSeed)
+    #     cudnn.benchmark = True
 
     if resume > 0:
         text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
@@ -62,19 +67,19 @@ def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_s
         capnet.train(mode=True)
         optimizer.load_state_dict(torch.load(os.path.join(checkpoint,'optim_' + str(resume) + '.pt')))
 
-        if gpu_id >= 0:
+        if device != 'cpu':
             for state in optimizer.state.values():
                 for k, v in state.items():
                     if isinstance(v, torch.Tensor):
-                        state[k] = v.cuda(gpu_id)
+                        state[k] = v.cuda()
 
-    if gpu_id >= 0:
-        capnet.cuda(gpu_id)
-        vgg_ext.cuda(gpu_id)
-        capsule_loss.cuda(gpu_id)
+    # if gpu_id >= 0:
+    #     capnet.cuda(gpu_id)
+    #     vgg_ext.cuda(gpu_id)
+    #     capsule_loss.cuda(gpu_id)
 
     transform_fwd = transforms.Compose([
-        transforms.Resize((imageSize, imageSize)),
+        transforms.Resize((image_size, image_size)),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomApply([
            transforms.RandomRotation(5),
@@ -111,9 +116,11 @@ def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_s
             img_label = labels_data.numpy().astype(np.float)
             optimizer.zero_grad()
 
-            if gpu_id >= 0:
-                img_data = img_data.cuda(gpu_id)
-                labels_data = labels_data.cuda(gpu_id)
+            img_data = img_data.to(device)
+            labels_data = labels_data.to(device)
+            # if gpu_id >= 0:
+            #     img_data = img_data.cuda(gpu_id)
+            #     labels_data = labels_data.cuda(gpu_id)
 
             input_v = Variable(img_data)
             x = vgg_ext(input_v)
@@ -162,9 +169,11 @@ def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_s
             labels_data[labels_data > 1] = 1
             img_label = labels_data.numpy().astype(np.float)
 
-            if gpu_id >= 0:
-                img_data = img_data.cuda(gpu_id)
-                labels_data = labels_data.cuda(gpu_id)
+            img_data = img_data.to(device)
+            labels_data = labels_data.to(device)
+            # if gpu_id >= 0:
+            #     img_data = img_data.cuda(gpu_id)
+            #     labels_data = labels_data.cuda(gpu_id)
 
             input_v = Variable(img_data)
 
@@ -199,19 +208,22 @@ def train_capsule(manualSeed,gpu_id,resume,checkpoint,lr,beta1,imageSize,train_s
         % (epoch, loss_train, acc_train*100, loss_test, acc_test*100))
 
         text_writer.flush()
-        capnet.train(mode=True)
+        capnet.train()
 
     text_writer.close()
     return
 
-def train_cnn(model,batch_size,num_workers,checkpoint,epochs,print_every=1000  ):
+def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20,print_every=1000  ):
+    if not os.path.exists(checkpoint):
+        os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
-    criterion = nn.BCELoss().cuda()
-    optimizer = optim.Adam(model.parameters(), lr=0.003)
+    model = model.to(device)
+    criterion = nn.BCELoss().to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
 
-    train_transforms = transforms.Compose([transforms.Resize(256),
+    train_transforms = transforms.Compose([transforms.Resize(image_size),
                                            transforms.RandomHorizontalFlip(p=0.5),
                                            transforms.RandomApply([
                                                transforms.RandomRotation(5),
@@ -222,7 +234,7 @@ def train_cnn(model,batch_size,num_workers,checkpoint,epochs,print_every=1000  )
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
-    dataset_train = datasets.ImageFolder('/data/tam/kaggle/extract_raw_img',
+    dataset_train = datasets.ImageFolder(train_set,
                                       transform=train_transforms)
     weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
     weights = torch.DoubleTensor(weights)
@@ -231,7 +243,7 @@ def train_cnn(model,batch_size,num_workers,checkpoint,epochs,print_every=1000  )
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, sampler=sampler,
                                               num_workers=num_workers)
 
-    dataset_val = datasets.ImageFolder('/data/tam/kaggle/extract_raw_img_test',
+    dataset_val = datasets.ImageFolder(val_set,
                                      transform=train_transforms)
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
 
@@ -242,6 +254,7 @@ def train_cnn(model,batch_size,num_workers,checkpoint,epochs,print_every=1000  )
     text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
     model.train()
     steps =0
+    running_loss = 0
     for epoch in range(epochs):
         for inputs, labels in tqdm(dataloader_train):
             #     for inputs, labels in tqdm(testloader):

@@ -109,10 +109,10 @@ class FeatureExtractor(nn.Module):
 
 
 class RoutingLayer(nn.Module):
-    def __init__(self, gpu_id, num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
+    def __init__(self,  num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
         super(RoutingLayer, self).__init__()
 
-        self.gpu_id = gpu_id
+        # self.gpu_id = gpu_id
         self.num_iterations = num_iterations
         self.route_weights = nn.Parameter(torch.randn(num_output_capsules, num_input_capsules, data_out, data_in))
 
@@ -129,8 +129,8 @@ class RoutingLayer(nn.Module):
 
         if random:
             noise = Variable(0.01 * torch.randn(*self.route_weights.size()))
-            if self.gpu_id >= 0:
-                noise = noise.cuda(self.gpu_id)
+            # if self.gpu_id >= 0:
+            #     noise = noise.cuda(self.gpu_id)
             route_weights = self.route_weights + noise
         else:
             route_weights = self.route_weights
@@ -146,15 +146,15 @@ class RoutingLayer(nn.Module):
 
         if dropout > 0.0:
             drop = Variable(torch.FloatTensor(*priors.size()).bernoulli(1.0 - dropout))
-            if self.gpu_id >= 0:
-                drop = drop.cuda(self.gpu_id)
+            # if self.gpu_id >= 0:
+            #     drop = drop.cuda(self.gpu_id)
             priors = priors * drop
 
         logits = Variable(torch.zeros(*priors.size()))
         # logits[b, out_caps, in_caps, data_out, 1]
 
-        if self.gpu_id >= 0:
-            logits = logits.cuda(self.gpu_id)
+        # if self.gpu_id >= 0:
+        #     logits = logits.cuda(self.gpu_id)
 
         num_iterations = self.num_iterations
 
@@ -179,14 +179,14 @@ class RoutingLayer(nn.Module):
 
 
 class CapsuleNet(nn.Module):
-    def __init__(self, num_class, gpu_id):
+    def __init__(self, num_class):
         super(CapsuleNet, self).__init__()
 
         self.num_class = num_class
         self.fea_ext = FeatureExtractor()
         self.fea_ext.apply(self.weights_init)
 
-        self.routing_stats = RoutingLayer(gpu_id=gpu_id, num_input_capsules=NO_CAPS, num_output_capsules=num_class,
+        self.routing_stats = RoutingLayer(num_input_capsules=NO_CAPS, num_output_capsules=num_class,
                                           data_in=8, data_out=4, num_iterations=2)
 
     def weights_init(self, m):
@@ -240,7 +240,7 @@ class Args:
     niter =25
     lr =0.005
     beta1=0.9
-    gpu_id=0
+    # gpu_id=0
     resume=0
     outf='checkpoints/binary_faceforensicspp'
     disable_random = False
@@ -260,9 +260,9 @@ if __name__ == "__main__":
     random.seed(opt.manualSeed)
     torch.manual_seed(opt.manualSeed)
 
-    if opt.gpu_id >= 0:
-        torch.cuda.manual_seed_all(opt.manualSeed)
-        cudnn.benchmark = True
+    # if opt.gpu_id >= 0:
+    #     torch.cuda.manual_seed_all(opt.manualSeed)
+    #     cudnn.benchmark = True
 
     if opt.resume > 0:
         text_writer = open(os.path.join(opt.outf, 'train.csv'), 'a')
@@ -271,8 +271,8 @@ if __name__ == "__main__":
 
 
     vgg_ext = VggExtractor()
-    capnet = CapsuleNet(2, opt.gpu_id)
-    capsule_loss = CapsuleLoss(opt.gpu_id)
+    capnet = CapsuleNet(2)
+    capsule_loss = CapsuleLoss()
 
     optimizer = Adam(capnet.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
@@ -281,16 +281,16 @@ if __name__ == "__main__":
         capnet.train(mode=True)
         optimizer.load_state_dict(torch.load(os.path.join(opt.outf,'optim_' + str(opt.resume) + '.pt')))
 
-        if opt.gpu_id >= 0:
-            for state in optimizer.state.values():
-                for k, v in state.items():
-                    if isinstance(v, torch.Tensor):
-                        state[k] = v.cuda(opt.gpu_id)
+        # if opt.gpu_id >= 0:
+        #     for state in optimizer.state.values():
+        #         for k, v in state.items():
+        #             if isinstance(v, torch.Tensor):
+        #                 state[k] = v.cuda(opt.gpu_id)
 
-    if opt.gpu_id >= 0:
-        capnet.cuda(opt.gpu_id)
-        vgg_ext.cuda(opt.gpu_id)
-        capsule_loss.cuda(opt.gpu_id)
+    # if opt.gpu_id >= 0:
+    #     capnet.cuda(opt.gpu_id)
+    #     vgg_ext.cuda(opt.gpu_id)
+    #     capsule_loss.cuda(opt.gpu_id)
 
     transform_fwd = transforms.Compose([
         transforms.Resize((opt.imageSize, opt.imageSize)),
@@ -326,9 +326,9 @@ if __name__ == "__main__":
             img_label = labels_data.numpy().astype(np.float)
             optimizer.zero_grad()
 
-            if opt.gpu_id >= 0:
-                img_data = img_data.cuda(opt.gpu_id)
-                labels_data = labels_data.cuda(opt.gpu_id)
+            # if opt.gpu_id >= 0:
+            #     img_data = img_data.cuda(opt.gpu_id)
+            #     labels_data = labels_data.cuda(opt.gpu_id)
 
             input_v = Variable(img_data)
             x = vgg_ext(input_v)
@@ -377,9 +377,9 @@ if __name__ == "__main__":
             labels_data[labels_data > 1] = 1
             img_label = labels_data.numpy().astype(np.float)
 
-            if opt.gpu_id >= 0:
-                img_data = img_data.cuda(opt.gpu_id)
-                labels_data = labels_data.cuda(opt.gpu_id)
+            # if opt.gpu_id >= 0:
+            #     img_data = img_data.cuda(opt.gpu_id)
+            #     labels_data = labels_data.cuda(opt.gpu_id)
 
             input_v = Variable(img_data)
 

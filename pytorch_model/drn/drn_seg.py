@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from networks.drn import drn_c_26
+from pytorch_model.drn.drn import drn_c_26
 
 
 def fill_up_weights(up):
@@ -92,6 +92,7 @@ class DRNSub(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+        x = nn.Sigmoid()(x)
         return x
 
 

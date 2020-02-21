@@ -1,7 +1,10 @@
 import os
 import argparse
 import random
+from tf_model.focal_loss import BinaryFocalLoss
 
+# from pytorch_model.train import *
+# from tf_model.train import *
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
     parser.add_argument('--train_set', default="data/train/", help='path to train data ')
@@ -15,9 +18,12 @@ def parse_args():
     parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
     parser.add_argument('--resume',type=int, default = 0, help='Resume from checkpoint ')
 
-    subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,gan,meso,xception')
+    subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnet ,gan,meso,xception')
 
     parser_capsule = subparsers.add_parser('capsule', help='Capsule ')
+    parser_capsule = subparsers.add_parser('drn', help='Capsule ')
+
+    parser_resnet = subparsers.add_parser('resnet', help='Capsule ')
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
 
@@ -32,17 +38,36 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
 
-
-
-    data_path = args.data_path
     model = args.model
     if model== "capsule":
+        from pytorch_model.train import train_capsule
+        train_capsule()
         pass
     elif model == "drn":
+        from pytorch_model.train import train_cnn
+        from pytorch_model.drn.drn_seg import DRNSub
+        model = DRNSub(1)
+        train_cnn(model,batch_size=2)
+        pass
+    elif model == "resnet":
+        from pytorch_model.train import train_cnn
+        from pytorch_model.model_cnn_pytorch import Resnext50
+        model = Resnext50()
+        train_cnn(model)
         pass
     elif model == "gan":
         pass
     elif model == "meso":
+        from tf_model.mesonet.model import Meso4
+        from tf_model.train import train_cnn
+        model = Meso4().model
+        loss = 'binary_crossentropy'
+        train_cnn(model,loss)
         pass
     elif model == "xception":
+        from tf_model.train import train_cnn
+        from tf_model.model_cnn_keras import xception
+        model = xception()
+        loss = BinaryFocalLoss(gamma=2)
+        train_cnn(model,loss)
         pass

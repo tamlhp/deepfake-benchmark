@@ -3,9 +3,9 @@ import tensorflow as tf
 import keras
 from tf_model.focal_loss import BinaryFocalLoss
 
-def xception():
+def xception(image_size=256):
     model = keras.models.Sequential([
-        keras.applications.Xception(include_top=False, weights="imagenet", input_shape=(128, 128, 3)),
+        keras.applications.Xception(include_top=False, weights="imagenet", input_shape=(image_size, image_size, 3)),
         keras.layers.Flatten(),
         #     keras.layers.Dense(128,activation = 'relu',kernel_initializer='random_normal'),
         #     keras.layers.Dense(16,activation = 'relu',kernel_initializer='random_normal'),
@@ -13,9 +13,9 @@ def xception():
     ])
     return model
 
-def inception():
+def inception(image_size=256):
     model = keras.models.Sequential([
-        keras.applications.Xception(include_top=False, weights="imagenet", input_shape=(128, 128, 3)),
+        keras.applications.Xception(include_top=False, weights="imagenet", input_shape=(image_size, image_size, 3)),
         keras.layers.Flatten(),
         #     keras.layers.Dense(128,activation = 'relu',kernel_initializer='random_normal'),
         #     keras.layers.Dense(16,activation = 'relu',kernel_initializer='random_normal'),

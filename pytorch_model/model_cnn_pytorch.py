@@ -1,11 +1,7 @@
 import os, sys, random
-import numpy as np
-import pandas as pd
-import cv2
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 import torchvision.models as models
 
@@ -22,7 +18,7 @@ class MyResNeXt(models.resnet.ResNet):
         self.fc = nn.Linear(2048, 1)
 
 def MyResNetX():
-    model = models.resnet.ResNet(pretrained=True)
+    model = models.resnet.ResNet()
     model.fc = nn.Sequential(nn.Linear(2048, 1),
                                  nn.Sigmoid())
     return model
@@ -33,7 +29,7 @@ def Resnext50():
     return model
 
 def mnasnet():
-    model = models.mnasnet1_0(pretrained=True).cuda()
+    model = models.mnasnet1_0(pretrained=True)
     model.classifier = nn.Sequential(nn.Linear(1280, 1),
                                      nn.Sigmoid())
     return model

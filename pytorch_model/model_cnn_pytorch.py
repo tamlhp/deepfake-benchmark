@@ -22,7 +22,7 @@ def MyResNetX():
     model.fc = nn.Sequential(nn.Linear(2048, 1),
                                  nn.Sigmoid())
     return model
-def Resnext50():
+def resnext50():
     model = models.resnext50_32x4d(pretrained=True)
     model.fc = nn.Sequential(nn.Linear(2048, 1),
                                  nn.Sigmoid())
@@ -32,4 +32,10 @@ def mnasnet():
     model = models.mnasnet1_0(pretrained=True)
     model.classifier = nn.Sequential(nn.Linear(1280, 1),
                                      nn.Sigmoid())
+    return model
+
+def resnext101():
+    model = models.resnext101_32x8d(pretrained=True)
+    model.fc = nn.Sequential(nn.Linear(2048, 1),
+                             nn.Sigmoid())
     return model

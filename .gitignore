@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 .idea/
 checkpoint/
+events.out.tf*

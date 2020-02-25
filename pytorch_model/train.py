@@ -31,7 +31,7 @@ def make_weights_for_balanced_classes(images, nclasses):
     return weight
 
 
-def train_capsule(manualSeed=0,resume=0,beta1=0.9,dropout=0.05,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20, ):
+def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',manualSeed=0,resume=0,beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20, ):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
@@ -213,7 +213,7 @@ def train_capsule(manualSeed=0,resume=0,beta1=0.9,dropout=0.05,train_set = '../.
     text_writer.close()
     return
 
-def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20,print_every=1000  ):
+def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()

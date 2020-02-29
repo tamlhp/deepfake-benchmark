@@ -17,9 +17,10 @@ def get_generate(val_set,image_size,batch_size):
 
     return generator_val
 
-def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,batch_size=16):
+def eval_cnn(model,loss,val_set ='../../extract_raw_img',image_size=256,batch_size=16):
 
     #### Load data
     generator_val = get_generate(val_set,image_size,batch_size)
     ### Compile model
+    model.compile(optimizer="adam", loss=loss, metrics=['accuracy'])
     model.evaluate_generator(generator_val, len(generator_val))

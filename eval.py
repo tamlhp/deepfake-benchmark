@@ -110,8 +110,8 @@ if __name__ == "__main__":
         from tf_model.eval_tf import eval_cnn
         model = Meso4().model
         model.load_weights(args.checkpoint + args.resume)
-
-        eval_cnn(model,val_set = args.val_set,image_size=args.image_size, \
+        loss = 'binary_crossentropy'
+        eval_cnn(model,loss=loss,val_set = args.val_set,image_size=args.image_size, \
                   batch_size=args.batch_size)
         pass
     elif model == "xception_tf":
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         from tf_model.model_cnn_keras import xception
         model = xception()
         model.load_weights(args.checkpoint + args.resume)
-
-        eval_cnn(model, val_set=args.val_set, image_size=args.image_size, \
+        loss = BinaryFocalLoss(gamma=2)
+        eval_cnn(model,loss=loss, val_set=args.val_set, image_size=args.image_size, \
                  batch_size=args.batch_size)
         pass

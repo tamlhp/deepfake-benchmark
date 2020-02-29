@@ -29,9 +29,37 @@ def make_weights_for_balanced_classes(images, nclasses):
     for idx, val in enumerate(images):
         weight[idx] = weight_per_class[val[1]]
     return weight
+def get_generate(train_set,val_set,image_size,batch_size,num_workers):
+    transform_fwd = transforms.Compose([transforms.Resize(image_size),
+                                           transforms.RandomHorizontalFlip(p=0.5),
+                                           transforms.RandomApply([
+                                               transforms.RandomRotation(5),
+                                               transforms.RandomAffine(degrees=5, scale=(0.95, 1.05))
+                                           ], p=0.5),
+                                           transforms.ToTensor(),
+                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                std=[0.229, 0.224, 0.225])
+
+                                           ])
+    dataset_train = datasets.ImageFolder(train_set,
+                                      transform=transform_fwd)
+    assert dataset_train
+    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
+    weights = torch.DoubleTensor(weights)
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+
+    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, sampler=sampler,
+                                              num_workers=num_workers)
+
+    dataset_val = datasets.ImageFolder(val_set,
+                                     transform=transform_fwd)
+    assert dataset_val
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
+
+    return dataloader_train,dataloader_val
 
 
-def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',manualSeed=0,resume=0,beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20, ):
+def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',manualSeed=0,resume=0,beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
@@ -58,8 +86,6 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
         text_writer = open(os.path.join(checkpoint, 'train.csv'), 'w')
 
 
-
-
     optimizer = Adam(capnet.parameters(), lr=lr, betas=(beta1, 0.999))
 
     if resume > 0:
@@ -78,29 +104,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
     #     vgg_ext.cuda(gpu_id)
     #     capsule_loss.cuda(gpu_id)
 
-    transform_fwd = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomApply([
-           transforms.RandomRotation(5),
-           transforms.RandomAffine(degrees=5,scale=(0.95,1.05))
-           ], p=0.5),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        ])
-
-    dataset_train = datasets.ImageFolder(root=train_set, transform=transform_fwd)
-    assert dataset_train
-    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
-    weights = torch.DoubleTensor(weights)
-    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
-
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=int(num_workers))
-
-    dataset_val = datasets.ImageFolder(root=val_set, transform=transform_fwd)
-    assert dataset_val
-    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=int(num_workers))
-
+    dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
 
     for epoch in range(resume+1, epochs+1):
         count = 0
@@ -221,33 +225,7 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-
-
-    train_transforms = transforms.Compose([transforms.Resize(image_size),
-                                           transforms.RandomHorizontalFlip(p=0.5),
-                                           transforms.RandomApply([
-                                               transforms.RandomRotation(5),
-                                               transforms.RandomAffine(degrees=5, scale=(0.95, 1.05))
-                                           ], p=0.5),
-                                           transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
-
-                                           ])
-    dataset_train = datasets.ImageFolder(train_set,
-                                      transform=train_transforms)
-    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
-    weights = torch.DoubleTensor(weights)
-    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
-
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, sampler=sampler,
-                                              num_workers=num_workers)
-
-    dataset_val = datasets.ImageFolder(val_set,
-                                     transform=train_transforms)
-    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
-
-
+    dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
 
     # train_losses, test_losses = [], []
     # import time
@@ -264,7 +242,8 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
             #         inputs, labels = inputs.to(device), labels[1].float().to(device)
 
             optimizer.zero_grad()
-            logps = model.forward(inputs)[:, 0]
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
             loss = criterion(logps, labels)
             #         loss = F.binary_cross_entropy_with_logits(logps, labels)
             loss.backward()
@@ -278,7 +257,8 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
                 with torch.no_grad():
                     for inputs, labels in dataloader_val:
                         inputs, labels = inputs.to(device), labels.float().to(device)
-                        logps = model.forward(inputs)[:, 0]
+                        logps = model.forward(inputs)
+                        logps = logps.squeeze()
                         batch_loss = criterion(logps, labels)
                         #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
                         test_loss += batch_loss.item()

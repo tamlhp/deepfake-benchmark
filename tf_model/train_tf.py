@@ -4,9 +4,7 @@ from sklearn.utils import class_weight
 from keras.preprocessing.image import ImageDataGenerator
 import keras
 
-def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",epochs=20):
-
-    #### Load data
+def get_generate(train_set,val_set,image_size,batch_size):
     dataGenerator = ImageDataGenerator(rescale=1. / 255, rotation_range=5,
                                        width_shift_range=0.05,
                                        height_shift_range=0.05,
@@ -25,6 +23,13 @@ def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../ext
         batch_size=batch_size,
         class_mode='binary',
         subset='training')
+
+    return generator_train,generator_val
+
+def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",epochs=20):
+
+    #### Load data
+    generator_train, generator_val = get_generate(train_set,val_set,image_size,batch_size)
 
 
     # counter = Counter(generator_train.classes)

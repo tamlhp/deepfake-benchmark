@@ -35,7 +35,6 @@ from keras.regularizers import l2
 
 
 import keras
-from IPython.display import SVG
 from keras.utils.vis_utils import model_to_dot
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator

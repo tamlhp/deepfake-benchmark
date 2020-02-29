@@ -88,7 +88,7 @@ def eval_capsule(val_set ='../../extract_raw_img',resume=0,image_size=256,batch_
 
     return
 
-def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume=0,batch_size=16,num_workers=8,checkpoint="checkpoint"):
+def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint"):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
@@ -96,7 +96,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume=0,batc
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load( os.path.join(checkpoint, 'mnasnet_pytorch_%d.pt' % resume)))
+    model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
 
     dataloader_val = get_generate(val_set,image_size,batch_size,num_workers)
 

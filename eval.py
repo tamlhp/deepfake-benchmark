@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--checkpoint',default = None,required=True, help='path to checkpoint ')
     parser.add_argument('--gpu_id',type=str, default = "0", help='GPU id ')
-    parser.add_argument('--resume',type=int, default = 0, help='Resume from checkpoint ')
+    parser.add_argument('--resume',type=str, default = "", help='Resume from checkpoint ')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         from tf_model.mesonet.model import Meso4
         from tf_model.eval_tf import eval_cnn
         model = Meso4().model
-        model.load_weights(args.checkpoint + "/checkpoint_{:04d}.pth".format(args.resume))
+        model.load_weights(args.checkpoint + args.resume)
 
         eval_cnn(model,val_set = args.val_set,image_size=args.image_size, \
                   batch_size=args.batch_size)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         from tf_model.eval_tf import eval_cnn
         from tf_model.model_cnn_keras import xception
         model = xception()
-        model.load_weights(args.checkpoint + "/checkpoint_{:04d}.pth".format(args.resume))
+        model.load_weights(args.checkpoint + args.resume)
 
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, \
                  batch_size=args.batch_size)

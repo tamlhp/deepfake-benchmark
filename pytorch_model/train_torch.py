@@ -128,6 +128,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
 
             input_v = Variable(img_data)
             x = vgg_ext(input_v)
+            x = x.cpu()
             classes, class_ = capnet(x, random=random, dropout=dropout)
 
             loss_dis = capsule_loss(classes, Variable(labels_data, requires_grad=False))

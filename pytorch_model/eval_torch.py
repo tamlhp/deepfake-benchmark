@@ -64,6 +64,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
         input_v = Variable(img_data)
 
         x = vgg_ext(input_v)
+        x = x.cpu()
         classes, class_ = capnet(x, random=False)
 
         loss_dis = capsule_loss(classes, Variable(labels_data, requires_grad=False))

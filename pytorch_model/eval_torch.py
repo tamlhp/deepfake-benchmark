@@ -83,7 +83,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
         tol_label = np.concatenate((tol_label, img_label))
         tol_pred = np.concatenate((tol_pred, output_pred))
         loss_test += loss_dis_data
-        count += 1
+        count += batch_size
 
     acc_test = metrics.accuracy_score(tol_label, tol_pred)
     loss_test /= count

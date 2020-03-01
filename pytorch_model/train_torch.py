@@ -150,7 +150,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             tol_pred = np.concatenate((tol_pred, output_pred))
 
             loss_train += loss_dis_data
-            count += 1
+            count += batch_size
 
 
         acc_train = metrics.accuracy_score(tol_label, tol_pred)
@@ -201,7 +201,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             tol_pred = np.concatenate((tol_pred, output_pred))
 
             loss_test += loss_dis_data
-            count += 1
+            count += batch_size
 
         acc_test = metrics.accuracy_score(tol_label, tol_pred)
         loss_test /= count

@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument('--image_size', type=int, default=256, help='the height / width of the input image to network')
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--checkpoint',default = None,required=True, help='path to checkpoint ')
-    parser.add_argument('--gpu_id',type=str, default = "0", help='GPU id ')
+    parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
     parser.add_argument('--resume',type=str, default = "", help='Resume from checkpoint ')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print(args)
 
     model = args.model
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     if model== "capsule":
         from pytorch_model.eval_torch import eval_capsule
         eval_capsule(val_set = args.val_set,gpu_id=int(args.gpu_id),resume=args.resume, \

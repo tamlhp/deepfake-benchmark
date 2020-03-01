@@ -50,7 +50,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     if model== "capsule":
         from pytorch_model.eval_torch import eval_capsule
-        eval_capsule(val_set = args.val_set,gpu_id=str(args.gpu_id),resume=args.resume, \
+        eval_capsule(val_set = args.val_set,gpu_id=int(args.gpu_id),resume=args.resume, \
                       image_size=args.image_size,batch_size=args.batch_size, \
                       num_workers=args.workers,checkpoint=args.checkpoint)
         pass

@@ -29,15 +29,16 @@ def get_generate(val_set,image_size,batch_size,num_workers):
     return dataloader_val
 
 
-def eval_capsule(val_set ='../../extract_raw_img',resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint"):
+def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint"):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     vgg_ext = VggExtractor().to(device)
-    capnet = CapsuleNet(2).to(device)
+    capnet = CapsuleNet(2,gpu_id)
     capsule_loss = CapsuleLoss().to(device)
+    # optimizer = Adam(capnet.parameters(), lr=0.003, betas=(0.9, 0.999))
 
     capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
 

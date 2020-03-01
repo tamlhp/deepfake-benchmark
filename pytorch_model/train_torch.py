@@ -59,14 +59,14 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
     return dataloader_train,dataloader_val
 
 
-def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',manualSeed=0,resume=0,beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20):
+def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume=0,beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     vgg_ext = VggExtractor().to(device)
-    capnet = CapsuleNet(2).to(device)
+    capnet = CapsuleNet(2,gpu_id=gpu_id).to(device)
     capsule_loss = CapsuleLoss().to(device)
 
 
@@ -105,7 +105,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
     #     capsule_loss.cuda(gpu_id)
 
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
-
+    capnet.train()
     for epoch in range(resume+1, epochs+1):
         count = 0
         loss_train = 0

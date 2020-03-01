@@ -36,7 +36,7 @@ def parse_args():
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
 
-    parser_meso = subparsers.add_parser('meso', help='Mesonet')
+    parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
-        train_capsule(train_set = args.train_set,val_set = args.val_set,manualSeed=0,resume=0,beta1=0.9, \
+        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=0,resume=0,beta1=0.9, \
                       dropout=0.05,image_size=args.image_size,batch_size=args.batch_size,lr=args.lr, \
                       num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,)
         pass
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         pass
     elif model == "gan":
         pass
-    elif model == "meso":
+    elif model == "meso4":
         from tf_model.mesonet.model import Meso4
         from tf_model.train_tf import train_cnn
         model = Meso4().model

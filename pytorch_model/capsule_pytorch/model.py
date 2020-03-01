@@ -109,10 +109,10 @@ class FeatureExtractor(nn.Module):
 
 
 class RoutingLayer(nn.Module):
-    def __init__(self,  num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
+    def __init__(self,gpu_id,  num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
         super(RoutingLayer, self).__init__()
 
-        # self.gpu_id = gpu_id
+        self.gpu_id = gpu_id
         self.num_iterations = num_iterations
         self.route_weights = nn.Parameter(torch.randn(num_output_capsules, num_input_capsules, data_out, data_in))
 
@@ -129,8 +129,8 @@ class RoutingLayer(nn.Module):
 
         if random:
             noise = Variable(0.01 * torch.randn(*self.route_weights.size()))
-            # if self.gpu_id >= 0:
-            #     noise = noise.cuda(self.gpu_id)
+            if self.gpu_id >= 0:
+                noise = noise.cuda(self.gpu_id)
             route_weights = self.route_weights + noise
         else:
             route_weights = self.route_weights
@@ -146,15 +146,15 @@ class RoutingLayer(nn.Module):
 
         if dropout > 0.0:
             drop = Variable(torch.FloatTensor(*priors.size()).bernoulli(1.0 - dropout))
-            # if self.gpu_id >= 0:
-            #     drop = drop.cuda(self.gpu_id)
+            if self.gpu_id >= 0:
+                drop = drop.cuda(self.gpu_id)
             priors = priors * drop
 
         logits = Variable(torch.zeros(*priors.size()))
         # logits[b, out_caps, in_caps, data_out, 1]
 
-        # if self.gpu_id >= 0:
-        #     logits = logits.cuda(self.gpu_id)
+        if self.gpu_id >= 0:
+            logits = logits.cuda(self.gpu_id)
 
         num_iterations = self.num_iterations
 
@@ -179,14 +179,14 @@ class RoutingLayer(nn.Module):
 
 
 class CapsuleNet(nn.Module):
-    def __init__(self, num_class):
+    def __init__(self, num_class,gpu_id=-1):
         super(CapsuleNet, self).__init__()
 
         self.num_class = num_class
         self.fea_ext = FeatureExtractor()
         self.fea_ext.apply(self.weights_init)
 
-        self.routing_stats = RoutingLayer(num_input_capsules=NO_CAPS, num_output_capsules=num_class,
+        self.routing_stats = RoutingLayer(gpu_id=gpu_id,num_input_capsules=NO_CAPS, num_output_capsules=num_class,
                                           data_in=8, data_out=4, num_iterations=2)
 
     def weights_init(self, m):

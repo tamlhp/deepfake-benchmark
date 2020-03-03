@@ -109,6 +109,8 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "gan":
+        from tf_model.train_tf import train_gan
+        train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,checkpoint=args.checkpoint)
         pass
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4

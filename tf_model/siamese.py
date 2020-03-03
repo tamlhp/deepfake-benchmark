@@ -83,8 +83,13 @@ def get_siamese_model(input_shape):
     prediction = Dense(1, activation='sigmoid', bias_initializer=initialize_bias)(L1_distance)
 
     # Connect the inputs with the outputs
-    siamese_net = Model(inputs=[left_input, right_input], outputs=prediction)
+    # siamese_net = Model(inputs=[left_input, right_input], outputs=prediction)
 
+    ####################
+    model.add(Dense(1,activation='sigmoid', bias_initializer=initialize_bias))
+    class_1 = model(left_input)
+    class_2 = model(right_input)
+    siamese_net = Model(inputs=[left_input, right_input], outputs=[prediction,class_1,class_2])
     # return the model
     return siamese_net
 
@@ -139,15 +144,19 @@ class DataGenerator(keras.utils.Sequence):
         X_l = np.empty((self.batch_size, self.image_size, self.image_size, 3))
         X_r = np.empty((self.batch_size, self.image_size, self.image_size, 3))
         y = np.empty((self.batch_size), dtype=int)
+        y1 = np.empty((self.batch_size), dtype=int)
+        y2 = np.empty((self.batch_size), dtype=int)
 
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
             img = Image.open(ID).resize((self.image_size, self.image_size))
+            y1[i] = int(rr)
             X_l[i,] = np.array(img)
             rr2 = random.randint(0, 1)
+            y2[i] = int(rr2)
             ID2 = ""
-            if rr == 0:
+            if rr2 == 0:
                 ID2 = random.choice(self.df_path)
             else:
                 ID2 = random.choice(self.real_path)
@@ -156,6 +165,7 @@ class DataGenerator(keras.utils.Sequence):
             # Store class
             y[i] = 1 if rr == rr2 else 0
         X = [X_l, X_r]
+        y = [y,y1,y2]
         return X, y
 
 

@@ -12,6 +12,7 @@ from facenet_pytorch import MTCNN
 import glob
 import matplotlib.pyplot as plt
 import torch
+torch.multiprocessing.set_start_method('spawn')
 
 # from pytorch_model.train import *
 # from tf_model.train import *

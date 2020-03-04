@@ -73,7 +73,10 @@ def extract_face(vi):
         face = image[y0:y1, x0:x1]
         plt.imsave(join(output, name_vi + "_" + str(id_frame) + ".jpg"), face, format='jpg')
         id_frame+=1
-import multiprocessing
+# import multiprocessing
+
+from concurrent.futures import ThreadPoolExecutor
+
 args = parse_args()
 if __name__ == "__main__":
 
@@ -81,5 +84,12 @@ if __name__ == "__main__":
     # print(paths[0])
     # extract_face(paths[0])
     print(len(paths))
-    pool = multiprocessing.Pool(args.workers)
-    pool.map(extract_face, tqdm(paths))
+    # pool = multiprocessing.Pool(args.workers)
+    # pool.map(extract_face, tqdm(paths))
+    # def process_file(i):
+    #     extract_face
+    #     return y_pred
+
+
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        predictions = ex.map(extract_face, tqdm(paths))

@@ -1,19 +1,22 @@
-import os
+# import os
 import argparse
-import random
+# import random
 from os.path import isfile, join
-import json
+# import json
 from tqdm import tqdm
 import cv2
-import numpy as np
-import pickle
+# import numpy as np
+# import pickle
 from facenet_pytorch import MTCNN
-from operator import itemgetter
+# from operator import itemgetter
 import glob
 import matplotlib.pyplot as plt
+import torch
 
 # from pytorch_model.train import *
 # from tf_model.train import *
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
     parser.add_argument('--inp', default="data/train/", help='path to train data ')
@@ -23,7 +26,7 @@ def parse_args():
 
     return parser.parse_args()
 
-detector = MTCNN()
+detector = MTCNN(device=device)
 
 
 def extract_face(vi):
@@ -78,4 +81,4 @@ if __name__ == "__main__":
     # extract_face(paths[0])
     print(len(paths))
     pool = multiprocessing.Pool(args.workers)
-    pool.map(extract_face, paths)
+    pool.map(extract_face, tqdm(paths))

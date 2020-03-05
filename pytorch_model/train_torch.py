@@ -218,7 +218,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
     text_writer.close()
     return
 
-def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
+def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
@@ -227,6 +227,8 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
     criterion = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
+    if resume != ''
+    model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
 
     # train_losses, test_losses = [], []
     # import time

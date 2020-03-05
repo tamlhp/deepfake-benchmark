@@ -58,3 +58,27 @@ def xception():
     model[0].final_block.pool = nn.Sequential(nn.AdaptiveAvgPool2d((1,1)))
     model = FCN(model, 2048)
     return model
+
+
+class FCN2(torch.nn.Module):
+    def __init__(self, base):
+        super(FCN2, self).__init__()
+        self.base = base
+
+    def forward(self, x):
+        x = self.base(x)
+        print(x.size(-1))
+        x = nn.Linear(x.size(-1), 1)(x)
+        print(x.size)
+        x = nn.Sigmoid()(x)
+        return x
+def xception2():
+    model = get_model("xception", pretrained=False)
+    model = nn.Sequential(*list(model.children())[:-1]) # Remove original output layer
+    model[0].final_block.pool = nn.Sequential(nn.Flatten())
+    model = FCN2(model)
+    return model
+
+from torchsummary import summary
+model = xception2()
+summary(model,(3,256,256))

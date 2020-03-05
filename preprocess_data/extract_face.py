@@ -5,7 +5,7 @@ from os.path import isfile, join
 # import json
 from tqdm import tqdm
 import cv2
-# import numpy as np
+import numpy as np
 # import pickle
 from facenet_pytorch import MTCNN
 # from operator import itemgetter
@@ -28,11 +28,11 @@ def parse_args():
     return parser.parse_args()
 
 detector = MTCNN(device=device)
-
+margin = 0.2
 
 def extract_face(vi):
     output = args.output
-    margin = 0.2
+
     duration = args.duration
     # data = glob.glob("/hdd/tam/FaceForensics/data/original_sequences/youtube/c23/videos/*.mp4")
     # print(vi)
@@ -57,7 +57,8 @@ def extract_face(vi):
         #         face_positions = face_recognition.face_locations(img)
         face_positions = detector.detect(image)
         try:
-            face_position = face_positions[0][0]
+            # face_position = face_positions[0][0]
+            face_position = face_positions[0][np.argmax(face_positions[1])]
         except:
             # print(face_positions)
             continue

@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--checkpoint',default = None,required=True, help='path to checkpoint ')
     parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
-    parser.add_argument('--resume',type=int, default = 0, help='Resume from checkpoint ')
+    parser.add_argument('--resume',type=str, default = '', help='Resume from checkpoint ')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
-        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=0,resume=0,beta1=0.9, \
+        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=0,resume=args.resume,beta1=0.9, \
                       dropout=0.05,image_size=args.image_size,batch_size=args.batch_size,lr=args.lr, \
                       num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,)
         pass
@@ -63,49 +63,49 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.drn.drn_seg import DRNSub
         model = DRNSub(1)
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "local_nn":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.loacal_nn import local_nn
         model = local_nn()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "self_attention":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.self_attention import self_attention
         model = self_attention()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "resnext50":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext50
         model = resnext50()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "resnext101":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext101
         model = resnext101()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "mnasnet":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import mnasnet
         model = mnasnet()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "xception_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception
         model = xception()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
         pass
     elif model == "gan":
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         from tf_model.train_tf import train_cnn
         model = Meso4().model
         loss = 'binary_crossentropy'
-        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)
         pass
     elif model == "xception_tf":
@@ -125,6 +125,6 @@ if __name__ == "__main__":
         from tf_model.model_cnn_keras import xception
         model = xception()
         loss = BinaryFocalLoss(gamma=2)
-        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size, \
+        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter)
         pass

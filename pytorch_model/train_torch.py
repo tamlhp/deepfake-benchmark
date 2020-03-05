@@ -227,7 +227,7 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
     criterion = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
-    if resume != ''
+    if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
 
     # train_losses, test_losses = [], []

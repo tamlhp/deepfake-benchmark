@@ -78,7 +78,10 @@ def xception2():
     model[0].final_block.pool = nn.Sequential(nn.Flatten())
     model = FCN2(model)
     return model
+if __name__ == "__main__":
+    from torchsummary import summary
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    model = xception2().to(device)
 
-from torchsummary import summary
-model = xception2()
-summary(model,(3,256,256))
+    summary(model,(3,256,256))

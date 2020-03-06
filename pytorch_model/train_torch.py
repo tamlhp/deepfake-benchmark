@@ -218,6 +218,33 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
     text_writer.close()
     return
 
+
+def eval_train(model ,dataloader_val,device,criterion,text_writer ):
+    test_loss = 0
+    accuracy = 0
+    model.eval()
+    with torch.no_grad():
+        for inputs, labels in dataloader_val:
+            inputs, labels = inputs.to(device), labels.float().to(device)
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
+            batch_loss = criterion(logps, labels)
+            #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+            test_loss += batch_loss.item()
+            #                     print("labels : ",labels)
+            #                     print("logps  : ",logps)
+            equals = labels == (logps > 0.5)
+            #                     print("equals   ",equals)
+            accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+    #                 train_losses.append(running_loss/len(trainloader))
+    #             test_losses.append(test_loss/len(testloader))
+    print(
+          f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
+          f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
+    text_writer.write('Test loss %.4f, Test accuracy  %.4f \n' % (
+        test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
+    text_writer.flush()
+    model.train()
 def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
@@ -282,6 +309,7 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
 
                 running_loss = 0
                 model.train()
+        eval_train(model ,dataloader_val,device,criterion,text_writer)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'mnasnet_pytorch_%d.pt' % epoch))
     return
 

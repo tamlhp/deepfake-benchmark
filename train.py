@@ -11,13 +11,14 @@ def parse_args():
     parser.add_argument('--train_set', default="data/train/", help='path to train data ')
     parser.add_argument('--val_set', default="data/test/", help='path to test data ')
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
-    parser.add_argument('--lr', type=float, default=0.003, help='learning rate')
+    parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
     parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
     parser.add_argument('--image_size', type=int, default=256, help='the height / width of the input image to network')
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--checkpoint',default = None,required=True, help='path to checkpoint ')
     parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
     parser.add_argument('--resume',type=str, default = '', help='Resume from checkpoint ')
+    parser.add_argument('--print_every',type=int, default = 5000, help='Print evaluate info every step train')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
 
@@ -65,56 +66,64 @@ if __name__ == "__main__":
         from pytorch_model.drn.drn_seg import DRNSub
         model = DRNSub(1)
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "local_nn":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.loacal_nn import local_nn
         model = local_nn()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "self_attention":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.self_attention import self_attention
         model = self_attention()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "resnext50":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext50
         model = resnext50()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "resnext101":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext101
         model = resnext101()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "mnasnet":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import mnasnet
         model = mnasnet()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "xception_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception
         model = xception()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "xception2_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception2
         model = xception2()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,print_every=5000)
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
         pass
     elif model == "gan":
         from tf_model.train_tf import train_gan

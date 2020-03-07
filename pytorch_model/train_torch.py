@@ -310,6 +310,6 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
                 running_loss = 0
                 model.train()
         eval_train(model ,dataloader_val,device,criterion,text_writer)
-        torch.save(model.state_dict(), os.path.join(checkpoint, 'mnasnet_pytorch_%d.pt' % epoch))
+        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
     return
 

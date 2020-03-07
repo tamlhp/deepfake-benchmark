@@ -28,6 +28,7 @@ def parse_args():
     parser_resnet = subparsers.add_parser('resnext101', help='Resnext101 ')
     parser_resnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
     parser_resnet = subparsers.add_parser('xception_torch', help='Xception pytorch ')
+    parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
 
@@ -100,6 +101,13 @@ if __name__ == "__main__":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.xception import xception
         model = xception(pretrained=False)
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+        pass
+    elif model == "xception2_torch":
+        from pytorch_model.eval_torch import eval_cnn
+        from pytorch_model.xception import xception2
+        model = xception2(pretrained=False)
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
         pass

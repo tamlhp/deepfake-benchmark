@@ -52,8 +52,8 @@ class FCN(torch.nn.Module):
         x = self.base(x)
         return self.h1(x)
 
-def xception():
-    model = get_model("xception", pretrained=False)
+def xception(pretrained = False):
+    model = get_model("xception", pretrained=pretrained)
     model = nn.Sequential(*list(model.children())[:-1]) # Remove original output layer
     model[0].final_block.pool = nn.Sequential(nn.AdaptiveAvgPool2d((1,1)))
     model = FCN(model, 2048)
@@ -64,16 +64,16 @@ class FCN2(torch.nn.Module):
     def __init__(self, base):
         super(FCN2, self).__init__()
         self.base = base
-
+        self.l = nn.Linear(2048 * 8 * 8, 1)
     def forward(self, x):
         x = self.base(x)
-        print(x.size(-1))
-        x = nn.Linear(x.size(-1), 1)(x)
-        print(x.size)
+        # print(x.size(-1))
+        x = self.l(x)
+        # print(x.size)
         x = nn.Sigmoid()(x)
         return x
-def xception2():
-    model = get_model("xception", pretrained=False)
+def xception2(pretrained = False):
+    model = get_model("xception", pretrained=pretrained)
     model = nn.Sequential(*list(model.children())[:-1]) # Remove original output layer
     model[0].final_block.pool = nn.Sequential(nn.Flatten())
     model = FCN2(model)

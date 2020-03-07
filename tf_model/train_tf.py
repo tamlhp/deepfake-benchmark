@@ -4,6 +4,7 @@ from sklearn.utils import class_weight
 from keras.preprocessing.image import ImageDataGenerator
 import keras
 import os
+from keras.optimizers import Adam
 
 def get_generate(train_set,val_set,image_size,batch_size):
     dataGenerator = ImageDataGenerator(rescale=1. / 255, rotation_range=5,
@@ -27,12 +28,12 @@ def get_generate(train_set,val_set,image_size,batch_size):
 
     return generator_train,generator_val
 
-def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",epochs=20):
+def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
 
     #### Load data
     generator_train, generator_val = get_generate(train_set,val_set,image_size,batch_size)
-
-
+    if resume != "":
+        model.load_weights(os.path.join(checkpoint, resume))
     # counter = Counter(generator_train.classes)
     # max_val = float(max(counter.values()))
     # class_weights = {class_id: max_val / num_images for class_id, num_images in counter.items()}
@@ -53,6 +54,27 @@ def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../ext
                         epochs=epochs, workers=num_workers, validation_steps=len(generator_val), class_weight=class_weights,
                         callbacks=callbacks)
 
+
+def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
+    from tf_model.siamese import DataGenerator
+    generator_train = DataGenerator(path=train_set, batch_size=batch_size)
+    generator_val = DataGenerator(path=val_set, batch_size=batch_size)
+    print(len(generator_train))
+    # model = get_siamese_model((256, 256, 3))
+    # model.summary()
+    # model.load_weights("siamese/checkpoint_0014.pth")
+    if resume != "":
+        model.load_weights(os.path.join(checkpoint, resume))
+    model.compile(loss=loss, optimizer=Adam(lr=0.001), metrics=['accuracy'])
+
+    tensorboard = keras.callbacks.TensorBoard(log_dir=checkpoint)
+    checkpoints = keras.callbacks.ModelCheckpoint(checkpoint + "/checkpoint_{epoch:04d}.pth", monitor='val_loss', verbose=0, save_best_only=False, period=2)
+    # early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=0)
+    callbacks = [tensorboard, checkpoints]
+
+    model.fit_generator(generator_train,validation_data=generator_val,steps_per_epoch=len(generator_train), validation_steps=len(generator_val),epochs=epochs, workers=num_workers,verbose=1,callbacks=callbacks)
+    # model.fit_generator(generator_train, validation_data=generator_val, epochs=50, workers=1,)
+                        # callbacks=[tensorboard_callback, checkpoints])
 def train_gan(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',training_seed=0,checkpoint="checkpoint"):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil

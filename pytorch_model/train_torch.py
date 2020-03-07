@@ -250,6 +250,10 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
+    torch.manual_seed(0)
+    if device == "cuda":
+        torch.cuda.manual_seed_all(0)
+        cudnn.benchmark = True
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)

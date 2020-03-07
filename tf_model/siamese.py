@@ -3,6 +3,8 @@
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from keras.backend.tensorflow_backend import set_session
 
 config = tf.ConfigProto()
@@ -23,22 +25,11 @@ from keras.layers.pooling import MaxPooling2D
 from keras.layers.core import Lambda, Flatten, Dense
 from keras.regularizers import l2
 from keras import backend as K
+import random
+import glob
 
-def initialize_weights(shape, name=None):
-    """
-        The paper, http://www.cs.utoronto.ca/~gkoch/files/msc-thesis.pdf
-        suggests to initialize CNN layer weights with mean as 0.0 and standard deviation of 0.01
-    """
-    return np.random.normal(loc=0.0, scale=1e-2, size=shape)
-
-
-def initialize_bias(shape, name=None):
-    """
-        The paper, http://www.cs.utoronto.ca/~gkoch/files/msc-thesis.pdf
-        suggests to initialize CNN layer bias with mean as 0.5 and standard deviation of 0.01
-    """
-    return np.random.normal(loc=0.5, scale=1e-2, size=shape)
-
+from PIL import Image
+import keras
 
 def get_siamese_model(input_shape):
     """
@@ -50,24 +41,20 @@ def get_siamese_model(input_shape):
 
     # Convolutional Neural Network
     model = Sequential()
-    model.add(Conv2D(64, (10, 10), activation='relu', input_shape=input_shape,
-                     kernel_initializer=initialize_weights, kernel_regularizer=l2(2e-4)))
+    model.add(Conv2D(64, (10, 10), activation='relu', input_shape=input_shape,\
+                    kernel_regularizer=l2(2e-4)))
     model.add(MaxPooling2D())
-    model.add(Conv2D(128, (7, 7), activation='relu',
-                     kernel_initializer=initialize_weights,
-                     bias_initializer=initialize_bias, kernel_regularizer=l2(2e-4)))
+    model.add(Conv2D(128, (7, 7), activation='relu',\
+                      kernel_regularizer=l2(2e-4)))
     model.add(MaxPooling2D())
-    model.add(Conv2D(128, (4, 4), activation='relu', kernel_initializer=initialize_weights,
-                     bias_initializer=initialize_bias, kernel_regularizer=l2(2e-4)))
+    model.add(Conv2D(128, (4, 4), activation='relu', kernel_regularizer=l2(2e-4)))
     model.add(MaxPooling2D())
-    model.add(Conv2D(256, (4, 4), activation='relu', kernel_initializer=initialize_weights,
-                     bias_initializer=initialize_bias, kernel_regularizer=l2(2e-4)))
+    model.add(Conv2D(256, (4, 4), activation='relu', kernel_regularizer=l2(2e-4)))
     model.add(MaxPooling2D())
     model.add(MaxPooling2D())
     model.add(Flatten())
-    model.add(Dense(4096, activation='sigmoid',
-                    kernel_regularizer=l2(1e-3),
-                    kernel_initializer=initialize_weights, bias_initializer=initialize_bias))
+    model.add(Dense(4096, activation='sigmoid',\
+                    kernel_regularizer=l2(1e-3)))
 
     # Generate the encodings (feature vectors) for the two images
     encoded_l = model(left_input)
@@ -80,26 +67,20 @@ def get_siamese_model(input_shape):
     L1_distance = L1_layer([encoded_l, encoded_r])
 
     # Add a dense layer with a sigmoid unit to generate the similarity score
-    prediction = Dense(1, activation='sigmoid', bias_initializer=initialize_bias)(L1_distance)
+    prediction = Dense(1, activation='sigmoid')(L1_distance)
 
     # Connect the inputs with the outputs
     # siamese_net = Model(inputs=[left_input, right_input], outputs=prediction)
 
     ####################
-    model.add(Dense(1,activation='sigmoid', bias_initializer=initialize_bias))
-    class_1 = model(left_input)
-    class_2 = model(right_input)
-    siamese_net = Model(inputs=[left_input, right_input], outputs=[prediction,class_1,class_2])
+    # model.add(Dense(1,activation='sigmoid'))
+    dense = Dense(1, activation='sigmoid')
+    class_1 = dense(encoded_l)
+    class_2 = dense(encoded_r)
+    siamese_net = Model(inputs=[left_input, right_input], outputs=[class_1,class_2,prediction])
+    # siamese_net = Model(inputs=[left_input, right_input], outputs=[prediction])
     # return the model
     return siamese_net
-
-
-import random
-import glob
-
-from PIL import Image
-import keras
-
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
@@ -165,22 +146,24 @@ class DataGenerator(keras.utils.Sequence):
             # Store class
             y[i] = 1 if rr == rr2 else 0
         X = [X_l, X_r]
-        y = [y,y1,y2]
+        y = [y1,y2,y]
         return X, y
 
+if __name__ == "__main__":
+    generator_train = DataGenerator(path="../../extract_raw_img/", batch_size=1)
+    generator_val = DataGenerator(path="../../extract_raw_img/", batch_size=1)
+    print(len(generator_train))
+    model = get_siamese_model((256, 256, 3))
+    model.summary()
+    # model.load_weights("siamese/checkpoint_0014.pth")
 
-generator_train = DataGenerator(path='/hdd/tam/kaggle/extract_raw_img', batch_size=16)
-generator_val = DataGenerator(path='/hdd/tam/kaggle/extract_raw_img_test', batch_size=16)
+    model.compile(loss="binary_crossentropy", optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
-model = get_siamese_model((256, 256, 3))
-model.summary()
-model.load_weights("siamese/checkpoint_0014.pth")
+    tensorboard_callback = keras.callbacks.TensorBoard(log_dir="./checpoint")
+    checkpoints = keras.callbacks.ModelCheckpoint("./checpoint/checkpoint_{epoch:04d}.pth", monitor='val_loss', verbose=0,\
+                                                  save_best_only=False, period=1)
 
-model.compile(loss="binary_crossentropy", optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    model.fit_generator(generator_train,steps_per_epoch=len(generator_train),epochs=50, workers=1,verbose=1)
+    # model.fit_generator(generator_train, validation_data=generator_val, epochs=50, workers=1,)
+                        # callbacks=[tensorboard_callback, checkpoints])
 
-tensorboard_callback = keras.callbacks.TensorBoard(log_dir="./siamese")
-checkpoints = keras.callbacks.ModelCheckpoint("./siamese/checkpoint_{epoch:04d}.pth", monitor='val_loss', verbose=0,
-                                              save_best_only=False, period=1)
-
-model.fit_generator(generator_train, validation_data=generator_val, epochs=50, workers=8,
-                    callbacks=[tensorboard_callback, checkpoints], initial_epoch=14)

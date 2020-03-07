@@ -23,10 +23,10 @@ IMGWIDTH = 128
 
 
 class Config():
-    training_dir = "/data/tam/kaggle/train_imgs/"
-    testing_dir = "/data/tam/kaggle/test_imgs/"
+    training_dir = "../../../extract_raw_img/"
+    testing_dir = "../../../extract_raw_img/"
     train_batch_size = 32
-    train_number_epochs = 100
+    train_number_epochs = 1
 
 
 class SiameseNetworkDataset(Dataset):
@@ -124,19 +124,20 @@ train_dataloader = DataLoader(siamese_dataset,
                               shuffle=True,
                               num_workers=8,
                               batch_size=Config.train_batch_size)
-
-net = SiameseNetworkResnet().cuda()
+device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+net = SiameseNetworkResnet().to(device)
 criterion = ContrastiveLoss(16)
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 import time
-
+from tqdm import tqdm
 iteration_number = 0
 for epoch in range(0, Config.train_number_epochs):
     for i, data in enumerate(train_dataloader, 0):
         img0, img1, label = data
-        img0, img1, label = img0.cuda(), img1.cuda(), label.cuda()
-        time.sleep(0.02)
+        img0, img1, label = img0.to(device), img1.to(device), label.to(device)
+        print(i)
         #         img0, img1 , label = img0, img1 , label
         # print(img0.size())
         optimizer.zero_grad()

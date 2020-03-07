@@ -35,6 +35,7 @@ def parse_args():
     parser_resnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
     parser_resnet = subparsers.add_parser('xception_torch', help='Xception pytorch ')
     parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
+    parser_resnet = subparsers.add_parser('dsp_fwa', help='Xception2 pytorch ')
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
 
@@ -44,7 +45,8 @@ def parse_args():
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
 
     ## tf
-    parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet')
+    parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
+    parser_xception_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
 
 
     return parser.parse_args()
@@ -125,6 +127,14 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
+    elif model == "dsp_fwa":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.DSP_FWA.models.classifier import SPPNet
+        model = SPPNet(backbone=50, num_class=1)
+        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
+        pass
     elif model == "gan":
         from tf_model.train_tf import train_gan
         train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,checkpoint=args.checkpoint)
@@ -145,3 +155,10 @@ if __name__ == "__main__":
         train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter)
         pass
+    elif model == "siamese_tf":
+        from tf_model.siamese import get_siamese_model
+        from tf_model.train_tf import train_siamese
+        model = get_siamese_model((256, 256, 3))
+        loss = 'binary_crossentropy'
+        train_siamese(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)

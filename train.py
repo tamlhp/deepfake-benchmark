@@ -35,7 +35,7 @@ def parse_args():
     parser_mnasnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
     parser_xception_torch = subparsers.add_parser('xception_torch', help='Xception pytorch ')
     parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
-    parser_dsp_fwa = subparsers.add_parser('dsp_fwa', help='Xception2 pytorch ')
+    parser_dsp_fwa = subparsers.add_parser('dsp_fwa', help='DSP_SWA pytorch ')
     parser_siamese_torch = subparsers.add_parser('siamese_torch', help='Siamese pytorch ')
     parser_siamese_torch.add_argument("--length_embed",type=int,required=False,default=1024,help="Length of embed vector")
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
         pass
     elif model == "local_nn":
         from pytorch_model.train_torch import train_cnn
-        from pytorch_model.loacal_nn import local_nn
+        from pytorch_model.local_nn import local_nn
         model = local_nn()
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\

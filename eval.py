@@ -64,7 +64,7 @@ if __name__ == "__main__":
         pass
     elif model == "local_nn":
         from pytorch_model.eval_torch import eval_cnn
-        from pytorch_model.loacal_nn import local_nn
+        from pytorch_model.local_nn import local_nn
         model = local_nn()
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)

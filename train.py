@@ -24,18 +24,20 @@ def parse_args():
 
     ## torch
     parser_capsule = subparsers.add_parser('capsule', help='Capsule')
-    parser_capsule.add_argument("seed",type=int,default=0,help="Manual seed")
-    parser_capsule.add_argument("beta1",type=int,default=0.9,help="Manual seed")
+    parser_capsule.add_argument("--seed",type=int,required=False,default=0,help="Manual seed")
+    parser_capsule.add_argument("--beta1",type=int,required=False,default=0.9,help="Manual seed")
     parser_drn = subparsers.add_parser('drn', help='DRN  ')
-    parser_drn = subparsers.add_parser('local_nn', help='Local NN ')
-    parser_drn = subparsers.add_parser('self_attention', help='Self Attention ')
+    parser_local_nn = subparsers.add_parser('local_nn', help='Local NN ')
+    parser_self_attention = subparsers.add_parser('self_attention', help='Self Attention ')
 
-    parser_resnet = subparsers.add_parser('resnext50', help='Resnext50 ')
-    parser_resnet = subparsers.add_parser('resnext101', help='Resnext101 ')
-    parser_resnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
-    parser_resnet = subparsers.add_parser('xception_torch', help='Xception pytorch ')
-    parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
-    parser_resnet = subparsers.add_parser('dsp_fwa', help='Xception2 pytorch ')
+    parser_resnext50 = subparsers.add_parser('resnext50', help='Resnext50 ')
+    parser_resnext101 = subparsers.add_parser('resnext101', help='Resnext101 ')
+    parser_mnasnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
+    parser_xception_torch = subparsers.add_parser('xception_torch', help='Xception pytorch ')
+    parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
+    parser_dsp_fwa = subparsers.add_parser('dsp_fwa', help='Xception2 pytorch ')
+    parser_siamese_torch = subparsers.add_parser('siamese_torch', help='Siamese pytorch ')
+    parser_siamese_torch.add_argument("--length_embed",type=int,required=False,default=1024,help="Length of embed vector")
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
-        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=0,resume=args.resume,beta1=0.9, \
+        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=args.seed,resume=args.resume,beta1=args.beta1, \
                       dropout=0.05,image_size=args.image_size,batch_size=args.batch_size,lr=args.lr, \
                       num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,)
         pass
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     elif model == "xception_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception
-        model = xception()
+        model = xception(pretrained=True)
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
@@ -122,7 +124,7 @@ if __name__ == "__main__":
     elif model == "xception2_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception2
-        model = xception2()
+        model = xception2(pretrained=True)
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
@@ -132,6 +134,14 @@ if __name__ == "__main__":
         from pytorch_model.DSP_FWA.models.classifier import SPPNet
         model = SPPNet(backbone=50, num_class=1)
         train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
+        pass
+    elif model == "siamese_torch":
+        from pytorch_model.train_torch import train_siamese
+        from pytorch_model.siamese import SiameseNetworkResnet
+        model = SiameseNetworkResnet(length_embed = args.length_embed,pretrained=True)
+        train_siamese(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,length_embed = args.length_embed,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass

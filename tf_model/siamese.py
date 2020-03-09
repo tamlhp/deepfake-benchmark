@@ -67,7 +67,7 @@ def get_siamese_model(input_shape):
     L1_distance = L1_layer([encoded_l, encoded_r])
 
     # Add a dense layer with a sigmoid unit to generate the similarity score
-    prediction = Dense(1, activation='sigmoid')(L1_distance)
+    # prediction = Dense(1, activation='sigmoid')(L1_distance)
 
     # Connect the inputs with the outputs
     # siamese_net = Model(inputs=[left_input, right_input], outputs=prediction)

@@ -136,7 +136,7 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
 
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
     capnet.train()
-    for epoch in range(resume+1, epochs+1):
+    for epoch in range(epochs):
         count = 0
         loss_train = 0
         loss_test = 0

@@ -455,5 +455,53 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
                 running_loss_contrastive = 0
                 running_loss_cls = 0
                 model.train()
+        test_loss_contrastive = 0
+        test_loss_cls = 0
+        accuracy1 = 0
+        accuracy2 = 0
+        model.eval()
+        # print("Epoch number {}\n iteration_number {} Current loss {}\n".format(epoch, iteration_number,
+        #                                                                        loss_contrastive.item()))
+        with torch.no_grad():
+            for img0, img1, y1, y2, label in dataloader_val:
+                img0, img1, y1, y2, label = img0.to(device), img1.to(device), \
+                                            y1.float().to(device), y2.float().to(device), label.to(device)
+                output1, output2, cls1, cls2 = model.forward(img0, img1)
+                cls1 = cls1.squeeze()
+                cls2 = cls2.squeeze()
+                batch_loss_contrastive = criterion(output1, output2, label)
+                #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+                test_loss_contrastive += batch_loss_contrastive.item()
+                loss_cls1 = criterion2(cls1, y1)
+                loss_cls2 = criterion2(cls2, y2)
+                test_loss_cls += loss_cls1 + loss_cls2
+
+                #                     print("labels : ",labels)
+                #                     print("logps  : ",logps)
+                equals1 = y1 == (cls1 > 0.5)
+                equals2 = y2 == (cls2 > 0.5)
+                #                     print("equals   ",equals)
+                accuracy1 += torch.mean(equals1.type(torch.FloatTensor)).item()
+                accuracy2 += torch.mean(equals2.type(torch.FloatTensor)).item()
+        #                 train_losses.append(running_loss/len(trainloader))
+        #             test_losses.append(test_loss/len(testloader))
+        print(f"Epoch {epoch+1}/{epochs}.. "
+              f"Train loss contrastive: {running_loss_contrastive/print_every:.3f}.. "
+              f"Train loss cls: {running_loss_cls/print_every:.3f}.. "
+              f"Test loss contrastive: {test_loss_contrastive/len(dataloader_val):.3f}.. "
+              f"Test loss cls: {test_loss_cls/len(dataloader_val):.3f}.. "
+              f"Test accuracy 1: {accuracy1/len(dataloader_val):.3f}"
+              f"Test accuracy 2: {accuracy2/len(dataloader_val):.3f}")
+        text_writer.write('Epoch %d, Train loss contrastive %.4f,Train loss cls %.4f  , Test loss contrastive %.4f,Test loss cls %.4f,\
+                         Test accuracy 1  %.4f ,Test accuracy 2  %.4f \n' % (
+            epoch, running_loss_contrastive / print_every, running_loss_cls / print_every, \
+            test_loss_contrastive / len(dataloader_val), test_loss_cls / len(dataloader_val), \
+            accuracy1 / len(dataloader_val), accuracy2 / len(dataloader_val)))
+        text_writer.flush()
+
+        steps = 0
+        running_loss_contrastive = 0
+        running_loss_cls = 0
+        model.train()
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
 

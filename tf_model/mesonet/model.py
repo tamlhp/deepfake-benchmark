@@ -54,7 +54,7 @@ class Meso4():
         x4 = MaxPooling2D(pool_size=(4, 4), padding='same')(x4)
 
         y = Flatten()(x4)
-        y = Dropout(keep_prob =0.5)(y)
+        y = Dropout(rate =0.5)(y)
         y = Dense(16)(y)
         y = LeakyReLU(alpha=0.1)(y)
         y = Dropout(0.5)(y)
@@ -116,11 +116,11 @@ class Meso42():
         x7 = BatchNormalization()(x7)
 
         y = Flatten()(x7)
-        y = Dropout(keep_prob =0.8)(y)
+        y = Dropout(rate =0.2)(y)
         y = Dense(1024)(y)
         y = LeakyReLU(alpha=0.1)(y)
 
-        y = Dropout(keep_prob = 0.8)(y)
+        y = Dropout(rate = 0.2)(y)
         y = Dense(256)(y)
         y = LeakyReLU(alpha=0.1)(y)
 
@@ -179,10 +179,10 @@ class MesoInception4():
         x4 = MaxPooling2D(pool_size=(4, 4), padding='same')(x4)
 
         y = Flatten()(x4)
-        y = Dropout(keep_prob  = 0.5)(y)
+        y = Dropout(rate  = 0.5)(y)
         y = Dense(16)(y)
         y = LeakyReLU(alpha=0.1)(y)
-        y = Dropout(keep_prob  = 0.5)(y)
+        y = Dropout(rate  = 0.5)(y)
         y = Dense(1, activation='sigmoid')(y)
 
         return KerasModel(inputs=x, outputs=y)

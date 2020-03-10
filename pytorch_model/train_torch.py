@@ -275,8 +275,8 @@ def eval_train(model ,dataloader_val,device,criterion,text_writer ):
         test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
     text_writer.flush()
     model.train()
-def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
-    from pytorch_model.focal_loss import FocalLoss
+def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
+    # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
@@ -287,7 +287,8 @@ def train_cnn(model,train_set = '../../extract_raw_img',val_set ='../../extract_
         cudnn.benchmark = True
     model = model.to(device)
     # criterion = nn.BCELoss().to(device)
-    criterion = FocalLoss(gamma=2).to(device)
+    # criterion = FocalLoss(gamma=2).to(device)
+    criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':

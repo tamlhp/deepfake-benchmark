@@ -1,8 +1,7 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-
+import torch.nn as nn
 import argparse
-from tf_model.focal_loss import BinaryFocalLoss
 
 # from pytorch_model.train import *
 # from tf_model.train import *
@@ -19,6 +18,7 @@ def parse_args():
     parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
     parser.add_argument('--resume',type=str, default = '', help='Resume from checkpoint ')
     parser.add_argument('--print_every',type=int, default = 5000, help='Print evaluate info every step train')
+    parser.add_argument('--loss',type=str, default = "bce", help='Loss function use')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
 
@@ -70,7 +70,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.drn.drn_seg import DRNSub
         model = DRNSub(1)
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -78,7 +84,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.local_nn import local_nn
         model = local_nn()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -86,7 +98,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.self_attention import self_attention
         model = self_attention()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -94,7 +112,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext50
         model = resnext50()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -102,7 +126,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import resnext101
         model = resnext101()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -110,7 +140,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import mnasnet
         model = mnasnet()
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -118,7 +154,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception
         model = xception(pretrained=True)
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -126,7 +168,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.xception import xception2
         model = xception2(pretrained=True)
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -134,7 +182,13 @@ if __name__ == "__main__":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.DSP_FWA.models.classifier import SPPNet
         model = SPPNet(backbone=50, num_class=1)
-        train_cnn(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        criterion = None
+        if args.loss == "bce":
+            criterion = nn.BCELoss()
+        elif args.loss == "focal":
+            from pytorch_model.focal_loss import FocalLoss
+            criterion = FocalLoss(gamma=2)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
@@ -155,15 +209,25 @@ if __name__ == "__main__":
         from tf_model.train_tf import train_cnn
         model = Meso4().model
         loss = 'binary_crossentropy'
-        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        if args.loss == "bce":
+            loss = 'binary_crossentropy'
+        elif args.loss == "focal":
+            from tf_model.focal_loss import BinaryFocalLoss
+            loss = BinaryFocalLoss(gamma=2)
+        train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)
         pass
     elif model == "xception_tf":
         from tf_model.train_tf import train_cnn
         from tf_model.model_cnn_keras import xception
         model = xception()
-        loss = BinaryFocalLoss(gamma=2)
-        train_cnn(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        loss = 'binary_crossentropy'
+        if args.loss == "bce":
+            loss = 'binary_crossentropy'
+        elif args.loss == "focal":
+            from tf_model.focal_loss import BinaryFocalLoss
+            loss = BinaryFocalLoss(gamma=2)
+        train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter)
         pass
     elif model == "siamese_tf":
@@ -171,5 +235,5 @@ if __name__ == "__main__":
         from tf_model.train_tf import train_siamese
         model = get_siamese_model((256, 256, 3))
         loss = 'binary_crossentropy'
-        train_siamese(model,loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+        train_siamese(model,loss = loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)

@@ -28,8 +28,8 @@ class SiameseNetworkDataset(Dataset):
         self.transform = transform
         self.should_invert = should_invert
         self.shuffle = shuffle
-        self.df_path = glob.glob(path + "/df/*.jpg")
-        self.real_path = glob.glob(path + "/real/*.jpg")
+        self.df_path = glob.glob(path + "/*df/*.jpg")
+        self.real_path = glob.glob(path + "/*real/*.jpg")
         self.indexes = range(min(len(self.df_path), len(self.real_path)))
         self.on_epoch_end()
 

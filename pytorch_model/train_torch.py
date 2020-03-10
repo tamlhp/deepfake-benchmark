@@ -363,7 +363,7 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
         torch.cuda.manual_seed_all(0)
         cudnn.benchmark = True
 
-    model = model().to(device)
+    model = model.to(device)
     criterion = ContrastiveLoss(length_embed)
     criterion2 = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)

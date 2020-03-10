@@ -57,8 +57,8 @@ def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../ext
 
 def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
     from tf_model.siamese import DataGenerator
-    generator_train = DataGenerator(path=train_set, batch_size=batch_size)
-    generator_val = DataGenerator(path=val_set, batch_size=batch_size)
+    generator_train = DataGenerator(path=train_set, batch_size=batch_size,image_size=image_size)
+    generator_val = DataGenerator(path=val_set, batch_size=batch_size,image_size=image_size)
     print(len(generator_train))
     # model = get_siamese_model((256, 256, 3))
     # model.summary()

@@ -80,8 +80,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 args = parse_args()
 if __name__ == "__main__":
-
-    paths = glob.glob(args.inp+ "/*.mp4")
+    paths = []
+    types = ('/*.mp4', '/*.avi')
+    # paths = glob.glob(args.inp+ "/*.mp4")
+    for files in types:
+        paths.extend(glob.glob(args.inp+ files))
     # print(paths[0])
     # extract_face(paths[0])
     print(len(paths))

@@ -59,9 +59,10 @@ if __name__ == "__main__":
 
     model = args.model
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
+    gpu_id = 0 if int(args.gpu_id) >=0 else -1
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
-        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=int(args.gpu_id),manualSeed=args.seed,resume=args.resume,beta1=args.beta1, \
+        train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=gpu_id,manualSeed=args.seed,resume=args.resume,beta1=args.beta1, \
                       dropout=0.05,image_size=args.image_size,batch_size=args.batch_size,lr=args.lr, \
                       num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,)
         pass

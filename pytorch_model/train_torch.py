@@ -486,8 +486,6 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
         #                 train_losses.append(running_loss/len(trainloader))
         #             test_losses.append(test_loss/len(testloader))
         print(f"Epoch {epoch+1}/{epochs}.. "
-              f"Train loss contrastive: {running_loss_contrastive/print_every:.3f}.. "
-              f"Train loss cls: {running_loss_cls/print_every:.3f}.. "
               f"Test loss contrastive: {test_loss_contrastive/len(dataloader_val):.3f}.. "
               f"Test loss cls: {test_loss_cls/len(dataloader_val):.3f}.. "
               f"Test accuracy 1: {accuracy1/len(dataloader_val):.3f}"

@@ -1,20 +1,20 @@
-import os
+# import os
 
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-import torchvision
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
+# import torchvision
+# import torchvision.datasets as dset
+# import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
-import matplotlib.pyplot as plt
-import torchvision.utils
+# import matplotlib.pyplot as plt
+# import torchvision.utils
 import numpy as np
 import random
 from PIL import Image
 import torch
-from torch.autograd import Variable
-import PIL.ImageOps
+# from torch.autograd import Variable
+# import PIL.ImageOps
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
@@ -28,8 +28,8 @@ class SiameseNetworkDataset(Dataset):
         self.transform = transform
         self.should_invert = should_invert
         self.shuffle = shuffle
-        self.df_path = glob.glob(path + "/*df/*.jpg")
-        self.real_path = glob.glob(path + "/*real/*.jpg")
+        self.df_path = glob.glob(path + "/*df/*.jpg").extend(glob.glob(path + "/*df/*.jpeg")).extend(glob.glob(path + "/*df/*.png"))
+        self.real_path = glob.glob(path + "/*real/*.jpg").extend(glob.glob(path + "/*real/*.jpeg")).extend(glob.glob(path + "/*real/*.png"))
         self.indexes = range(min(len(self.df_path), len(self.real_path)))
         self.on_epoch_end()
 

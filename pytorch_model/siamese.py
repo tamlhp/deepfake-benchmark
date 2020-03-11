@@ -106,16 +106,17 @@ class ContrastiveLoss(torch.nn.Module):
     Based on: http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
     """
 
-    def __init__(self, margin=2.0):
+    def __init__(self, margin=2.0,device):
         super(ContrastiveLoss, self).__init__()
         self.margin = margin
+        self.device = device
 
     def forward(self, output1, output2, label):
         euclidean_distance = F.pairwise_distance(output1, output2, keepdim=True)
         # loss_contrastive = torch.mean((1 - label) * torch.pow(euclidean_distance, 2) +
         #                               (label) * torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))
         loss_contrastive = torch.mean((label) * torch.pow(euclidean_distance, 2) +
-                                      (1-label) * torch.max(torch.tensor(0.0),torch.pow(torch.tensor(self.margin) - euclidean_distance, 2)))
+                                      (1-label) * torch.max(torch.tensor(0.0).to(device),torch.pow(torch.tensor(self.margin).to(device) - euclidean_distance, 2))).to(device)
         return loss_contrastive
 
 if __name__ == "__main__":

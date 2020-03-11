@@ -28,8 +28,8 @@ class SiameseNetworkDataset(Dataset):
         self.transform = transform
         self.should_invert = should_invert
         self.shuffle = shuffle
-        self.df_path = glob.glob(path + "/*df/*.jpg")
-        self.real_path = glob.glob(path + "/*real/*.jpg")
+        self.df_path = glob.glob(path + "/1_df/*.jpg")
+        self.real_path = glob.glob(path + "/0_real/*.jpg")
         self.indexes = range(min(len(self.df_path), len(self.real_path)))
         self.on_epoch_end()
 
@@ -112,9 +112,10 @@ class ContrastiveLoss(torch.nn.Module):
 
     def forward(self, output1, output2, label):
         euclidean_distance = F.pairwise_distance(output1, output2, keepdim=True)
-        loss_contrastive = torch.mean((1 - label) * torch.pow(euclidean_distance, 2) +
-                                      (label) * torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))
-
+        # loss_contrastive = torch.mean((1 - label) * torch.pow(euclidean_distance, 2) +
+        #                               (label) * torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))
+        loss_contrastive = torch.mean((label) * torch.pow(euclidean_distance, 2) +
+                                      (1-label) * torch.max(torch.tensor(0.0),torch.pow(torch.tensor(self.margin) - euclidean_distance, 2)))
         return loss_contrastive
 
 if __name__ == "__main__":
@@ -123,9 +124,9 @@ if __name__ == "__main__":
     class Config():
         training_dir = "../../../extract_raw_img"
         testing_dir = "../../../extract_raw_img"
-        train_batch_size = 32
+        train_batch_size = 2
         train_number_epochs = 1
-    siamese_dataset = SiameseNetworkDataset(path=Config.training_dir,path_eval =Config.testing_dir,
+    siamese_dataset = SiameseNetworkDataset(path=Config.training_dir,
                                             transform=transforms.Compose([transforms.Resize((IMGWIDTH, IMGWIDTH)),
                                                                           transforms.ToTensor()
                                                                           ])
@@ -139,8 +140,8 @@ if __name__ == "__main__":
                                   batch_size=Config.train_batch_size)
     device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
-    net = SiameseNetworkResnet().to(device)
-    criterion = ContrastiveLoss(16)
+    net = SiameseNetworkResnet(length_embed=128).to(device)
+    criterion = ContrastiveLoss(16.0)
     criterion2 = nn.BCELoss().to(device)
     optimizer = optim.Adam(net.parameters(), lr=0.001)
 
@@ -150,10 +151,10 @@ if __name__ == "__main__":
     for epoch in range(0, Config.train_number_epochs):
         for i, data in enumerate(train_dataloader, 0):
             img0, img1,y1,y2, label = data
-            # img0, img1,y1,y2, label = img0.to(device), img1.to(device),y1.float().to(device),y2.float().to(device), label.to(device)
+            img0, img1,y1,y2, label = img0.to(device), img1.to(device),y1.float().to(device),y2.float().to(device), label.to(device)
             print(i)
-            print(y1,"   ",y2,"   ",label)
-            continue
+            # print(y1,"   ",y2,"   ",label)
+            # continue
             #         img0, img1 , label = img0, img1 , label
             # print(img0.size())
             optimizer.zero_grad()

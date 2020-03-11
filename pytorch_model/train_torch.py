@@ -364,7 +364,7 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
         cudnn.benchmark = True
 
     model = model.to(device)
-    criterion = ContrastiveLoss(device=device).to(device)
+    criterion = ContrastiveLoss().to(device)
     criterion2 = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 

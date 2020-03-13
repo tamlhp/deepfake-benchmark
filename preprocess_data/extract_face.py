@@ -20,8 +20,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
-    parser.add_argument('--inp', default="data/train/", help='path to train data ')
-    parser.add_argument('--output', default="data/test/", help='path to test data ')
+    parser.add_argument('--in_dir', default="data/train/", help='path to train data ')
+    parser.add_argument('--out_dir', default="data/test/", help='path to test data ')
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--duration',type=int, default = 4, help='Resume from checkpoint ')
 
@@ -31,7 +31,7 @@ detector = MTCNN(device=device)
 margin = 0.2
 
 def extract_face(vi):
-    output = args.output
+    output = args.out_dir
 
     duration = args.duration
     # data = glob.glob("/hdd/tam/FaceForensics/data/original_sequences/youtube/c23/videos/*.mp4")
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     types = ('/*.mp4', '/*.avi')
     # paths = glob.glob(args.inp+ "/*.mp4")
     for files in types:
-        paths.extend(glob.glob(args.inp+ files))
+        paths.extend(glob.glob(args.in_dir+ files))
     # print(paths[0])
     # extract_face(paths[0])
     print(len(paths))

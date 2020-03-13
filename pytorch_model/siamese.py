@@ -150,7 +150,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
     net = SiameseNetworkResnet(length_embed=128).to(device)
-    criterion = ContrastiveLoss(16.0)
+    criterion = ContrastiveLoss(device)
     criterion2 = nn.BCELoss().to(device)
     optimizer = optim.Adam(net.parameters(), lr=0.001)
 

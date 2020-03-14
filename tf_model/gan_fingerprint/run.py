@@ -248,7 +248,6 @@ def train_classifier(
         # Perform maintenance tasks once per tick.
         cur_tick += 1
         cur_time = time.time()
-        tick_kimg = (cur_nimg - tick_start_nimg) / 1000.0
         tick_start_nimg = cur_nimg
         tick_time = cur_time - tick_start_time
         total_time = cur_time - train_start_time
@@ -257,12 +256,11 @@ def train_classifier(
 
         # Report progress.
         print(
-            'tick %-5d kimg %-8.1f time %-12s sec/tick %-7.1f sec/kimg %-7.2f maintenance %.1f' % (
+            'tick %-5d kimg %-8.1f time %-12s sec/tick %-7.1f maintenance %.1f' % (
                 tfutil.autosummary('Progress/tick', cur_tick),
                 tfutil.autosummary('Progress/kimg', cur_nimg / 1000.0),
                 misc.format_time(tfutil.autosummary('Timing/total_sec', total_time)),
                 tfutil.autosummary('Timing/sec_per_tick', tick_time),
-                tfutil.autosummary('Timing/sec_per_kimg', tick_time / tick_kimg),
                 tfutil.autosummary('Timing/maintenance_sec', maintenance_time)))
         tfutil.autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
         tfutil.autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))

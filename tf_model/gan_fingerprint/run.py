@@ -15,7 +15,7 @@ from tf_model.gan_fingerprint import tfutil
 from tf_model.gan_fingerprint import dataset
 from tf_model.gan_fingerprint import misc
 from sklearn import metrics
-
+from tqdm import tqdm
 import argparse
 
 #----------------------------------------------------------------------------
@@ -226,7 +226,8 @@ def train_classifier(
     total_val_iter = total_val_img/config.sched.minibatch_base
     text_writer = open(os.path.join(config.result_dir, 'train.csv'), 'a')
     for i in range(epochs):
-        while cur_nimg < total_kimg * 1000:
+        # while cur_nimg < total_kimg * 1000:
+        for jj in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):
 
             # Choose training parameters and configure training ops.
             sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
@@ -237,11 +238,11 @@ def train_classifier(
             prev_lod = sched.lod
 
             # Run training ops.
-            for repeat in range(minibatch_repeats):
-                tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-                tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-                tfutil.run([EGs_update_op], {})
-                cur_nimg += sched.minibatch
+            # for repeat in range(minibatch_repeats):
+            tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+            tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+            tfutil.run([EGs_update_op], {})
+            # cur_nimg += sched.minibatch
 
         # Perform maintenance tasks once per tick.
         cur_tick += 1

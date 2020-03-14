@@ -9,7 +9,7 @@
 import numpy as np
 import tensorflow as tf
 
-import tfutil
+from tf_model.gan_fingerprint import tfutil
 
 #----------------------------------------------------------------------------
 # Convenience func that casts all of its arguments to tf.float32.

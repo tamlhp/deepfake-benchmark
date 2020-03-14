@@ -223,8 +223,9 @@ def train_classifier(
     tick_start_time = time.time()
     train_start_time = tick_start_time - resume_time
     prev_lod = -1.0
-    total_val_iter = total_val_img/config.sched.minibatch_base
+    total_val_iter = int(total_val_img/config.sched.minibatch_base)
     text_writer = open(os.path.join(config.result_dir, 'train.csv'), 'a')
+    print(int(total_kimg * 1000/config.sched.minibatch_base))
     for i in range(epochs):
         # while cur_nimg < total_kimg * 1000:
         for jj in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):

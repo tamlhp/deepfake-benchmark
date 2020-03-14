@@ -4,8 +4,8 @@ Simple tester for the vgg19_trainable
 
 import tensorflow as tf
 
-import vgg19_trainable as vgg19
-import utils
+import tf_model.gan_fingerprint.vgg19_trainable as vgg19
+import tf_model.gan_fingerprint.utils as utils
 
 img1 = utils.load_image("./test_data/tiger.jpeg")
 img1_true_result = [1 if i == 292 else 0 for i in range(1000)]  # 1-hot result for tiger

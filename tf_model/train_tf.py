@@ -75,7 +75,7 @@ def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../..
     model.fit_generator(generator_train,validation_data=generator_val,steps_per_epoch=len(generator_train), validation_steps=len(generator_val),epochs=epochs, workers=num_workers,verbose=1,callbacks=callbacks)
     # model.fit_generator(generator_train, validation_data=generator_val, epochs=50, workers=1,)
                         # callbacks=[tensorboard_callback, checkpoints])
-def train_gan(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',training_seed=0,checkpoint="checkpoint"):
+def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test',training_seed=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20,total_train_img = 15000,total_val_img = 1000):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc
@@ -90,16 +90,20 @@ def train_gan(train_set = '../../extract_raw_img',val_set ='../../extract_raw_im
     os.environ.update(config.env)
     tfutil.init_tf(config.tf_config)
     if train_set[-1] == '/':
-        training_data_dir = train_set[:-1]
+        train_set = train_set[:-1]
     idx = train_set.rfind('/')
     config.data_dir = train_set[:idx]
     config.training_set = config.EasyDict(tfrecord_dir=val_set[idx + 1:], max_label_size='full')
     if val_set[-1] == '/':
-        validation_data_dir = val_set[:-1]
-    idx = validation_data_dir.rfind('/')
+        val_set = val_set[:-1]
+    idx = val_set.rfind('/')
     config.validation_set = config.EasyDict(tfrecord_dir=val_set[idx + 1:], max_label_size='full')
-    app = config.EasyDict(func='run.train_classifier', lr_mirror_augment=True, ud_mirror_augment=False,
-                          total_kimg=25000)
+
+    config.sched.minibatch_base = batch_size
+    config.sched.lod_initial_resolution = image_size
+
+    app = config.EasyDict(func='tf_model.gan_fingerprint.run.train_classifier', lr_mirror_augment=True, ud_mirror_augment=False,
+                          total_kimg=total_train_img/1000,epochs = epochs,total_val_img = total_val_img,)
     config.result_dir = checkpoint
     # elif app == 'test':
     #     assert model_path != ' ' and val_set != ' ' and out_fingerprint_dir != ' '

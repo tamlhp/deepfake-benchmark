@@ -3,7 +3,7 @@ import tensorflow as tf
 
 import numpy as np
 import time
-from tensorflow_vgg import vgg19
+from tf_model.gan_fingerprint.tensorflow_vgg import vgg19
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 

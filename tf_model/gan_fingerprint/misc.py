@@ -16,9 +16,9 @@ from collections import OrderedDict
 import scipy.ndimage
 import PIL.Image
 
-import config
-import dataset
-import legacy
+from tf_model.gan_fingerprint import config
+from tf_model.gan_fingerprint import dataset
+from tf_model.gan_fingerprint import legacy
 
 #----------------------------------------------------------------------------
 # Convenience wrappers for pickle that are able to load data produced by

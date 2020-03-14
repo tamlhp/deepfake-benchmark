@@ -47,13 +47,13 @@ rec_G_weight = 0.1
 
 desc        = 'pgan'                                        # Description string included in result subdir name.
 random_seed = 1000                                          # Global random seed.
-train       = EasyDict(func='train.train_classifier') # Options for main training func.
-EG       	= EasyDict(func='networks.EG', fmap_base=1024, fmap_max=512, mode=mode, latent_res=latent_res, switching_res=switching_res)             # Options for encoder network in the image domain.
-D_rec       = EasyDict(func='networks.D_patch', fmap_base=1024, fmap_max=512, latent_res=-1)             # Options for reconstruction-associated discriminator network.
+train       = EasyDict(func='tf_model.gan_fingerprint.train.train_classifier') # Options for main training func.
+EG       	= EasyDict(func='tf_model.gan_fingerprint.networks.EG', fmap_base=1024, fmap_max=512, mode=mode, latent_res=latent_res, switching_res=switching_res)             # Options for encoder network in the image domain.
+D_rec       = EasyDict(func='tf_model.gan_fingerprint.networks.D_patch', fmap_base=1024, fmap_max=512, latent_res=-1)             # Options for reconstruction-associated discriminator network.
 EG_opt      = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8) # Options for encoder and generator optimizer.
 D_rec_opt   = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8) # Options for reconstruction-associated discriminator optimizer.
-EG_loss     = EasyDict(func='loss.EG_classification', rec_weight=rec_weight, rec_G_weight=rec_G_weight)        # Options for encoder and generator loss.
-D_rec_loss  = EasyDict(func='loss.D_rec_wgangp')      # Options for reconstruction-associated discriminator loss.
+EG_loss     = EasyDict(func='tf_model.gan_fingerprint.loss.EG_classification', rec_weight=rec_weight, rec_G_weight=rec_G_weight)        # Options for encoder and generator loss.
+D_rec_loss  = EasyDict(func='tf_model.gan_fingerprint.loss.D_rec_wgangp')      # Options for reconstruction-associated discriminator loss.
 sched       = EasyDict()                                    # Options for train.TrainingSchedule.
 grid        = EasyDict(size='1080p', layout='row_per_class')       # Options for train.setup_snapshot_image_grid().
 

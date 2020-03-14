@@ -40,7 +40,8 @@ def parse_args():
     parser_siamese_torch.add_argument("--length_embed",type=int,required=False,default=1024,help="Length of embed vector")
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
-
+    parser_gan.add_argument("--total_train_img",type=int,required=False,default=10000,help="Total image in training set")
+    parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
     parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
@@ -174,7 +175,10 @@ if __name__ == "__main__":
         pass
     elif model == "gan":
         from tf_model.train_tf import train_gan
-        train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,checkpoint=args.checkpoint)
+        train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,\
+                  image_size=args.image_size,batch_size=args.batch_size,num_workers=args.workers, \
+                  epochs=args.niter,checkpoint=args.checkpoint,total_train_img = args.total_train_img,total_val_img = args.total_val_img)
+        # train_gan()
         pass
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4

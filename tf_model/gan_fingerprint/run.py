@@ -10,10 +10,11 @@ import time
 import numpy as np
 import tensorflow as tf
 
-import config
-import tfutil
-import dataset
-import misc
+from tf_model.gan_fingerprint import config
+from tf_model.gan_fingerprint import tfutil
+from tf_model.gan_fingerprint import dataset
+from tf_model.gan_fingerprint import misc
+from sklearn import metrics
 
 import argparse
 
@@ -152,12 +153,13 @@ def train_classifier(
     drange_net              = [-1,1],       # Dynamic range used when feeding image data to the networks.
     image_snapshot_ticks    = 10,           # How often to export image snapshots?
     save_tf_graph           = False,        # Include full TensorFlow computation graph in the tfevents file?
-    save_weight_histograms  = False):       # Include weight histograms in the tfevents file?
-
+    save_weight_histograms  = False,       # Include weight histograms in the tfevents file?
+    epochs = 10,
+        total_val_img = 5000,
+    ):
     maintenance_start_time = time.time()
     training_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.training_set)
     validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
-    network_snapshot_ticks = total_kimg // 100 # How often to export network snapshots?
 
     # Construct networks.
     with tf.device('/gpu:0'):
@@ -202,31 +204,8 @@ def train_classifier(
     EG_train_op = EG_opt.apply_updates()
     D_rec_train_op = D_rec_opt.apply_updates()
 
-    print('Setting up snapshot image grid...')
-    grid_size, train_reals, train_labels = setup_snapshot_image_grid(training_set, drange_net, [450, 10], **config.grid)
-    grid_size, val_reals, val_labels = setup_snapshot_image_grid(validation_set, drange_net, [450, 10], **config.grid)
-    sched = TrainingSchedule(total_kimg * 1000, training_set, **config.sched)
-
-    train_recs, train_fingerprints, train_logits = EGs.run(train_reals, minibatch_size=sched.minibatch//config.num_gpus)
-    train_preds = np.argmax(train_logits, axis=1)
-    train_gt = np.argmax(train_labels, axis=1)
-    train_acc = np.float32(np.sum(train_gt==train_preds)) / np.float32(len(train_gt))
-    print('Training Accuracy = %f' % train_acc)
-
-    val_recs, val_fingerprints, val_logits = EGs.run(val_reals, minibatch_size=sched.minibatch//config.num_gpus)
-    val_preds = np.argmax(val_logits, axis=1)
-    val_gt = np.argmax(val_labels, axis=1)
-    val_acc = np.float32(np.sum(val_gt==val_preds)) / np.float32(len(val_gt))
-    print('Validation Accuracy = %f' % val_acc)
-
     print('Setting up result dir...')
     result_subdir = misc.create_result_subdir(config.result_dir, config.desc)
-    misc.save_image_grid(train_reals[::30,:,:,:], os.path.join(result_subdir, 'train_reals.png'), drange=drange_net, grid_size=[15,10])
-    misc.save_image_grid(train_recs[::30,:,:,:], os.path.join(result_subdir, 'train_recs-init.png'), drange=drange_net, grid_size=[15,10])
-    misc.save_image_grid(train_fingerprints[::30,:,:,:], os.path.join(result_subdir, 'train_fingerrints-init.png'), drange=drange_net, grid_size=[15,10])
-    misc.save_image_grid(val_reals[::30,:,:,:], os.path.join(result_subdir, 'val_reals.png'), drange=drange_net, grid_size=[15,10])
-    misc.save_image_grid(val_recs[::30,:,:,:], os.path.join(result_subdir, 'val_recs-init.png'), drange=drange_net, grid_size=[15,10])
-    misc.save_image_grid(val_fingerprints[::30,:,:,:], os.path.join(result_subdir, 'val_fingerrints-init.png'), drange=drange_net, grid_size=[15,10])
 
     est_fingerprints = np.transpose(EGs.vars['Conv_fingerprints/weight'].eval(), axes=[3,2,0,1])
     misc.save_image_grid(est_fingerprints, os.path.join(result_subdir, 'est_fingerrints-init.png'), drange=[np.amin(est_fingerprints), np.amax(est_fingerprints)], grid_size=[est_fingerprints.shape[0],1])
@@ -244,78 +223,64 @@ def train_classifier(
     tick_start_time = time.time()
     train_start_time = tick_start_time - resume_time
     prev_lod = -1.0
-    while cur_nimg < total_kimg * 1000:
+    total_val_iter = total_val_img/config.sched.minibatch_base
+    text_writer = open(os.path.join(config.result_dir, 'train.csv'), 'a')
+    for i in range(epochs):
+        while cur_nimg < total_kimg * 1000:
 
-        # Choose training parameters and configure training ops.
-        sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
-        training_set.configure(sched.minibatch, sched.lod)
-        if reset_opt_for_new_lod:
-            if np.floor(sched.lod) != np.floor(prev_lod) or np.ceil(sched.lod) != np.ceil(prev_lod):
-                EG_opt.reset_optimizer_state(); D_rec_opt.reset_optimizer_state()
-        prev_lod = sched.lod
+            # Choose training parameters and configure training ops.
+            sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
+            training_set.configure(sched.minibatch, sched.lod)
+            if reset_opt_for_new_lod:
+                if np.floor(sched.lod) != np.floor(prev_lod) or np.ceil(sched.lod) != np.ceil(prev_lod):
+                    EG_opt.reset_optimizer_state(); D_rec_opt.reset_optimizer_state()
+            prev_lod = sched.lod
 
-        # Run training ops.
-        for repeat in range(minibatch_repeats):
-            tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-            tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-            tfutil.run([EGs_update_op], {})
-            cur_nimg += sched.minibatch
+            # Run training ops.
+            for repeat in range(minibatch_repeats):
+                tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+                tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+                tfutil.run([EGs_update_op], {})
+                cur_nimg += sched.minibatch
 
         # Perform maintenance tasks once per tick.
-        done = (cur_nimg >= total_kimg * 1000)
-        if cur_nimg >= tick_start_nimg + sched.tick_kimg * 1000 or done:
-            cur_tick += 1
-            cur_time = time.time()
-            tick_kimg = (cur_nimg - tick_start_nimg) / 1000.0
-            tick_start_nimg = cur_nimg
-            tick_time = cur_time - tick_start_time
-            total_time = cur_time - train_start_time
-            maintenance_time = tick_start_time - maintenance_start_time
-            maintenance_start_time = cur_time
+        cur_tick += 1
+        cur_time = time.time()
+        tick_kimg = (cur_nimg - tick_start_nimg) / 1000.0
+        tick_start_nimg = cur_nimg
+        tick_time = cur_time - tick_start_time
+        total_time = cur_time - train_start_time
+        maintenance_time = tick_start_time - maintenance_start_time
+        maintenance_start_time = cur_time
 
-            # Report progress.
-            print('tick %-5d kimg %-8.1f lod %-5.2f resolution %-4d minibatch %-4d time %-12s sec/tick %-7.1f sec/kimg %-7.2f maintenance %.1f' % (
+        # Report progress.
+        print(
+            'tick %-5d kimg %-8.1f time %-12s sec/tick %-7.1f sec/kimg %-7.2f maintenance %.1f' % (
                 tfutil.autosummary('Progress/tick', cur_tick),
                 tfutil.autosummary('Progress/kimg', cur_nimg / 1000.0),
-                tfutil.autosummary('Progress/lod', sched.lod),
-                tfutil.autosummary('Progress/resolution', sched.resolution),
-                tfutil.autosummary('Progress/minibatch', sched.minibatch),
                 misc.format_time(tfutil.autosummary('Timing/total_sec', total_time)),
                 tfutil.autosummary('Timing/sec_per_tick', tick_time),
                 tfutil.autosummary('Timing/sec_per_kimg', tick_time / tick_kimg),
                 tfutil.autosummary('Timing/maintenance_sec', maintenance_time)))
-            tfutil.autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
-            tfutil.autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
-            tfutil.save_summaries(summary_log, cur_nimg)
-
-            # Print accuracy.
-            if cur_tick % image_snapshot_ticks == 0 or done:
-
-                train_recs, train_fingerprints, train_logits = EGs.run(train_reals, minibatch_size=sched.minibatch//config.num_gpus)
-                train_preds = np.argmax(train_logits, axis=1)
-                train_gt = np.argmax(train_labels, axis=1)
-                train_acc = np.float32(np.sum(train_gt==train_preds)) / np.float32(len(train_gt))
-                print('Training Accuracy = %f' % train_acc)
-
-                val_recs, val_fingerprints, val_logits = EGs.run(val_reals, minibatch_size=sched.minibatch//config.num_gpus)
-                val_preds = np.argmax(val_logits, axis=1)
-                val_gt = np.argmax(val_labels, axis=1)
-                val_acc = np.float32(np.sum(val_gt==val_preds)) / np.float32(len(val_gt))
-                print('Validation Accuracy = %f' % val_acc)
-
-                misc.save_image_grid(train_recs[::30,:,:,:], os.path.join(result_subdir, 'train_recs-final.png'), drange=drange_net, grid_size=[15,10])
-                misc.save_image_grid(train_fingerprints[::30,:,:,:], os.path.join(result_subdir, 'train_fingerrints-final.png'), drange=drange_net, grid_size=[15,10])
-                misc.save_image_grid(val_recs[::30,:,:,:], os.path.join(result_subdir, 'val_recs-final.png'), drange=drange_net, grid_size=[15,10])
-                misc.save_image_grid(val_fingerprints[::30,:,:,:], os.path.join(result_subdir, 'val_fingerrints-final.png'), drange=drange_net, grid_size=[15,10])
-                
-                est_fingerprints = np.transpose(EGs.vars['Conv_fingerprints/weight'].eval(), axes=[3,2,0,1])
-                misc.save_image_grid(est_fingerprints, os.path.join(result_subdir, 'est_fingerrints-final.png'), drange=[np.amin(est_fingerprints), np.amax(est_fingerprints)], grid_size=[est_fingerprints.shape[0],1])
-            
-            if cur_tick % network_snapshot_ticks == 0 or done:
-                misc.save_pkl((EG, D_rec, EGs), os.path.join(result_subdir, 'network-snapshot-%06d.pkl' % (cur_nimg // 1000)))
-
-            # Record start time of the next tick.
-            tick_start_time = time.time()
+        tfutil.autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
+        tfutil.autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
+        tfutil.save_summaries(summary_log, cur_nimg)
+        idxs = []
+        labels = []
+        for i in range(total_val_iter):
+            real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
+            rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
+            idx = np.argmax(np.squeeze(logits),axis=1)
+            idxs.extend(idx)
+            labels.extend(np.argmax(np.squeeze(label), axis=1))
+            # print(logits)
+            # print("438 idx: ", idx)
+        acc_test = metrics.accuracy_score(idxs, labels)
+        print("Epoch  %d :   accuracy : %f " %(i,acc_test))
+        text_writer.write("Epoch  %d :   accuracy : %f " %(i,acc_test))
+        text_writer.flush()
+        misc.save_pkl((EG, D_rec, EGs),
+                      os.path.join(result_subdir, 'network-snapshot-%06d.pkl' % (cur_nimg // 1000)))
 
     # Write final results.
     misc.save_pkl((EG, D_rec, EGs), os.path.join(result_subdir, 'network-final.pkl'))

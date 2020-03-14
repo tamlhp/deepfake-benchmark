@@ -9,7 +9,7 @@ import os
 import glob
 import numpy as np
 import tensorflow as tf
-import tfutil
+from tf_model.gan_fingerprint import tfutil
 
 #----------------------------------------------------------------------------
 # Parse individual image from a tfrecords file.
@@ -225,7 +225,7 @@ class SyntheticDataset:
 #----------------------------------------------------------------------------
 # Helper func for constructing a dataset object using the given options.
 
-def load_dataset(class_name='dataset.TFRecordDataset', data_dir=None, verbose=False, **kwargs):
+def load_dataset(class_name='tf_model.gan_fingerprint.dataset.TFRecordDataset', data_dir=None, verbose=False, **kwargs):
     adjusted_kwargs = dict(kwargs)
     if 'tfrecord_dir' in adjusted_kwargs and data_dir is not None:
         adjusted_kwargs['tfrecord_dir'] = os.path.join(data_dir, adjusted_kwargs['tfrecord_dir'])

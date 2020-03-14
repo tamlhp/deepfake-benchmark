@@ -228,7 +228,7 @@ def train_classifier(
     print(int(total_kimg * 1000/config.sched.minibatch_base))
     for i in range(epochs):
         # while cur_nimg < total_kimg * 1000:
-        for jj in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):
+        for jtrain in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):
 
             # Choose training parameters and configure training ops.
             sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
@@ -267,7 +267,7 @@ def train_classifier(
         tfutil.save_summaries(summary_log, cur_nimg)
         idxs = []
         labels = []
-        for i in range(total_val_iter):
+        for jtest in range(total_val_iter):
             real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
             rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
             idx = np.argmax(np.squeeze(logits),axis=1)

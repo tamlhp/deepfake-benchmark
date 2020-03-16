@@ -234,6 +234,22 @@ def train_classifier(
         idxs = []
         labels = []
         for jtest in range(total_val_iter):
+            real, label = training_set.get_minibatch_np(config.sched.minibatch_base)
+            rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
+            idx = np.argmax(np.squeeze(logits),axis=1)
+            idxs.extend(idx)
+            labels.extend(np.argmax(np.squeeze(label), axis=1))
+            # print(logits)
+            # print("438 idx: ", idx)
+        # acc_test = metrics.accuracy_score(idxs, labels)
+        acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
+        print("Epoch  %d :   train accuracy : %f " %(i,acc_test))
+        text_writer.write("Epoch  %d :  train  accuracy : %f " %(i,acc_test))
+
+
+        idxs = []
+        labels = []
+        for jtest in range(total_val_iter):
             real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
             rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
             idx = np.argmax(np.squeeze(logits),axis=1)

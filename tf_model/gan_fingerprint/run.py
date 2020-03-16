@@ -209,7 +209,7 @@ def train_classifier(
                 tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
                 tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
                 tfutil.run([EGs_update_op], {})
-            # cur_nimg += sched.minibatch
+            cur_nimg += sched.minibatch
 
         # Perform maintenance tasks once per tick.
         cur_tick += 1
@@ -233,7 +233,7 @@ def train_classifier(
         tfutil.save_summaries(summary_log, cur_nimg)
         idxs = []
         labels = []
-        for jtest in range(total_val_iter):
+        for jtest in range(int(total_kimg * 1000/config.sched.minibatch_base)):
             real, label = training_set.get_minibatch_np(config.sched.minibatch_base)
             rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
             idx = np.argmax(np.squeeze(logits),axis=1)

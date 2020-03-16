@@ -194,8 +194,6 @@ def train_classifier(
     print(int(total_kimg * 1000/config.sched.minibatch_base))
     for i in range(epochs):
         # while cur_nimg < total_kimg * 1000:
-        training_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.training_set)
-        validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
         cur_nimg = 0
         for jtrain in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):
 
@@ -249,6 +247,7 @@ def train_classifier(
         print("Epoch  %d :   train accuracy : %f " %(i,acc_test))
         text_writer.write("Epoch  %d :  train  accuracy : %f " %(i,acc_test))
 
+        validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
 
         idxs = []
         labels = []

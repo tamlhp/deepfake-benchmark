@@ -103,7 +103,7 @@ def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test'
     config.sched.lod_initial_resolution = image_size
 
     app = config.EasyDict(func='tf_model.gan_fingerprint.run.train_classifier', lr_mirror_augment=True, ud_mirror_augment=False,
-                          total_kimg=total_train_img/1000,epochs = epochs,total_val_img = total_val_img,)
+                          total_kimg=total_train_img/1000.0,epochs = epochs,total_val_img = total_val_img,)
     config.result_dir = checkpoint
     # elif app == 'test':
     #     assert model_path != ' ' and val_set != ' ' and out_fingerprint_dir != ' '

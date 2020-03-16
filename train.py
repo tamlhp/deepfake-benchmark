@@ -39,6 +39,13 @@ def parse_args():
     parser_siamese_torch = subparsers.add_parser('siamese_torch', help='Siamese pytorch ')
     parser_siamese_torch.add_argument("--length_embed",type=int,required=False,default=1024,help="Length of embed vector")
 
+
+    parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
+    parser_pairwise.add_argument("--mode",type=int,required=True,default=0,help="0: train siamese net, 1: train classify net ")
+    parser_pairwise.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
+
+
+
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_train_img",type=int,required=False,default=10000,help="Total image in training set")
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
@@ -173,6 +180,27 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
+
+    elif model == "pairwise":
+        from pytorch_model.pairwise.train_pairwise import train_pairwise
+        from pytorch_model.pairwise.model import Pairwise,ClassifyFull
+        if args.mode == 0:
+            model = Pairwise()
+            train_pairwise(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                      batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                      epochs=args.niter,print_every=args.print_every)
+        else:
+            from pytorch_model.train_torch import train_cnn
+            import torch
+            model = ClassifyFull()
+            model.cffn.load_state_dict(torch.load(os.path.join(args.checkpoint, args.pair_path)))
+            criterion = get_criterion_torch(args.loss)
+            train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                      image_size=args.image_size, resume=args.resume, \
+                      batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                      epochs=args.niter, print_every=args.print_every)
+        pass
+
     elif model == "gan":
         from tf_model.train_tf import train_gan
         train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,\

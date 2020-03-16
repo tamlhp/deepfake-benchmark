@@ -1,14 +1,6 @@
-# import os
-
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
-# import torchvision
-# import torchvision.datasets as dset
-# import torchvision.transforms as transforms
+import os
 from torch.utils.data import DataLoader, Dataset
-# import matplotlib.pyplot as plt
-# import torchvision.utils
+
 import numpy as np
 import random
 from PIL import Image
@@ -130,12 +122,16 @@ class ContrastiveLoss(torch.nn.Module):
 if __name__ == "__main__":
     IMGWIDTH = 128
 
-    class Config():
-        training_dir = "../../../extract_raw_img"
-        testing_dir = "../../../extract_raw_img"
-        train_batch_size = 2
-        train_number_epochs = 1
-    siamese_dataset = SiameseNetworkDataset(path=Config.training_dir,
+    training_dir = "../../../extract_raw_img"
+    testing_dir = "../../../extract_raw_img"
+    train_batch_size = 2
+    train_number_epochs = 1
+
+
+    checkpoint = "checkpoint"
+    if not os.path.exists(checkpoint):
+        os.makedirs(checkpoint)
+    siamese_dataset = SiameseNetworkDataset(path=training_dir,
                                             transform=transforms.Compose([transforms.Resize((IMGWIDTH, IMGWIDTH)),
                                                                           transforms.ToTensor()
                                                                           ])
@@ -146,18 +142,18 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(siamese_dataset,
                                   shuffle=True,
                                   num_workers=1,
-                                  batch_size=Config.train_batch_size)
+                                  batch_size=train_batch_size)
     device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
-    net = SiameseNetworkResnet(length_embed=128).to(device)
+    model = SiameseNetworkResnet(length_embed=128).to(device)
     criterion = ContrastiveLoss(device)
     criterion2 = nn.BCELoss().to(device)
-    optimizer = optim.Adam(net.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     import time
     from tqdm import tqdm
     iteration_number = 0
-    for epoch in range(0, Config.train_number_epochs):
+    for epoch in range(0, train_number_epochs):
         for i, data in enumerate(train_dataloader, 0):
             img0, img1,y1,y2, label = data
             img0, img1,y1,y2, label = img0.to(device), img1.to(device),y1.float().to(device),y2.float().to(device), label.to(device)
@@ -167,13 +163,13 @@ if __name__ == "__main__":
             #         img0, img1 , label = img0, img1 , label
             # print(img0.size())
             optimizer.zero_grad()
-            output1, output2,cls1,cls2 = net(img0, img1)
+            output1, output2,cls1,cls2 = model(img0, img1)
             loss_contrastive = criterion(output1, output2, label)
             loss_contrastive.backward()
             optimizer.step()
 
             optimizer.zero_grad()
-            output1, output2, cls1, cls2 = net(img0, img1)
+            output1, output2, cls1, cls2 = model(img0, img1)
             loss_cls1 = criterion2(cls1,y1)
             # loss_cls1.backward()
             # optimizer.step()
@@ -185,13 +181,13 @@ if __name__ == "__main__":
             loss_cls = loss_cls1 + loss_cls2
             loss_cls.backward()
             optimizer.step()
-            if i % 20000 == 0:
+            if i % 2 == 0:
                 print("Epoch number {}\n iteration_number {} Current loss {}\n".format(epoch, iteration_number,
                                                                                        loss_contrastive.item()))
-                iteration_number += 20000
+                iteration_number += 2
                 # counter.append(iteration_number)
                 # loss_history.append(loss_contrastive.item())
-                if i % 200000 == 0:
-                    torch.save(net.state_dict(), "siameseResnet.pth")
-    torch.save(net.state_dict(), "siameseResnet.pth")
+                if i % 2 == 0:
+                    torch.save(model.state_dict(), os.path.join(checkpoint, 'pairwise_%d.pt' % epoch))
+    torch.save(model.state_dict(), os.path.join(checkpoint, 'pairwise_end.pt'))
 

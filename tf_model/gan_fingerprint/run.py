@@ -194,6 +194,9 @@ def train_classifier(
     print(int(total_kimg * 1000/config.sched.minibatch_base))
     for i in range(epochs):
         # while cur_nimg < total_kimg * 1000:
+        training_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.training_set)
+        validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
+
         for jtrain in tqdm(range(int(total_kimg * 1000/config.sched.minibatch_base))):
 
             # Choose training parameters and configure training ops.

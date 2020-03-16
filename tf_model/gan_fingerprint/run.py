@@ -232,23 +232,6 @@ def train_classifier(
         tfutil.autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
         tfutil.autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
         tfutil.save_summaries(summary_log, cur_nimg)
-        idxs = []
-        labels = []
-        for jtest in range(int(total_kimg * 1000/config.sched.minibatch_base)):
-            real, label = training_set.get_minibatch_np(config.sched.minibatch_base)
-            real = misc.adjust_dynamic_range(real, training_set.dynamic_range, drange_net)
-            rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
-            idx = np.argmax(np.squeeze(logits),axis=1)
-            idxs.extend(idx)
-            labels.extend(np.argmax(np.squeeze(label), axis=1))
-            # print(logits)
-            # print("438 idx: ", idx)
-        # acc_test = metrics.accuracy_score(idxs, labels)
-        acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
-        print("Epoch  %d :   train accuracy : %f " %(i,acc_test))
-        # text_writer.write("Epoch  %d :  train  accuracy : %f " %(i,acc_test))
-
-        validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
 
         idxs = []
         labels = []

@@ -47,7 +47,7 @@ def parse_args():
 
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
-    parser_gan.add_argument("--total_train_img",type=int,required=False,default=10000,help="Total image in training set")
+    parser_gan.add_argument("--total_train_img",type=float,required=False,default=10000,help="Total image in training set")
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
     parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')

@@ -239,3 +239,31 @@ def load_dataset(class_name='tf_model.gan_fingerprint.dataset.TFRecordDataset', 
     return dataset
 
 #----------------------------------------------------------------------------
+class demo:
+    pass
+if __name__ == "__main__":
+    import config
+    args = demo
+    os.environ.update(config.env)
+    tfutil.init_tf(config.tf_config)
+    args.training_data_dir = "../../checkpoint/data/test"
+    # args.training_data_dir = "~/code/GANFingerprints/classifier_visNet/data"
+    args.validation_data_dir = args.training_data_dir
+    if args.training_data_dir[-1] == '/':
+        args.training_data_dir = args.training_data_dir[:-1]
+    idx = args.training_data_dir.rfind('/')
+    config.data_dir = args.training_data_dir[:idx]
+    config.training_set = config.EasyDict(tfrecord_dir=args.training_data_dir[idx + 1:], max_label_size='full')
+    if args.validation_data_dir[-1] == '/':
+        args.validation_data_dir = args.validation_data_dir[:-1]
+    idx = args.validation_data_dir.rfind('/')
+    config.validation_set = config.EasyDict(tfrecord_dir=args.validation_data_dir[idx + 1:], max_label_size='full')
+    training_set = load_dataset(data_dir=config.data_dir, verbose=True, **config.training_set)
+    # print(training_set)
+    # print(training_set.get_minibatch_tf())
+
+    with tf.name_scope('Inputs'):
+        reals, labels   = training_set.get_minibatch_tf()
+
+    print(training_set.get_minibatch_np(3))
+    print(tfutil.run([reals,labels]))

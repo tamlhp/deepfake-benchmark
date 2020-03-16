@@ -22,40 +22,6 @@ import argparse
 # Choose the size and contents of the image snapshot grids that are exported
 # periodically during training.
 
-def setup_snapshot_image_grid(training_set, drange_net, grid_size=None,
-    size    = '1080p',      # '1080p' = to be viewed on 1080p display, '4k' = to be viewed on 4k display.
-    layout  = 'random'):    # 'random' = grid contents are selected randomly, 'row_per_class' = each row corresponds to one class label.
-
-    # Select size.
-    if grid_size is None:
-        if size == '1080p':
-            gw = np.clip(1920 // training_set.shape[2], 3, 32)
-            gh = np.clip(1080 // training_set.shape[1], 2, 32)
-        if size == '4k':
-            gw = np.clip(3840 // training_set.shape[2], 7, 32)
-            gh = np.clip(2160 // training_set.shape[1], 4, 32)
-    else:
-        gw = grid_size[0]
-        gh = grid_size[1]
-
-    # Fill in reals and labels.
-    reals = np.zeros([gw * gh] + training_set.shape, dtype=np.float32)
-    labels = np.zeros([gw * gh, training_set.label_size], dtype=training_set.label_dtype)
-    for idx in range(gw * gh):
-        x = idx % gw; y = idx // gw
-        while True:
-            real, label = training_set.get_minibatch_np(1)
-            if layout == 'row_per_class' and training_set.label_size > 0:
-                if label[0, y % training_set.label_size] == 0.0:
-                    continue
-            real = real.astype(np.float32)
-            real = misc.adjust_dynamic_range(real, training_set.dynamic_range, drange_net)
-            reals[idx] = real[0]
-            labels[idx] = label[0]
-            break
-
-    return (gw, gh), reals, labels
-
 #----------------------------------------------------------------------------
 # Just-in-time processing of training images before feeding them to the networks.
 
@@ -233,16 +199,16 @@ def train_classifier(
             # Choose training parameters and configure training ops.
             sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
             training_set.configure(sched.minibatch, sched.lod)
-            if reset_opt_for_new_lod:
-                if np.floor(sched.lod) != np.floor(prev_lod) or np.ceil(sched.lod) != np.ceil(prev_lod):
-                    EG_opt.reset_optimizer_state(); D_rec_opt.reset_optimizer_state()
-            prev_lod = sched.lod
+            # if reset_opt_for_new_lod:
+            #     if np.floor(sched.lod) != np.floor(prev_lod) or np.ceil(sched.lod) != np.ceil(prev_lod):
+            #         EG_opt.reset_optimizer_state(); D_rec_opt.reset_optimizer_state()
+            # prev_lod = sched.lod
 
             # Run training ops.
-            # for repeat in range(minibatch_repeats):
-            tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-            tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-            tfutil.run([EGs_update_op], {})
+            for repeat in range(minibatch_repeats):
+                tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+                tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+                tfutil.run([EGs_update_op], {})
             # cur_nimg += sched.minibatch
 
         # Perform maintenance tasks once per tick.
@@ -275,7 +241,8 @@ def train_classifier(
             labels.extend(np.argmax(np.squeeze(label), axis=1))
             # print(logits)
             # print("438 idx: ", idx)
-        acc_test = metrics.accuracy_score(idxs, labels)
+        # acc_test = metrics.accuracy_score(idxs, labels)
+        acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
         print("Epoch  %d :   accuracy : %f " %(i,acc_test))
         text_writer.write("Epoch  %d :   accuracy : %f " %(i,acc_test))
         text_writer.flush()

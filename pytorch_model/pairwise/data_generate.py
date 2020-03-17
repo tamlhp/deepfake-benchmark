@@ -45,12 +45,27 @@ class PairwiseDataset(Dataset):
         # Initialization
         # Store sample
         img = Image.open(ID)
+        while len(img.mode) < 3:
+            rr = random.randint(0, 1)
+            if rr == 0:
+                ID = random.choice(self.real_path)
+            else:
+                ID = random.choice(self.df_path)
+            img = Image.open(ID)
         rr2 = random.randint(0, 1)
         if rr2 == 0:
-            ID2 = random.choice(self.df_path)
-        else:
             ID2 = random.choice(self.real_path)
+        else:
+            ID2 = random.choice(self.df_path)
         img2 = Image.open(ID2)
+
+        while len(img2.mode) < 3:
+            rr = random.randint(0, 1)
+            if rr == 0:
+                ID2 = random.choice(self.real_path)
+            else:
+                ID2 = random.choice(self.df_path)
+            img2 = Image.open(ID2)
         if self.transform is not None:
             img = self.transform(img)
             img2 = self.transform(img2)

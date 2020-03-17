@@ -10,7 +10,7 @@ from torchvision import transforms, datasets, models
 from pytorch_model.pairwise.dense_block import DenseBlock,TransitionBlock,BasicBlock,BottleneckBlock
 
 class cffn(nn.Module):
-    def __init__(self):
+    def __init__(self,image_size = 256):
         super(cffn, self).__init__()
         growth_rate = 24
         dropRate = 0.0

@@ -41,9 +41,9 @@ class SiameseNetworkDataset(Dataset):
     def __getitem__(self, index):
         rr = random.randint(0, 1)
         if rr == 0:
-            ID = self.df_path[index]
-        else:
             ID = self.real_path[index]
+        else:
+            ID = self.df_path[index]
         X_l, X_r, y1, y2, y = self.__data_generation(ID, rr)
 
         return X_l, X_r,y1,y2,y
@@ -55,9 +55,9 @@ class SiameseNetworkDataset(Dataset):
         img = Image.open(ID)
         rr2 = random.randint(0, 1)
         if rr2 == 0:
-            ID2 = random.choice(self.df_path)
-        else:
             ID2 = random.choice(self.real_path)
+        else:
+            ID2 = random.choice(self.df_path)
         img2 = Image.open(ID2)
         if self.transform is not None:
             img = self.transform(img)

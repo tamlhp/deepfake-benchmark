@@ -250,7 +250,7 @@ def train_classifier(
         text_writer.write("Epoch  %d :   accuracy : %f " %(i,acc_test))
         text_writer.flush()
         misc.save_pkl((EG, D_rec, EGs),
-                      os.path.join(result_subdir, 'network-snapshot-%06d.pkl' % (cur_nimg // 1000)))
+                      os.path.join(result_subdir, 'network-snapshot-%06d.pkl' % (i)))
 
     # Write final results.
     misc.save_pkl((EG, D_rec, EGs), os.path.join(result_subdir, 'network-final.pkl'))

@@ -29,7 +29,7 @@ class cffn(nn.Module):
 
         self.block4 = DenseBlock(2, 126, growth_rate, BasicBlock, dropRate)# 126x8x8
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear((126+2*24)*4*4, 128)
+        self.fc = nn.Linear((126+2*24)*8*8, 128)
 
     def forward(self, input):
         x = self.conv1(input)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     from pytorch_model.pairwise.contrastive_loss import ContrastiveLoss
     from pytorch_model.pairwise.data_generate import get_generate_pairwise
 
-    image_size = 128
+    image_size = 256
 
     train_set = "../../../../extract_raw_img"
     val_set = "../../../../extract_raw_img"

@@ -30,7 +30,7 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
 
 
     if resume != '':
-        model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
+        model.cffn.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
     text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
     model.train()
     steps = 0
@@ -61,6 +61,6 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
                 running_loss_contrastive = 0
                 model.train()
 
-        torch.save(model.state_dict(), os.path.join(checkpoint, 'pairwise_%d.pt' % epoch))
-    torch.save(model.state_dict(), os.path.join(checkpoint, 'pairwise_100.pt'))
+        torch.save(model.cffn.state_dict(), os.path.join(checkpoint, 'pairwise_%d.pt' % epoch))
+    torch.save(model.cffn.state_dict(), os.path.join(checkpoint, 'pairwise_100.pt'))
 

@@ -32,6 +32,7 @@ def parse_args():
 
     parser_resnext50 = subparsers.add_parser('resnext50', help='Resnext50 ')
     parser_resnext101 = subparsers.add_parser('resnext101', help='Resnext101 ')
+    parser_myresnext = subparsers.add_parser('myresnext', help='My Resnext ')
     parser_mnasnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
     parser_xception_torch = subparsers.add_parser('xception_torch', help='Xception pytorch ')
     parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
@@ -136,6 +137,17 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every)
         pass
+
+    elif model == "myresnext":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.model_cnn_pytorch import MyResNetX
+        model = MyResNetX()
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every)
+        pass
+
     elif model == "mnasnet":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import mnasnet

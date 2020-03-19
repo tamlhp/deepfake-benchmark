@@ -15,12 +15,11 @@ class MyResNeXt(models.resnet.ResNet):
         # self.load_state_dict(checkpoint)
 
         # Override the existing FC layer with a new one.
-        self.fc = nn.Linear(2048, 1)
+        self.fc = nn.Sequential(nn.Linear(2048, 1),
+                                 nn.Sigmoid())
 
 def MyResNetX():
-    model = models.resnet.ResNet()
-    model.fc = nn.Sequential(nn.Linear(2048, 1),
-                                 nn.Sigmoid())
+    model = MyResNeXt()
     return model
 def resnext50(pretrained=True):
     model = models.resnext50_32x4d(pretrained=pretrained)

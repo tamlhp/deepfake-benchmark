@@ -199,7 +199,7 @@ def train_classifier(
 
             # Choose training parameters and configure training ops.
             sched = TrainingSchedule(cur_nimg, training_set, **config.sched)
-            training_set.configure(sched.minibatch, sched.lod)
+            training_set.configure(config.sched.minibatch_base, sched.lod)
             # if reset_opt_for_new_lod:
             #     if np.floor(sched.lod) != np.floor(prev_lod) or np.ceil(sched.lod) != np.ceil(prev_lod):
             #         EG_opt.reset_optimizer_state(); D_rec_opt.reset_optimizer_state()
@@ -207,10 +207,10 @@ def train_classifier(
 
             # Run training ops.
             for repeat in range(minibatch_repeats):
-                tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
-                tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: sched.minibatch})
+                tfutil.run([D_rec_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: config.sched.minibatch_base})
+                tfutil.run([EG_train_op], {lod_in: sched.lod, lrate_in: sched.lrate, minibatch_in: config.sched.minibatch_base})
                 tfutil.run([EGs_update_op], {})
-            cur_nimg += sched.minibatch
+            cur_nimg += config.sched.minibatch_base
 
         # Perform maintenance tasks once per tick.
         cur_tick += 1

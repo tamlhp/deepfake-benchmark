@@ -54,6 +54,8 @@ def parse_args():
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
+    parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
+    parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
 
     ## tf
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
@@ -212,7 +214,19 @@ if __name__ == "__main__":
                       batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
                       epochs=args.niter, print_every=args.print_every)
         pass
+    elif model == "efficient":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.efficientnet import EfficientNet
 
+        model = EfficientNet.from_pretrained('efficientnet-b'+args.type,num_classes=1)
+        model = nn.Sequential(model,nn.Sigmoid())
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every)
+        pass
+# ---------------------------------------------------------------------------------------------
     elif model == "gan":
         from tf_model.train_tf import train_gan
         train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,\

@@ -14,6 +14,7 @@ class cffn(nn.Module):
         super(cffn, self).__init__()
         growth_rate = 24
         dropRate = 0.0
+        self.image_size = image_size
         reduction = 0.5
         self.conv1 = nn.Conv2d(3, 48, kernel_size=7, stride=4,
                                padding=2, bias=False)   # 48 x 64 x 64
@@ -29,7 +30,7 @@ class cffn(nn.Module):
 
         self.block4 = DenseBlock(2, 126, growth_rate, BasicBlock, dropRate)# 126x8x8
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear((126+2*24)*8*8, 128)
+        self.fc = nn.Linear((126+2*24)*(int(self.image_size/32))**2, 128)
 
     def forward(self, input):
         x = self.conv1(input)

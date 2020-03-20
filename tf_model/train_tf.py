@@ -93,7 +93,7 @@ def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test'
         train_set = train_set[:-1]
     idx = train_set.rfind('/')
     config.data_dir = train_set[:idx]
-    config.training_set = config.EasyDict(tfrecord_dir=val_set[idx + 1:], max_label_size='full')
+    config.training_set = config.EasyDict(tfrecord_dir=train_set[idx + 1:], max_label_size='full')
     if val_set[-1] == '/':
         val_set = val_set[:-1]
     idx = val_set.rfind('/')

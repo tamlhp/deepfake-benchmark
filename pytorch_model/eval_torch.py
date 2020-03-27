@@ -47,7 +47,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
 
     count = 0
     loss_test = 0
-    for img_data, labels_data in dataloader_val:
+    for img_data, labels_data in tqdm(dataloader_val):
         begin = time.time()
         labels_data[labels_data > 1] = 1
         img_label = labels_data.numpy().astype(np.float)
@@ -105,7 +105,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
     accuracy = 0
     model.eval()
     with torch.no_grad():
-        for inputs, labels in dataloader_val:
+        for inputs, labels in tqdm(dataloader_val):
             begin = time.time()
 
             inputs, labels = inputs.to(device), labels.float().to(device)

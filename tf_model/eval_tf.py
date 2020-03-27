@@ -34,6 +34,8 @@ def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_
 
 
     assert checkpoint != ' ' and val_set != ' '
+    tfutil.init_tf(config.tf_config)
+
     if val_set[-1] == '/':
         val_set = val_set[:-1]
     idx = val_set.rfind('/')

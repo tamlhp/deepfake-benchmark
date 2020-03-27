@@ -2,7 +2,6 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 
 import argparse
-from tf_model.focal_loss import BinaryFocalLoss
 
 # from pytorch_model.train import *
 # from tf_model.train import *
@@ -129,6 +128,8 @@ if __name__ == "__main__":
     elif model == "xception_tf":
         from tf_model.eval_tf import eval_cnn
         from tf_model.model_cnn_keras import xception
+        from tf_model.focal_loss import BinaryFocalLoss
+
         model = xception()
         model.load_weights(args.checkpoint + args.resume)
         loss = BinaryFocalLoss(gamma=2)

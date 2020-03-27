@@ -37,6 +37,8 @@ def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_
     if val_set[-1] == '/':
         val_set = val_set[:-1]
     idx = val_set.rfind('/')
+    config.data_dir = val_set[:idx]
+
     config.validation_set = config.EasyDict(tfrecord_dir=val_set[idx + 1:], max_label_size='full')
 
     app = config.EasyDict(func='tf_model.gan_fingerprint.run.eval_classifier', model_path=checkpoint,

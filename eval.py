@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--checkpoint',default = None,required=True, help='path to checkpoint ')
     parser.add_argument('--gpu_id',type=int, default = 0, help='GPU id ')
     parser.add_argument('--resume',type=str, default = "", help='Resume from checkpoint ')
+    parser.add_argument('--time',type=bool, default = False, help='Print time ')
 
     subparsers = parser.add_subparsers(dest="model", help='Choose 1 of the model from: capsule,drn,resnext50, resnext ,gan,meso,xception')
 
@@ -31,6 +32,7 @@ def parse_args():
     parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
+    parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
 
     parser_meso = subparsers.add_parser('meso4', help='Mesonet 4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
@@ -53,67 +55,67 @@ if __name__ == "__main__":
         from pytorch_model.eval_torch import eval_capsule
         eval_capsule(val_set = args.val_set,gpu_id=int(args.gpu_id),resume=args.resume, \
                       image_size=args.image_size,batch_size=args.batch_size, \
-                      num_workers=args.workers,checkpoint=args.checkpoint)
+                      num_workers=args.workers,checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "drn":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.drn.drn_seg import DRNSub
         model = DRNSub(1)
         eval_cnn(model,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint)
+                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "local_nn":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.local_nn import local_nn
         model = local_nn()
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "self_attention":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.self_attention import self_attention
         model = self_attention()
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "resnext50":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.model_cnn_pytorch import resnext50
         model = resnext50(pretrained=False)
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "resnext101":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.model_cnn_pytorch import resnext101
         model = resnext101(pretrained=False)
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "mnasnet":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.model_cnn_pytorch import mnasnet
         model = mnasnet(pretrained=False)
         eval_cnn(model,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint)
+                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "xception_torch":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.xception import xception
         model = xception(pretrained=False)
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "xception2_torch":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.xception import xception2
         model = xception2(pretrained=False)
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
-                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint)
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time)
         pass
     elif model == "gan":
         from tf_model.eval_tf import eval_gan
-        eval_gan(val_set=args.val_set,checkpoint=args.checkpoint,output = "checkpoint")
+        eval_gan(val_set=args.val_set,checkpoint=args.checkpoint,total_val_img=args.total_val_img,show_time=args.time)
         pass
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4

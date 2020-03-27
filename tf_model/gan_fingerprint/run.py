@@ -256,6 +256,46 @@ def train_classifier(
     misc.save_pkl((EG, D_rec, EGs), os.path.join(result_subdir, 'network-final.pkl'))
     summary_log.close()
     open(os.path.join(result_subdir, '_training-done.txt'), 'wt').close()
+def eval_classifier(
+    drange_net              = [-1,1],       # Dynamic range used when feeding image data to the networks.
+        total_val_img = 5000,
+        model_path="checkpoint",
+        show_time=False
+    ):
+    maintenance_start_time = time.time()
+    validation_set = dataset.load_dataset(data_dir=config.data_dir, verbose=True, **config.validation_set)
+
+    # Construct networks.
+    with tf.device('/gpu:0'):
+        try:
+            EG, D_rec, EGs = misc.load_network_pkl(model_path)
+            print('Loading networks from "%s"...' % model_path)
+        except:
+            print('Khong load duoc model...')
+            return
+
+    EG.print_layers(); D_rec.print_layers()
+
+    print('Eval...')
+    total_val_iter = int(total_val_img/config.sched.minibatch_base)
+
+    idxs = []
+    labels = []
+    for jtest in range(total_val_iter):
+        begin = time.time()
+        real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
+        real = misc.adjust_dynamic_range(real, validation_set.dynamic_range, drange_net)
+        rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
+        idx = np.argmax(np.squeeze(logits),axis=1)
+        if show_time:
+            print("Time:  ",time.time()-begin)
+        idxs.extend(idx)
+        labels.extend(np.argmax(np.squeeze(label), axis=1))
+        # print(logits)
+        # print("438 idx: ", idx)
+    # acc_test = metrics.accuracy_score(idxs, labels)
+    acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
+    print(acc_test)
 
 #----------------------------------------------------------------------------
 # Main entry point.

@@ -2,16 +2,14 @@ import torch
 import random
 import os
 import torchvision.transforms as transforms
-from torch.optim import Adam
 import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
 from sklearn import metrics
 import numpy as np
 from torch.autograd import Variable
 from pytorch_model.capsule_pytorch.model import VggExtractor,CapsuleNet,CapsuleLoss
-from torch import optim
 import torch.nn as nn
-
+import time
 from tqdm import tqdm
 
 def get_generate(val_set,image_size,batch_size,num_workers):
@@ -29,7 +27,7 @@ def get_generate(val_set,image_size,batch_size,num_workers):
     return dataloader_val
 
 
-def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint"):
+def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -50,7 +48,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     count = 0
     loss_test = 0
     for img_data, labels_data in dataloader_val:
-
+        begin = time.time()
         labels_data[labels_data > 1] = 1
         img_label = labels_data.numpy().astype(np.float)
 
@@ -77,7 +75,8 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
                 output_pred[i] = 1.0
             else:
                 output_pred[i] = 0.0
-
+        if show_time:
+            print("Time : ", time.time()-begin)
         tol_label = np.concatenate((tol_label, img_label))
         tol_pred = np.concatenate((tol_pred, output_pred))
         loss_test += loss_dis_data
@@ -89,7 +88,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
 
     return
 
-def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint"):
+def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -107,9 +106,13 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
     model.eval()
     with torch.no_grad():
         for inputs, labels in dataloader_val:
+            begin = time.time()
+
             inputs, labels = inputs.to(device), labels.float().to(device)
             logps = model.forward(inputs)
             logps = logps.squeeze()
+            if show_time:
+                print("Time : ", time.time() - begin)
             batch_loss = criterion(logps, labels)
             #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
             test_loss += batch_loss.item()

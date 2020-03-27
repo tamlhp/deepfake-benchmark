@@ -27,18 +27,19 @@ def eval_cnn(model,loss,val_set ='../../extract_raw_img',image_size=256,batch_si
     result = model.evaluate_generator(generator_val, len(generator_val),verbose=1)
     print(result)
 
-def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",output = "checkpoint"):
+def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_img=1000,show_time=False):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc
 
 
-    assert checkpoint != ' ' and val_set != ' ' and output != ' '
-    misc.init_output_logging()
-    print('Initializing TensorFlow...')
-    os.environ.update(config.env)
-    tfutil.init_tf(config.tf_config)
-    app = config.EasyDict(func='util_scripts.classify', model_path=checkpoint,
-                          testing_data_path=val_set, out_fingerprint_dir=output)
+    assert checkpoint != ' ' and val_set != ' '
+    if val_set[-1] == '/':
+        val_set = val_set[:-1]
+    idx = val_set.rfind('/')
+    config.validation_set = config.EasyDict(tfrecord_dir=val_set[idx + 1:], max_label_size='full')
+
+    app = config.EasyDict(func='tf_model.gan_fingerprint.run.eval_classifier', model_path=checkpoint,
+                          total_val_img=total_val_img,show_time=show_time)
 
     tfutil.call_func_by_name(**app)

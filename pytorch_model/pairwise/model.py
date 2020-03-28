@@ -47,7 +47,7 @@ class cffn(nn.Module):
 class classify(nn.Module):
     def __init__(self):
         super(classify, self).__init__()
-        self.conv1 = nn.Conv2d(126, 2, kernel_size=3)
+        self.conv1 = nn.Conv2d((126+2*24), 2, kernel_size=3)
         self.pool = nn.AdaptiveAvgPool2d((1,1))
         self.fc = nn.Linear(2,1)
         self.sigmoid = nn.Sigmoid()

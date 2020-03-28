@@ -40,19 +40,22 @@ class cffn(nn.Module):
         x = self.trans2(x)
         x = self.block3(x)
         x = self.trans3(x)
-        x = self.block4(x)
-        x = self.flatten(x)
+        x_c = self.block4(x)
+        x = self.flatten(x_c)
         x = self.fc(x)
-        return x
+        return x,x_c
 class classify(nn.Module):
     def __init__(self):
         super(classify, self).__init__()
-
-        self.fc = nn.Linear(128,1)
+        self.conv1 = nn.Conv2d(126, 2, kernel_size=3)
+        self.pool = nn.AdaptiveAvgPool2d((1,1))
+        self.fc = nn.Linear(2,1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, input):
-        x = self.fc(input)
+        x = self.conv1(input)
+        x = self.pool(x)
+        x = self.fc(x)
         x = self.sigmoid(x)
         return x
 class Pairwise(nn.Module):
@@ -79,8 +82,8 @@ class ClassifyFull(nn.Module):
 
 
     def forward(self, input):
-        x = self.cffn(input)
-        x = self.classify(x)
+        x,x_c = self.cffn(input)
+        x = self.classify(x_c)
         return x
 
 

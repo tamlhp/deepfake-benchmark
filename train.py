@@ -199,14 +199,14 @@ if __name__ == "__main__":
         from pytorch_model.pairwise.train_pairwise import train_pairwise
         from pytorch_model.pairwise.model import Pairwise,ClassifyFull
         if args.mode == 0:
-            model = Pairwise()
+            model = Pairwise(args.image_size)
             train_pairwise(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                       batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                       epochs=args.niter,print_every=args.print_every)
         else:
             from pytorch_model.train_torch import train_cnn
             import torch
-            model = ClassifyFull()
+            model = ClassifyFull(args.image_size)
             model.cffn.load_state_dict(torch.load(os.path.join(args.checkpoint, args.pair_path)))
             criterion = get_criterion_torch(args.loss)
             train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,

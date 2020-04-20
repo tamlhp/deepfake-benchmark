@@ -49,19 +49,21 @@ class classify(nn.Module):
         super(classify, self).__init__()
         self.conv1 = nn.Conv2d((126+2*24), 2, kernel_size=3)
         self.pool = nn.AdaptiveAvgPool2d((1,1))
+        self.flatten = nn.Flatten()
         self.fc = nn.Linear(2,1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, input):
         x = self.conv1(input)
         x = self.pool(x)
+        x = self.flatten(x)
         x = self.fc(x)
         x = self.sigmoid(x)
         return x
 class Pairwise(nn.Module):
-    def __init__(self):
+    def __init__(self,image_size):
         super(Pairwise, self).__init__()
-        self.cffn = cffn()
+        self.cffn = cffn(image_size)
 
     def forward_once(self, x):
         output = self.cffn(x)
@@ -75,9 +77,9 @@ class Pairwise(nn.Module):
         return output1, output2
 
 class ClassifyFull(nn.Module):
-    def __init__(self):
+    def __init__(self,image_size):
         super(ClassifyFull, self).__init__()
-        self.cffn = cffn()
+        self.cffn = cffn(image_size)
         self.classify = classify()
 
 

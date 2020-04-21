@@ -11,6 +11,7 @@ from pytorch_model.capsule_pytorch.model import VggExtractor,CapsuleNet,CapsuleL
 import torch.nn as nn
 import time
 from tqdm import tqdm
+from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 
 def get_generate(val_set,image_size,batch_size,num_workers):
     transform_fwd = transforms.Compose([transforms.Resize(image_size),
@@ -47,6 +48,9 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
 
     count = 0
     loss_test = 0
+    y_label = []
+    y_pred = []
+    y_pred_label = []
     for img_data, labels_data in tqdm(dataloader_val):
         begin = time.time()
         labels_data[labels_data > 1] = 1
@@ -81,11 +85,18 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
         tol_pred = np.concatenate((tol_pred, output_pred))
         loss_test += loss_dis_data
         count += batch_size
-
+        y_label.extend(img_label)
+        y_pred.extend(output_dis)
+        y_pred_label.extend(output_pred)
     acc_test = metrics.accuracy_score(tol_label, tol_pred)
     loss_test /= count
     print('Test loss: %.4f  acc: %.2f'% ( loss_test, acc_test*100))
-
+    log_loss_metric = log_loss(y_label, y_pred, labels=np.array([0., 1.]))
+    print(f"Test log_loss: {log_loss_metric:.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
     return
 
 def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
@@ -104,13 +115,19 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
     test_loss = 0
     accuracy = 0
     model.eval()
+    y_label = []
+    y_pred = []
+    y_pred_label = []
     with torch.no_grad():
         for inputs, labels in tqdm(dataloader_val):
             begin = time.time()
-
+            # print(labels)
+            y_label.extend(labels)
             inputs, labels = inputs.to(device), labels.float().to(device)
             logps = model.forward(inputs)
             logps = logps.squeeze()
+            # print(logps)
+            y_pred.extend(logps)
             if show_time:
                 print("Time : ", time.time() - begin)
             batch_loss = criterion(logps, labels)
@@ -119,13 +136,24 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
             #                     print("labels : ",labels)
             #                     print("logps  : ",logps)
             equals = labels == (logps > 0.5)
+            pred_label = (logps > 0.5)
+            y_pred_label.extend(pred_label)
             #                     print("equals   ",equals)
             accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
     #                 train_losses.append(running_loss/len(trainloader))
     #             test_losses.append(test_loss/len(testloader))
-    print(f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
-          f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
-
+    print(f"Test loss: {test_loss/len(dataloader_val):.3f}.. \n" +
+          f"Test accuracy: {accuracy/len(dataloader_val):.3f}\n" +
+          f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
 
     return
 
+if __name__ == "__main__":
+    from pytorch_model.xception import xception
+    # model = xception(pretrained=False)
+    # eval_cnn(model,val_set ='../../../extract_raw_img_test',checkpoint="../../../model/xception/",resume="model_pytorch_4.pt")
+    eval_capsule(val_set ='../../../extract_raw_img_test',checkpoint="../../../model/capsule/",resume=6)

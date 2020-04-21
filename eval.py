@@ -29,6 +29,7 @@ def parse_args():
     parser_resnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
     parser_resnet = subparsers.add_parser('xception_torch', help='Xception pytorch ')
     parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
+    parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
@@ -116,10 +117,19 @@ if __name__ == "__main__":
         from tf_model.eval_tf import eval_gan
         eval_gan(val_set=args.val_set,checkpoint=args.checkpoint,total_val_img=args.total_val_img,show_time=args.time)
         pass
+    elif model == "pairwise":
+        from pytorch_model.pairwise.model import ClassifyFull
+        from pytorch_model.eval_torch import eval_cnn
+        import torch
+        model = ClassifyFull(args.image_size)
+        model.cffn.load_state_dict(torch.load(os.path.join(args.checkpoint, args.pair_path)))
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+    # ----------------------------------------------------
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4
         from tf_model.eval_tf import eval_cnn
-        model = Meso4().model
+        model = Meso4(image_size=args.image_size).model
         model.load_weights(args.checkpoint + args.resume)
         loss = 'binary_crossentropy'
         eval_cnn(model,loss=loss,val_set = args.val_set,image_size=args.image_size, \
@@ -130,7 +140,7 @@ if __name__ == "__main__":
         from tf_model.model_cnn_keras import xception
         from tf_model.focal_loss import BinaryFocalLoss
 
-        model = xception()
+        model = xception(image_size=args.image_size)
         model.load_weights(args.checkpoint + args.resume)
         loss = BinaryFocalLoss(gamma=2)
         eval_cnn(model,loss=loss, val_set=args.val_set, image_size=args.image_size, \

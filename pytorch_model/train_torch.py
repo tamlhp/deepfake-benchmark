@@ -11,6 +11,7 @@ from torch.autograd import Variable
 from pytorch_model.capsule_pytorch.model import VggExtractor,CapsuleNet,CapsuleLoss
 from torch import optim
 import torch.nn as nn
+from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 
 from tqdm import tqdm
 
@@ -198,7 +199,9 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
         tol_pred = np.array([], dtype=np.float)
 
         count = 0
-
+        y_label = []
+        y_pred = []
+        y_pred_label = []
         for img_data, labels_data in dataloader_val:
 
             labels_data[labels_data > 1] = 1
@@ -232,15 +235,21 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
 
             loss_test += loss_dis_data
             count += batch_size
-
+            y_label.extend(img_label)
+            y_pred.extend(output_dis)
+            y_pred_label.extend(output_pred)
         acc_test = metrics.accuracy_score(tol_label, tol_pred)
         loss_test /= count
 
         print('[Epoch %d] Train loss: %.4f   acc: %.2f | Test loss: %.4f  acc: %.2f'
         % (epoch, loss_train, acc_train*100, loss_test, acc_test*100))
-
-        text_writer.write('%d,%.4f,%.2f,%.4f,%.2f\n'
-        % (epoch, loss_train, acc_train*100, loss_test, acc_test*100))
+        log_loss_metric = log_loss(y_label,y_pred,labels=np.array([0.,1.]))
+        print(f"Test log_loss: {log_loss_metric:.3f}\n" +
+              f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+              f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+              f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+        text_writer.write('%d,%.4f,%.2f,%.4f,%.2f , %.4f\n'
+        % (epoch, loss_train, acc_train*100, loss_test, acc_test*100,log_loss_metric))
 
         text_writer.flush()
         capnet.train()

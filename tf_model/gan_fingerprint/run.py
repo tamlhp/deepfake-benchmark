@@ -17,6 +17,7 @@ from tf_model.gan_fingerprint import misc
 from sklearn import metrics
 from tqdm import tqdm
 import argparse
+from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 
 #----------------------------------------------------------------------------
 # Choose the size and contents of the image snapshot grids that are exported
@@ -233,21 +234,24 @@ def train_classifier(
         tfutil.autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
         tfutil.save_summaries(summary_log, cur_nimg)
 
-        idxs = []
-        labels = []
+        y_label = []
+        y_pred = []
+        y_pred_label = []
         for jtest in range(total_val_iter):
             real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
             real = misc.adjust_dynamic_range(real, training_set.dynamic_range, drange_net)
             rec, fingerprint, logits = EGs.run(real, minibatch_size=config.sched.minibatch_base, num_gpus=1, out_dtype=np.float32)
             idx = np.argmax(np.squeeze(logits),axis=1)
-            idxs.extend(idx)
-            labels.extend(np.argmax(np.squeeze(label), axis=1))
+            y_pred_label.extend(idx)
+            y_label.extend(np.argmax(np.squeeze(label), axis=1))
+            y_pred.extend(logits)
             # print(logits)
             # print("438 idx: ", idx)
         # acc_test = metrics.accuracy_score(idxs, labels)
-        acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
-        print("Epoch  %d :   accuracy : %f " %(i,acc_test))
-        text_writer.write("Epoch  %d :   accuracy : %f " %(i,acc_test))
+        acc_test = np.float32(np.sum(np.array(y_pred_label) == np.array(y_label))) / np.float32(len(y_label))
+        log_loss_metric = log_loss(y_label, y_pred, labels=np.array([0., 1.]))
+        print("Epoch  %d :  loss : %f   accuracy : %f " %(i,log_loss_metric,acc_test))
+        text_writer.write("Epoch  %d : loss : %f    accuracy : %f " %(i,log_loss_metric,acc_test))
         text_writer.flush()
         misc.save_pkl((EG, D_rec, EGs),
                       os.path.join(result_subdir, 'network-snapshot-%06d.pkl' % (i)))
@@ -279,8 +283,9 @@ def eval_classifier(
     print('Eval...')
     total_val_iter = int(total_val_img/config.sched.minibatch_base)
 
-    idxs = []
-    labels = []
+    y_label = []
+    y_pred = []
+    y_pred_label = []
     for jtest in range(total_val_iter):
         begin = time.time()
         real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
@@ -289,13 +294,21 @@ def eval_classifier(
         idx = np.argmax(np.squeeze(logits),axis=1)
         if show_time:
             print("Time:  ",time.time()-begin)
-        idxs.extend(idx)
-        labels.extend(np.argmax(np.squeeze(label), axis=1))
+        y_pred_label.extend(idx)
+        y_label.extend(np.argmax(np.squeeze(label), axis=1))
+        y_pred.extend(logits)
         # print(logits)
         # print("438 idx: ", idx)
     # acc_test = metrics.accuracy_score(idxs, labels)
-    acc_test = np.float32(np.sum(np.array(idxs) == np.array(labels))) / np.float32(len(labels))
+    acc_test = np.float32(np.sum(np.array(y_pred_label) == np.array(y_label))) / np.float32(len(y_label))
+    log_loss_metric = log_loss(y_label, y_pred, labels=np.array([0., 1.]))
+    print("loss : %f   accuracy : %f " % (log_loss_metric, acc_test))
     print(acc_test)
+    print(f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
 
 #----------------------------------------------------------------------------
 # Main entry point.

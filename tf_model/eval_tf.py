@@ -23,7 +23,7 @@ def eval_cnn(model,loss,val_set ='../../extract_raw_img',image_size=256,batch_si
     #### Load data
     generator_val = get_generate(val_set,image_size,batch_size)
     ### Compile model
-    model.compile(optimizer="adam", loss=loss, metrics=['accuracy'])
+    model.compile(optimizer="adam", loss=loss, metrics=['accuracy',keras.metrics.Recall(),keras.metrics.Precision()])
     result = model.evaluate_generator(generator_val, len(generator_val),verbose=1)
     print(result)
 

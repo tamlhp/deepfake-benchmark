@@ -132,3 +132,4 @@ dmypy.json
 checkpoint/
 *checkpoint/
 events.out.tf*
+*tfrecords*

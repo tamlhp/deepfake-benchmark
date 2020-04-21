@@ -237,7 +237,7 @@ if __name__ == "__main__":
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4
         from tf_model.train_tf import train_cnn
-        model = Meso4().model
+        model = Meso4(image_size=args.image_size).model
         loss = get_loss_tf(args.loss)
         train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     elif model == "xception_tf":
         from tf_model.train_tf import train_cnn
         from tf_model.model_cnn_keras import xception
-        model = xception()
+        model = xception(image_size=args.image_size)
         loss = get_loss_tf(args.loss)
         train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter)
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     elif model == "siamese_tf":
         from tf_model.siamese import get_siamese_model
         from tf_model.train_tf import train_siamese
-        model = get_siamese_model((256, 256, 3))
+        model = get_siamese_model((args.image_size, args.image_size, 3))
         loss = 'binary_crossentropy'
         train_siamese(model,loss = loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)

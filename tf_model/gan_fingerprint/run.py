@@ -307,7 +307,7 @@ def eval_classifier(
     log_loss_metric = log_loss(y_label, y_softmax, labels=np.array([0., 1.]))
     print("loss : %f   accuracy : %f " % (log_loss_metric, acc_test))
     print(acc_test)
-    print(f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+    print(f"Test log_loss: {log_loss(y_label,y_softmax,labels=np.array([0.,1.])):.3f}\n" +
           f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
           f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
           f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     gpu_id = 0 if int(args.gpu_id) >= 0 else -1
     if model== "capsule":
         from pytorch_model.eval_torch import eval_capsule
-        eval_capsule(val_set = args.val_set,gpu_id=int(args.gpu_id),resume=args.resume, \
+        eval_capsule(val_set = args.val_set,gpu_id=int(gpu_id),resume=args.resume, \
                       image_size=args.image_size,batch_size=args.batch_size, \
                       num_workers=args.workers,checkpoint=args.checkpoint,show_time=args.time)
         pass

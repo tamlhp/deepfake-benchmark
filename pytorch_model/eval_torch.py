@@ -123,13 +123,13 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
         for inputs, labels in tqdm(dataloader_val):
             begin = time.time()
             # print(labels)
-            y_label.extend(labels)
+            y_label.extend(labels.cpu().numpy().astype(np.float64))
             inputs, labels = inputs.to(device), labels.float().to(device)
             logps = model.forward(inputs)
             logps = logps.squeeze()
             # print(logps)
             logps_cpu = logps.cpu().numpy()
-            y_pred.extend(logps_cpu)
+            y_pred.extend(logps_cpu.astype(np.float64))
             if show_time:
                 print("Time : ", time.time() - begin)
             batch_loss = criterion(logps, labels)

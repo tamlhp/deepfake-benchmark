@@ -107,7 +107,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
 
     dataloader_val = get_generate(val_set,image_size,batch_size,num_workers)
 
@@ -128,7 +128,8 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
             logps = model.forward(inputs)
             logps = logps.squeeze()
             # print(logps)
-            y_pred.extend(logps)
+            logps_cpu = logps.cpu().numpy()
+            y_pred.extend(logps_cpu)
             if show_time:
                 print("Time : ", time.time() - begin)
             batch_loss = criterion(logps, labels)
@@ -137,7 +138,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
             #                     print("labels : ",labels)
             #                     print("logps  : ",logps)
             equals = labels == (logps > 0.5)
-            pred_label = (logps > 0.5)
+            pred_label = (logps_cpu > 0.5)
             y_pred_label.extend(pred_label)
             #                     print("equals   ",equals)
             accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
@@ -155,6 +156,6 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
 
 if __name__ == "__main__":
     from pytorch_model.xception import xception
-    # model = xception(pretrained=False)
-    # eval_cnn(model,val_set ='../../../extract_raw_img_test',checkpoint="../../../model/xception/",resume="model_pytorch_4.pt")
-    eval_capsule(val_set ='../../../extract_raw_img_test',checkpoint="../../../model/capsule/",resume=6)
+    model = xception(pretrained=False)
+    eval_cnn(model,val_set ='../../../extract_raw_img_test',checkpoint="../../../model/xception/",resume="model_pytorch_4.pt")
+    # eval_capsule(val_set ='../../../extract_raw_img_test',checkpoint="../../../model/capsule/",resume=6)

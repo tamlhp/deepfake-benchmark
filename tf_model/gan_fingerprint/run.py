@@ -260,6 +260,7 @@ def train_classifier(
     misc.save_pkl((EG, D_rec, EGs), os.path.join(result_subdir, 'network-final.pkl'))
     summary_log.close()
     open(os.path.join(result_subdir, '_training-done.txt'), 'wt').close()
+from scipy.special import softmax
 def eval_classifier(
     drange_net              = [-1,1],       # Dynamic range used when feeding image data to the networks.
         total_val_img = 5000,
@@ -286,6 +287,7 @@ def eval_classifier(
     y_label = []
     y_pred = []
     y_pred_label = []
+    y_softmax = []
     for jtest in range(total_val_iter):
         begin = time.time()
         real, label = validation_set.get_minibatch_np(config.sched.minibatch_base)
@@ -297,11 +299,12 @@ def eval_classifier(
         y_pred_label.extend(idx)
         y_label.extend(np.argmax(np.squeeze(label), axis=1))
         y_pred.extend(logits)
+        y_softmax.extend(softmax(logits,axis=1))
         # print(logits)
         # print("438 idx: ", idx)
     # acc_test = metrics.accuracy_score(idxs, labels)
     acc_test = np.float32(np.sum(np.array(y_pred_label) == np.array(y_label))) / np.float32(len(y_label))
-    log_loss_metric = log_loss(y_label, y_pred, labels=np.array([0., 1.]))
+    log_loss_metric = log_loss(y_label, y_softmax, labels=np.array([0., 1.]))
     print("loss : %f   accuracy : %f " % (log_loss_metric, acc_test))
     print(acc_test)
     print(f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +

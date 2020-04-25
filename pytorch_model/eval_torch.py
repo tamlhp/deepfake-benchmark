@@ -14,7 +14,7 @@ from tqdm import tqdm
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 
 def get_generate(val_set,image_size,batch_size,num_workers):
-    transform_fwd = transforms.Compose([transforms.Resize(image_size),
+    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225])
@@ -51,6 +51,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     y_label = []
     y_pred = []
     y_pred_label = []
+    capnet.eval()
     for img_data, labels_data in tqdm(dataloader_val):
         begin = time.time()
         labels_data[labels_data > 1] = 1

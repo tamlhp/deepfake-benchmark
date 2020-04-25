@@ -51,6 +51,7 @@ if __name__ == "__main__":
 
     model = args.model
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
+    gpu_id = 0 if int(args.gpu_id) >= 0 else -1
     if model== "capsule":
         from pytorch_model.eval_torch import eval_capsule
         eval_capsule(val_set = args.val_set,gpu_id=int(args.gpu_id),resume=args.resume, \

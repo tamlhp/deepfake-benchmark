@@ -30,20 +30,24 @@ class cffn(nn.Module):
 
         self.block4 = DenseBlock(2, 126, growth_rate, BasicBlock, dropRate)# 126x8x8
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear((126+2*24)*(int(self.image_size/32))**2, 128)
+        self.fc = nn.Linear((48+2*24)*(int(self.image_size/4))**2+(60+3*24)*(int(self.image_size/8))**2+(78+4*24)*(int(self.image_size/16))**2+(126+2*24)*(int(self.image_size/32))**2, 128)
 
     def forward(self, input):
         x = self.conv1(input)
-        x = self.block1(x)
-        x = self.trans1(x)
-        x = self.block2(x)
-        x = self.trans2(x)
-        x = self.block3(x)
-        x = self.trans3(x)
-        x_c = self.block4(x)
-        x = self.flatten(x_c)
+        x1 = self.block1(x)
+        x = self.trans1(x1)
+        x2 = self.block2(x)
+        x = self.trans2(x2)
+        x3 = self.block3(x)
+        x = self.trans3(x3)
+        xc = self.block4(x)
+        x1 = self.flatten(x1)
+        x2 = self.flatten(x2)
+        x3 = self.flatten(x3)
+        x4 = self.flatten(xc)
+        x = torch.cat([x1,x2,x3,x4],1)
         x = self.fc(x)
-        return x,x_c
+        return x,xc
 class classify(nn.Module):
     def __init__(self):
         super(classify, self).__init__()
@@ -80,6 +84,8 @@ class ClassifyFull(nn.Module):
     def __init__(self,image_size):
         super(ClassifyFull, self).__init__()
         self.cffn = cffn(image_size)
+        for param in self.cffn.parameters():
+            param.requires_grad = False
         self.classify = classify()
 
 
@@ -95,7 +101,7 @@ if __name__ == "__main__":
     from pytorch_model.pairwise.contrastive_loss import ContrastiveLoss
     from pytorch_model.pairwise.data_generate import get_generate_pairwise
 
-    image_size = 256
+    image_size = 128
 
     train_set = "../../../../extract_raw_img"
     val_set = "../../../../extract_raw_img"
@@ -106,8 +112,9 @@ if __name__ == "__main__":
         os.makedirs(checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available()
                               else "cpu")
-    model = Pairwise().to(device)
-    # model_clss = ClassifyFull()
+    model = Pairwise(image_size).to(device)
+    # model.summary()
+    model_clss = ClassifyFull(image_size)
     # model_clss.cffn.load_state_dict(torch.load(os.path.join(checkpoint, 'pairwise_0.pt')))
     # torch.save(model_clss.state_dict(), os.path.join(checkpoint, 'cls_sss.pt'))
 

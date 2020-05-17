@@ -34,7 +34,7 @@ def preprocess_image(img, size=15):
 
 def filter_image(img, law_masks):
     law_images = {}
-    for name, filter_kernel in law_masks.iteritems():
+    for name, filter_kernel in law_masks.items():
         filtered_img = cv2.filter2D(img, -1, filter_kernel)
         law_images[name] = filtered_img
 
@@ -45,7 +45,7 @@ def compute_energy(law_images, m_size):
     laws_energy = {}
     mean_kernel = generate_mean_kernel(m_size)
 
-    for name, law_image in law_images.iteritems():
+    for name, law_image in law_images.items():
         law_image = np.abs(law_image)
         energy_image = cv2.filter2D(law_image, -1, mean_kernel)
         laws_energy[name] = energy_image

@@ -7,6 +7,7 @@ import glob
 from matplotlib import pyplot as plt
 import pickle
 from scipy.interpolate import griddata
+import argparse
 
 
 def azimuthalAverage(image, center=None):
@@ -69,88 +70,33 @@ N = 80
 y = []
 error = []
 
-number_iter = 1000
-
-psd1D_total = np.zeros([number_iter, N])
-label_total = np.zeros([number_iter])
-# psd1D_org_mean = np.zeros(N)
-# psd1D_org_std = np.zeros(N)
-
-cont = 0
-
-
-# fake data
-rootdir = 'dataset_celebA/'
-
-for filename in glob.glob(rootdir + "*.jpg"):
-
-
-    psd1D_total[cont, :] = interpolated
-    label_total[cont] = 1
-    cont += 1
-
-    if cont == number_iter:
-        break
-
-# for x in range(N):
-#     psd1D_org_mean[x] = np.mean(psd1D_total[:, x])
-#     psd1D_org_std[x] = np.std(psd1D_total[:, x])
-
-## real data
-psd1D_total2 = np.zeros([number_iter, N])
-label_total2 = np.zeros([number_iter])
-# psd1D_org_mean2 = np.zeros(N)
-# psd1D_org_std2 = np.zeros(N)
-
-cont = 0
-rootdir2 = '/home/duralllopez/DATASETS/celebA/img_align_celeba/'
-
-for filename in glob.glob(rootdir2 + "*.jpg"):
-    img = cv2.imread(filename, 0)
-
-    f = np.fft.fft2(img)
-    fshift = np.fft.fftshift(f)
-    fshift += epsilon
-
-    magnitude_spectrum = 20 * np.log(np.abs(fshift))
-
-    # Calculate the azimuthally averaged 1D power spectrum
-    psd1D = azimuthalAverage(magnitude_spectrum)
-
-    points = np.linspace(0, N, num=psd1D.size)  # coordinates of a
-    xi = np.linspace(0, N, num=N)  # coordinates for interpolation
-
-    interpolated = griddata(points, psd1D, xi, method='cubic')
-
-    interpolated /= interpolated[0]
-
-    psd1D_total2[cont, :] = interpolated
-    label_total2[cont] = 0
-    cont += 1
-
-    if cont == number_iter:
-        break
-
-# for x in range(N):
-#     psd1D_org_mean2[x] = np.mean(psd1D_total2[:, x])
-#     psd1D_org_std2[x] = np.std(psd1D_total2[:, x])
-
-# y.append(psd1D_org_mean)
-# y.append(psd1D_org_mean2)
-# error.append(psd1D_org_std)
-# error.append(psd1D_org_std2)
-
-psd1D_total_final = np.concatenate((psd1D_total, psd1D_total2), axis=0)
-label_total_final = np.concatenate((label_total, label_total2), axis=0)
-
-data["data"] = psd1D_total_final
-data["label"] = label_total_final
-
-output = open('train.pkl', 'wb')
-pickle.dump(data, output)
-output.close()
-
-print("DATA Saved")
-
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser(description="Deepfake detection")
+    parser.add_argument('--in_train', default="data/train/", help='path to train data ')
+    parser.add_argument('--in_val', default="data/test/", help='path to test data ')
+    parser.add_argument('--out_train', type=str, default="train_feature.pkl", help='out_train')
+    parser.add_argument('--out_val', type=str, default="val_feature.pkl", help='out_val')
+
+    args = parser.parse_args()
+    features = []
+    for i in glob.glob(args.in_train):
+        print(i)
+        img = cv2.imread(i)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        feature = get_interpolated(img)
+        features.append(feature)
+        # pass
+    output = open(args.out_train, 'wb')
+    pickle.dump(features, output)
+    output.close()
+
+    features = []
+    for i in glob.glob(args.in_val):
+        img = cv2.imread(i)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        feature = get_interpolated(img)
+        features.append(feature)
+        # pass
+    output = open(args.out_val, 'wb')
+    pickle.dump(features, output)
+    output.close()

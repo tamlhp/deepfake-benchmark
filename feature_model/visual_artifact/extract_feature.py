@@ -1,6 +1,6 @@
-import os
+# import os
 import argparse
-from collections import defaultdict
+# from collections import defaultdict
 import dlib
 import cv2
 from feature_model.visual_artifact.pipeline.eyecolor import extract_eyecolor_features

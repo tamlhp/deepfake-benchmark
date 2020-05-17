@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     features = []
-    for i in range(len(glob.glob(args.in_train))):
+    for i in glob.glob(args.in_train):
         img = cv2.imread(i)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         feature = extract_visual_artifact(img)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     output.close()
 
     features = []
-    for i in range(len(glob.glob(args.in_val))):
+    for i in glob.glob(args.in_val):
         img = cv2.imread(i)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         feature = extract_visual_artifact(img)

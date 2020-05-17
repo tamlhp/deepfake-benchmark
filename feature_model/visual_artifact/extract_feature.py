@@ -9,7 +9,7 @@ from feature_model.visual_artifact.pipeline.face_utils import *
 from feature_model.visual_artifact.pipeline import pipeline_utils
 from feature_model.visual_artifact.pipeline.texture import extract_features_eyes,extract_features_faceborder,extract_features_mouth,extract_features_nose
 import glob
-
+import pickle
 
 # img = cv2.imread("../prnu/camera.jpg")
 # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -46,21 +46,30 @@ def extract_visual_artifact(img):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deepfake detection")
-    parser.add_argument('--train_set', default="data/train/", help='path to train data ')
-    parser.add_argument('--val_set', default="data/test/", help='path to test data ')
-    parser.add_argument('--batch_size', type=int, default=64, help='batch size')
-    parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
-    parser.add_argument('--niter', type=int, default=25, help='number of epochs to train for')
-    parser.add_argument('--image_size', type=int, default=256,
-                        help='the height / width of the input image to network')
-    parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
-    parser.add_argument('--checkpoint', default=None, required=True, help='path to checkpoint ')
-    parser.add_argument('--gpu_id', type=int, default=0, help='GPU id ')
-    parser.add_argument('--resume', type=str, default='', help='Resume from checkpoint ')
-    parser.add_argument('--print_every', type=int, default=5000, help='Print evaluate info every step train')
-    parser.add_argument('--loss', type=str, default="bce", help='Loss function use')
+    parser.add_argument('--in_train', default="data/train/", help='path to train data ')
+    parser.add_argument('--in_val', default="data/test/", help='path to test data ')
+    parser.add_argument('--out_train', type=str, default="train_feature.pkl", help='out_train')
+    parser.add_argument('--out_val', type=str, default="val_feature.pkl", help='out_val')
 
     args = parser.parse_args()
+    features = []
+    for i in range(len(glob.glob(args.in_train))):
+        img = cv2.imread(i)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        feature = extract_visual_artifact(img)
+        features.append(feature)
+        # pass
+    output = open(args.out_train, 'wb')
+    pickle.dump(features, output)
+    output.close()
 
-    for i in range(len(glob.glob())):
-        pass
+    features = []
+    for i in range(len(glob.glob(args.in_val))):
+        img = cv2.imread(i)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        feature = extract_visual_artifact(img)
+        features.append(feature)
+        # pass
+    output = open(args.out_val, 'wb')
+    pickle.dump(features, output)
+    output.close()

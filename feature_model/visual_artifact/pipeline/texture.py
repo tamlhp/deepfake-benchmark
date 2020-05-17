@@ -18,7 +18,7 @@ def extract_features_mask(img, mask):
     law_energy = laws_texture.compute_energy(law_images, 10)
 
     energy_features_list = []
-    for type, energy in law_energy.iteritems():
+    for type, energy in law_energy.items():
         # extract features for mask
         energy_masked = energy[np.where(mask != 0)]
         energy_feature = np.mean(energy_masked, dtype=np.float32)

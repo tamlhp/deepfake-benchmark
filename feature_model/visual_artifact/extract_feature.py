@@ -42,7 +42,8 @@ def extract_visual_artifact(img):
         features_mounth = extract_features_mouth(landmarks, face_crop, scale=scale)
         features_nose = extract_features_nose(landmarks, face_crop, scale=scale)
         features_face = extract_features_faceborder(landmarks, face_crop, scale=scale)
-    return np.concatenate([feature_eyecolor,features_eyes,features_mounth,features_nose,features_face],axis=0)
+        feature = np.concatenate([feature_eyecolor, features_eyes, features_mounth, features_nose, features_face], axis=0)
+    return feature
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deepfake detection")

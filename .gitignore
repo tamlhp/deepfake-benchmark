@@ -133,3 +133,7 @@ checkpoint/
 *checkpoint/
 events.out.tf*
 *tfrecords*
+*labels
+*.png
+*.jpg
+*.jpeg

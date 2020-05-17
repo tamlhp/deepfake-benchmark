@@ -12,85 +12,15 @@ from pytorch_model.capsule_pytorch.model import VggExtractor,CapsuleNet,CapsuleL
 from torch import optim
 import torch.nn as nn
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
-
 from tqdm import tqdm
+from pytorch_model.data_generate import get_generate,get_generate_siamese
 
-# https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3
-def make_weights_for_balanced_classes(images, nclasses):
-    count = [0] * nclasses
-    for item in images:
-        count[item[1]] += 1
-    weight_per_class = [0.] * nclasses
-    N = float(sum(count))
-    print(count)
-    for i in range(nclasses):
-        weight_per_class[i] = N/float(count[i])
-    print(weight_per_class)
-    weight = [0] * len(images)
-    for idx, val in enumerate(images):
-        weight[idx] = weight_per_class[val[1]]
-    return weight
-def get_generate(train_set,val_set,image_size,batch_size,num_workers):
-    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.RandomHorizontalFlip(p=0.5),
-                                           transforms.RandomApply([
-                                               transforms.RandomRotation(5),
-                                               transforms.RandomAffine(degrees=5, scale=(0.95, 1.05))
-                                           ], p=0.5),
-                                           transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
 
-                                           ])
-    dataset_train = datasets.ImageFolder(train_set,
-                                      transform=transform_fwd)
-    assert dataset_train
-    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
-    weights = torch.DoubleTensor(weights)
-    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
 
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, sampler=sampler,
-                                              num_workers=num_workers)
 
-    dataset_val = datasets.ImageFolder(val_set,
-                                     transform=transform_fwd)
-    assert dataset_val
-    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
-
-    return dataloader_train,dataloader_val
-def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
-    from pytorch_model.siamese import SiameseNetworkDataset
-
-    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.RandomHorizontalFlip(p=0.5),
-                                           transforms.RandomApply([
-                                               transforms.RandomRotation(5),
-                                               transforms.RandomAffine(degrees=5, scale=(0.95, 1.05))
-                                           ], p=0.5),
-                                           transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
-
-                                           ])
-    dataset_train = SiameseNetworkDataset(path=train_set,
-                                            transform=transform_fwd
-                                            , should_invert=False,shuffle=True)
-
-    assert dataset_train
-
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True,
-                                              num_workers=num_workers)
-
-    dataset_val = SiameseNetworkDataset(path=val_set,
-                                            transform=transform_fwd
-                                            , should_invert=False,shuffle=True)
-
-    assert dataset_val
-    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
-
-    return dataloader_train,dataloader_val
-
-def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume="",beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",epochs=20):
+def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume="",\
+                  beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",\
+                  epochs=20,adj_brightness=1.0, adj_contrast=1.0):
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
@@ -152,6 +82,8 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             optimizer.zero_grad()
 
             img_data = img_data.to(device)
+            img_data = transforms.functional.adjust_brightness(img_data,adj_brightness)
+            img_data = transforms.functional.adjust_contrast(img_data,adj_contrast)
             labels_data = labels_data.to(device)
             # if gpu_id >= 0:
             #     img_data = img_data.cuda(gpu_id)
@@ -208,6 +140,8 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             img_label = labels_data.numpy().astype(np.float)
 
             img_data = img_data.to(device)
+            img_data = transforms.functional.adjust_brightness(img_data, adj_brightness)
+            img_data = transforms.functional.adjust_contrast(img_data, adj_contrast)
             labels_data = labels_data.to(device)
             # if gpu_id >= 0:
             #     img_data = img_data.cuda(gpu_id)
@@ -258,13 +192,15 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
     return
 
 
-def eval_train(model ,dataloader_val,device,criterion,text_writer ):
+def eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=1.0, adj_contrast=1.0 ):
     test_loss = 0
     accuracy = 0
     model.eval()
     with torch.no_grad():
         for inputs, labels in dataloader_val:
             inputs, labels = inputs.to(device), labels.float().to(device)
+            inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
             logps = model.forward(inputs)
             logps = logps.squeeze()
             batch_loss = criterion(logps, labels)
@@ -284,7 +220,9 @@ def eval_train(model ,dataloader_val,device,criterion,text_writer ):
         test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
     text_writer.flush()
     model.train()
-def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
+def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
+              batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
+              adj_brightness=1.0, adj_contrast=1.0):
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
@@ -316,7 +254,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
             #         labels = np.array([labels])
             inputs, labels = inputs.to(device), labels.float().to(device)
             #         inputs, labels = inputs.to(device), labels[1].float().to(device)
-
+            inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
             optimizer.zero_grad()
             logps = model.forward(inputs)
             logps = logps.squeeze()
@@ -333,6 +272,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 with torch.no_grad():
                     for inputs, labels in dataloader_val:
                         inputs, labels = inputs.to(device), labels.float().to(device)
+                        inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                        inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
                         logps = model.forward(inputs)
                         logps = logps.squeeze()
                         batch_loss = criterion(logps, labels)
@@ -356,11 +297,13 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 running_loss = 0
                 steps = 0
                 model.train()
-        eval_train(model ,dataloader_val,device,criterion,text_writer)
+        eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
     return
 
-def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,length_embed = 1024,batch_size=16,resume = '',lr=0.001,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000):
+def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
+                  length_embed = 1024,batch_size=16,resume = '',lr=0.001,num_workers=8,checkpoint="checkpoint",\
+                  epochs=20,print_every=1000,adj_brightness=1.0, adj_contrast=1.0):
     from pytorch_model.siamese import ContrastiveLoss
 
     if not os.path.exists(checkpoint):
@@ -395,6 +338,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
             img0, img1,y1,y2, label = img0.to(device), img1.to(device),y1.float().to(device),y2.float().to(device), label.to(device)
             #         img0, img1 , label = img0, img1 , label
             # print(img0.size())
+            img0 = transforms.functional.adjust_brightness(img0,adj_brightness)
+            img0 = transforms.functional.adjust_contrast(img0,adj_contrast)
+            img1 = transforms.functional.adjust_brightness(img1,adj_brightness)
+            img1 = transforms.functional.adjust_contrast(img1,adj_contrast)
             optimizer.zero_grad()
             output1, output2,cls1,cls2 = model(img0, img1)
             loss_contrastive = criterion(output1, output2, label)
@@ -427,6 +374,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
                     for img0,img1,y1,y2, label in dataloader_val:
                         img0,img1, y1, y2, label = img0.to(device), img1.to(device),\
                                                     y1.float().to(device), y2.float().to(device), label.to(device)
+                        img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
+                        img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
+                        img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
+                        img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
                         output1, output2, cls1, cls2 = model.forward(img0, img1)
                         cls1 = cls1.squeeze()
                         cls2 = cls2.squeeze()
@@ -475,6 +426,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
             for img0, img1, y1, y2, label in dataloader_val:
                 img0, img1, y1, y2, label = img0.to(device), img1.to(device), \
                                             y1.float().to(device), y2.float().to(device), label.to(device)
+                img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
+                img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
+                img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
+                img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
                 output1, output2, cls1, cls2 = model.forward(img0, img1)
                 cls1 = cls1.squeeze()
                 cls2 = cls2.squeeze()

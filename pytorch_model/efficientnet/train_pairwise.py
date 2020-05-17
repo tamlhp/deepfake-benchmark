@@ -25,6 +25,7 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
 
     model = model.to(device)
     criterion = ContrastiveLoss(device=device).to(device)
+    # criterion =
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
 
@@ -33,8 +34,6 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
     dataloader_val = get_generate_pairwise(val_set,image_size,batch_size,num_workers)
 
 
-    if resume != '':
-        model.cffn.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
     text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
     model.train()
     steps = 0
@@ -46,10 +45,6 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
             img0, img1, label = img0.to(device), img1.to(device),label.to(device)
             #         img0, img1 , label = img0, img1 , label
             # print(img0.size())
-            img0 = transforms.functional.adjust_brightness(img0,adj_brightness)
-            img0 = transforms.functional.adjust_contrast(img0,adj_contrast)
-            img1 = transforms.functional.adjust_brightness(img1,adj_brightness)
-            img1 = transforms.functional.adjust_contrast(img1,adj_contrast)
             optimizer.zero_grad()
             output1, output2= model(img0, img1)
             loss_contrastive = criterion(output1, output2, label)
@@ -69,6 +64,8 @@ def train_pairwise(model,train_set = '../../extract_raw_img',val_set ='../../ext
                 running_loss_contrastive = 0
                 model.train()
 
-        torch.save(model.cffn.state_dict(), os.path.join(checkpoint, 'pairwise_%d.pt' % epoch))
-    torch.save(model.cffn.state_dict(), os.path.join(checkpoint, 'pairwise_100.pt'))
+        torch.save(model.efficient.state_dict(), os.path.join(checkpoint, 'efficient3_%d.pt' % epoch))
+    torch.save(model.efficient.state_dict(), os.path.join(checkpoint, 'efficient3_100.pt'))
 
+if __name__ == "__main__":
+    train_pairwise()

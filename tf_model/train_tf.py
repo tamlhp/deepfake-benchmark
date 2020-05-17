@@ -5,12 +5,28 @@ from keras.preprocessing.image import ImageDataGenerator
 import keras
 import os
 from keras.optimizers import Adam
-
-def get_generate(train_set,val_set,image_size,batch_size):
+from PIL import ImageEnhance,Image
+def image_contrast_adjusment(img):
+    # print(img.shape)
+    # print(type(img))
+    # print(img)
+    # print(np.max(img))
+    # print(img.astype(int).astype("int16"))
+    img = img.astype("uint8")
+    # print(img)
+    # print(np.min(img))
+    # print(np.max(img))
+    contrast = ImageEnhance.Contrast(Image.fromarray(img))
+    img = contrast.enhance(1.0)
+    return np.array(img,dtype='float64')
+def get_generate(train_set,val_set,image_size,batch_size,adj_brightness=1.0, adj_contrast=1.0):
     dataGenerator = ImageDataGenerator(rescale=1. / 255, rotation_range=5,
                                        width_shift_range=0.05,
                                        height_shift_range=0.05,
-                                       horizontal_flip=True, shear_range=0.05)
+                                       horizontal_flip=True, shear_range=0.05,
+                                       brightness_range=[adj_brightness-1e-6, adj_brightness+1e-6],
+                                       preprocessing_function = image_contrast_adjusment
+                                       )
     generator_train = dataGenerator.flow_from_directory(
             train_set,
             target_size=(image_size, image_size),
@@ -28,10 +44,13 @@ def get_generate(train_set,val_set,image_size,batch_size):
 
     return generator_train,generator_val
 
-def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
+def train_cnn(model,loss,train_set = '../../../extract_raw_img',val_set ='../../../extract_raw_img',image_size=256,\
+              batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20, \
+              adj_brightness=1.0, adj_contrast=1.0):
 
     #### Load data
-    generator_train, generator_val = get_generate(train_set,val_set,image_size,batch_size)
+    generator_train, generator_val = get_generate(train_set,val_set,image_size,batch_size,adj_brightness=adj_brightness,\
+                                                  adj_contrast=adj_contrast)
     if resume != "":
         model.load_weights(os.path.join(checkpoint, resume))
     # counter = Counter(generator_train.classes)
@@ -55,7 +74,8 @@ def train_cnn(model,loss,train_set = '../../extract_raw_img',val_set ='../../ext
                         callbacks=callbacks)
 
 
-def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
+def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
+                  batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
     from tf_model.siamese import DataGenerator
     generator_train = DataGenerator(path=train_set, batch_size=batch_size,image_size=image_size)
     generator_val = DataGenerator(path=val_set, batch_size=batch_size,image_size=image_size)
@@ -75,7 +95,9 @@ def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../..
     model.fit_generator(generator_train,validation_data=generator_val,steps_per_epoch=len(generator_train), validation_steps=len(generator_val),epochs=epochs, workers=num_workers,verbose=1,callbacks=callbacks)
     # model.fit_generator(generator_train, validation_data=generator_val, epochs=50, workers=1,)
                         # callbacks=[tensorboard_callback, checkpoints])
-def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test',training_seed=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20,total_train_img = 15000,total_val_img = 1000):
+def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test',training_seed=0,image_size=256,\
+              batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20,total_train_img = 15000,\
+              total_val_img = 1000):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc
@@ -115,3 +137,10 @@ def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test'
     #                           testing_data_path=val_set, out_fingerprint_dir=out_fingerprint_dir)
 
     tfutil.call_func_by_name(**app)
+
+if __name__ == "__main__":
+    from mesonet.model import Meso4
+    from train_tf import train_cnn
+    model = Meso4(image_size=256).model
+    loss = "binary_crossentropy"
+    train_cnn(model,loss)

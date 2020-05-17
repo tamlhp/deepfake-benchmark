@@ -1,9 +1,7 @@
 import torch
 import random
 import os
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-import torch.backends.cudnn as cudnn
+
 from sklearn import metrics
 import numpy as np
 from torch.autograd import Variable
@@ -12,20 +10,9 @@ import torch.nn as nn
 import time
 from tqdm import tqdm
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
+from pytorch_model.data_generate import get_val_generate
 
-def get_generate(val_set,image_size,batch_size,num_workers):
-    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
-                                           ])
 
-    dataset_val = datasets.ImageFolder(val_set,
-                                     transform=transform_fwd)
-    assert dataset_val
-    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
-
-    return dataloader_val
 
 
 def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False):
@@ -41,7 +28,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
 
 
-    dataloader_val = get_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
 
     tol_label = np.array([], dtype=np.float)
     tol_pred = np.array([], dtype=np.float)
@@ -109,7 +96,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
 
     model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
 
-    dataloader_val = get_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
 
     # train_losses, test_losses = [], []
     # import time

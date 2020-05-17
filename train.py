@@ -46,6 +46,10 @@ def parse_args():
     parser_pairwise.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
 
 
+    parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
+    parser_pairwise.add_argument("--mode",type=int,required=True,default=0,help="0: train siamese net, 1: train classify net ")
+    parser_pairwise.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
+
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_train_img",type=float,required=False,default=10000,help="Total image in training set")
@@ -61,6 +65,9 @@ def parse_args():
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
     parser_xception_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
 
+    ## adjust image
+    parser.add_argument('--adj_brightness',type=float, default = 1, help='adj_brightness')
+    parser.add_argument('--adj_contrast',type=float, default = 1, help='adj_contrast')
 
     return parser.parse_args()
 
@@ -88,11 +95,14 @@ if __name__ == "__main__":
     model = args.model
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     gpu_id = 0 if int(args.gpu_id) >=0 else -1
+    adj_brightness = float(args.adj_brightness)
+    adj_contrast = float(args.adj_contrast)
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
         train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=gpu_id,manualSeed=args.seed,resume=args.resume,beta1=args.beta1, \
                       dropout=0.05,image_size=args.image_size,batch_size=args.batch_size,lr=args.lr, \
-                      num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,)
+                      num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter,\
+                      adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "drn":
         from pytorch_model.train_torch import train_cnn
@@ -101,7 +111,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "local_nn":
         from pytorch_model.train_torch import train_cnn
@@ -110,7 +120,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "self_attention":
         from pytorch_model.train_torch import train_cnn
@@ -119,7 +129,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "resnext50":
         from pytorch_model.train_torch import train_cnn
@@ -128,7 +138,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "resnext101":
         from pytorch_model.train_torch import train_cnn
@@ -137,7 +147,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
 
     elif model == "myresnext":
@@ -147,7 +157,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
 
     elif model == "mnasnet":
@@ -157,7 +167,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "xception_torch":
         from pytorch_model.train_torch import train_cnn
@@ -166,7 +176,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "xception2_torch":
         from pytorch_model.train_torch import train_cnn
@@ -175,7 +185,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "dsp_fwa":
         from pytorch_model.train_torch import train_cnn
@@ -184,7 +194,7 @@ if __name__ == "__main__":
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "siamese_torch":
         from pytorch_model.train_torch import train_siamese
@@ -192,7 +202,7 @@ if __name__ == "__main__":
         model = SiameseNetworkResnet(length_embed = args.length_embed,pretrained=True)
         train_siamese(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,length_embed = args.length_embed,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                  epochs=args.niter,print_every=args.print_every)
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
 
     elif model == "pairwise":
@@ -202,7 +212,7 @@ if __name__ == "__main__":
             model = Pairwise(args.image_size)
             train_pairwise(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                       batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
-                      epochs=args.niter,print_every=args.print_every)
+                      epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         else:
             from pytorch_model.train_torch import train_cnn
             import torch
@@ -212,7 +222,26 @@ if __name__ == "__main__":
             train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                       image_size=args.image_size, resume=args.resume, \
                       batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
-                      epochs=args.niter, print_every=args.print_every)
+                      epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "pairwise_efficient":
+        from pytorch_model.efficientnet.train_pairwise import train_pairwise
+        from pytorch_model.efficientnet.model_pairwise import EfficientPairwise,EfficientFull
+        if args.mode == 0:
+            model = EfficientPairwise()
+            train_pairwise(model,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                      batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                      epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        else:
+            from pytorch_model.train_torch import train_cnn
+            import torch
+            model = EfficientFull()
+            model.efficient.load_state_dict(torch.load(os.path.join(args.checkpoint, args.pair_path)))
+            criterion = get_criterion_torch(args.loss)
+            train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                      image_size=args.image_size, resume=args.resume, \
+                      batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                      epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
     elif model == "efficient":
         from pytorch_model.train_torch import train_cnn
@@ -224,14 +253,15 @@ if __name__ == "__main__":
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \
                   batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
-                  epochs=args.niter, print_every=args.print_every)
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
 # ---------------------------------------------------------------------------------------------
     elif model == "gan":
         from tf_model.train_tf import train_gan
         train_gan(train_set = args.train_set,val_set = args.val_set,training_seed=0,\
                   image_size=args.image_size,batch_size=args.batch_size,num_workers=args.workers, \
-                  epochs=args.niter,checkpoint=args.checkpoint,total_train_img = args.total_train_img,total_val_img = args.total_val_img)
+                  epochs=args.niter,checkpoint=args.checkpoint,total_train_img = args.total_train_img,total_val_img = args.total_val_img, \
+                adj_brightness = adj_brightness, adj_contrast = adj_contrast)
         # train_gan()
         pass
     elif model == "meso4":
@@ -240,7 +270,8 @@ if __name__ == "__main__":
         model = Meso4(image_size=args.image_size).model
         loss = get_loss_tf(args.loss)
         train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)
+                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter, \
+                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)
         pass
     elif model == "xception_tf":
         from tf_model.train_tf import train_cnn
@@ -248,7 +279,8 @@ if __name__ == "__main__":
         model = xception(image_size=args.image_size)
         loss = get_loss_tf(args.loss)
         train_cnn(model,loss=loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter)
+                  batch_size=args.batchSize,num_workers=1,checkpoint=args.checkpoint,epochs=args.niter, \
+                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)
         pass
     elif model == "siamese_tf":
         from tf_model.siamese import get_siamese_model
@@ -256,4 +288,5 @@ if __name__ == "__main__":
         model = get_siamese_model((args.image_size, args.image_size, 3))
         loss = 'binary_crossentropy'
         train_siamese(model,loss = loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
-                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter)
+                  batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter, \
+                      adj_brightness=adj_brightness, adj_contrast=adj_contrast)

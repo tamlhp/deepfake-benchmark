@@ -222,3 +222,20 @@ class EfficientNet(nn.Module):
         valid_models = ['efficientnet-b' + str(i) for i in range(9)]
         if model_name not in valid_models:
             raise ValueError('model_name should be one of: ' + ', '.join(valid_models))
+
+class Identity(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        return x
+if __name__ == "__main__":
+    model = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1)
+    import torchsummary
+    # torchsummary.summary(model,(3,128,128))
+    # model2 = nn.Sequential(*(list(model.children())[:-3]))
+    # torchsummary.summary(model2,(3,128,128))
+    # model._dropout = Identity()
+    # model._fc = Identity()
+    # print(model)
+    torchsummary.summary(model, (3, 128, 128))

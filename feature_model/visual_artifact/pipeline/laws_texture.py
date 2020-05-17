@@ -7,8 +7,8 @@ LAWS = {'L5': [1, 4, 6, 4, 1], 'E5': [-1, -2, 0, 2, 1], 'S5': [-1, 0, 2, 0, -1],
 
 def generate_law_filters():
     law_masks = {}
-    for type1, vector1 in LAWS.iteritems():
-        for type2, vector2 in LAWS.iteritems():
+    for type1, vector1 in LAWS.items():
+        for type2, vector2 in LAWS.items():
             mask_type = type1+type2
             filter_mask = np.asarray(vector1)[:, np.newaxis].T * np.asarray(vector2)[:, np.newaxis]
             law_masks[mask_type] = filter_mask

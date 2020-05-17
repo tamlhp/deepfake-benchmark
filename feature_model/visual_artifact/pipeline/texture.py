@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-import pipeline_utils
-import face_utils
-import laws_texture
+from feature_model.visual_artifact.pipeline import pipeline_utils
+from feature_model.visual_artifact.pipeline import face_utils
+from feature_model.visual_artifact.pipeline import laws_texture
 
 
 # laws texture
@@ -174,7 +174,7 @@ def process_faces(classifiers, face_crop_list, landmarks_list, pipeline, scale=2
             features_0 = extract_features_nose(landmarks, face_crop, scale=scale)
             features_1 = extract_features_faceborder(landmarks, face_crop, scale=scale)
         else:
-            print 'Unknown pipeline argument.'
+            print ('Unknown pipeline argument.')
             return 0.0, None, False
 
         if features_0 is not None and features_1 is not None:

@@ -234,8 +234,11 @@ if __name__ == "__main__":
     import torchsummary
     # torchsummary.summary(model,(3,128,128))
     # model2 = nn.Sequential(*(list(model.children())[:-3]))
+    model2 = nn.Sequential(nn.Conv2d(4, 3, kernel_size=1, bias=False),
+                           model)
+
     # torchsummary.summary(model2,(3,128,128))
     # model._dropout = Identity()
     # model._fc = Identity()
     # print(model)
-    torchsummary.summary(model, (3, 128, 128))
+    torchsummary.summary(model2, (4, 128, 128))

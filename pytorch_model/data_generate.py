@@ -1,7 +1,11 @@
 import torch
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-
+import glob
+from torch.utils.data import Dataset
+import numpy as np
+from PIL import Image
+import cv2
 
 # https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3
 def make_weights_for_balanced_classes(images, nclasses):
@@ -96,3 +100,85 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
     return dataloader_train,dataloader_val
 
 
+class ImageGeneratorFFT(Dataset):
+
+    def __init__(self, path, transform=None, should_invert=True,shuffle=True):
+        self.path = path
+        self.transform = transform
+        self.should_invert = should_invert
+        self.shuffle = shuffle
+        data_path = []
+        data_path = data_path + glob.glob(path + "/*/*.jpg")
+        data_path = data_path + glob.glob(path + "/*/*.jpeg")
+        data_path = data_path + glob.glob(path + "/*/*.png")
+        self.data_path = data_path
+
+        self.indexes = range(len(self.data_path))
+        self.on_epoch_end()
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        if self.shuffle == True:
+            np.random.shuffle(self.data_path)
+    def __getitem__(self, index):
+
+        img = cv2.imread(self.data_path[index])
+        img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
+        f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
+        fshift = np.fft.fftshift(f)
+        fshift += 1e-8
+
+        magnitude_spectrum = np.log(np.abs(fshift))
+        magnitude_spectrum = np.array([magnitude_spectrum]).T
+        img = np.concatenate([img,magnitude_spectrum],axis=2)
+        y = 0
+        if 'real' in self.data_path[index]:
+            y = 0
+        elif 'df' in self.data_path[index]:
+            y = 1
+        return img,y
+
+    def __len__(self):
+        return int(np.floor(len(self.data_path)))
+def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
+    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                           transforms.ToTensor(),
+                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                std=[0.229, 0.224, 0.225])
+
+                                           ])
+    fft_dataset = ImageGeneratorFFT(path=train_set,
+                                            transform=transform_fwd
+                                            , should_invert=False,shuffle=True)
+    print("pairwise_dataset len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+
+    dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
+                                              num_workers=num_workers)
+    dataset_val = ImageGeneratorFFT(path=val_set,
+                                            transform=transform_fwd
+                                            , should_invert=False,shuffle=True)
+    assert dataset_val
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
+    return dataloader_train,dataloader_val
+
+def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
+    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                           transforms.ToTensor(),
+                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                std=[0.229, 0.224, 0.225])
+
+                                           ])
+    fft_dataset = ImageGeneratorFFT(path=train_set,
+                                            transform=transform_fwd
+                                            , should_invert=False,shuffle=True)
+    print("pairwise_dataset len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+
+    fft_dataloader = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
+                                              num_workers=num_workers)
+    return fft_dataloader

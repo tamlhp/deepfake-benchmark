@@ -2,6 +2,7 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 
 import argparse
+import torch.nn as nn
 
 # from pytorch_model.train import *
 # from tf_model.train import *
@@ -31,8 +32,12 @@ def parse_args():
     parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
     parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
 
+    parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
+
+    parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
+    parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
 
     parser_meso = subparsers.add_parser('meso4', help='Mesonet 4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
@@ -124,6 +129,21 @@ if __name__ == "__main__":
         import torch
         model = ClassifyFull(args.image_size)
         model.cffn.load_state_dict(torch.load(os.path.join(args.checkpoint, args.pair_path)))
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+
+    elif model == "pairwise_efficient":
+        from pytorch_model.efficientnet.model_pairwise import EfficientPairwise,EfficientFull
+        from pytorch_model.eval_torch import eval_cnn
+        model = EfficientFull()
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+    elif model == "efficient":
+        from pytorch_model.efficientnet import EfficientNet
+        from pytorch_model.eval_torch import eval_cnn
+
+        model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1)
+        model = nn.Sequential(model, nn.Sigmoid())
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
     # ----------------------------------------------------

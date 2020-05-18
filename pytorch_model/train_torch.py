@@ -13,7 +13,7 @@ from torch import optim
 import torch.nn as nn
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 from tqdm import tqdm
-from pytorch_model.data_generate import get_generate,get_generate_siamese
+from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_fft
 
 
 
@@ -272,8 +272,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 with torch.no_grad():
                     for inputs, labels in dataloader_val:
                         inputs, labels = inputs.to(device), labels.float().to(device)
-                        inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
-                        inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
+                        # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                        # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
                         logps = model.forward(inputs)
                         logps = logps.squeeze()
                         batch_loss = criterion(logps, labels)

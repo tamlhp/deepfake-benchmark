@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import pickle
 from scipy.interpolate import griddata
 import argparse
+import traceback
 
 
 def azimuthalAverage(image, center=None):
@@ -79,24 +80,32 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     features = []
-    for i in glob.glob(args.in_train):
-        print(i)
-        img = cv2.imread(i)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        feature = get_interpolated(img)
-        features.append(feature)
+    try:
+        for i in glob.glob(args.in_train):
+            print(i)
+            img = cv2.imread(i)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            feature = get_interpolated(img)
+            features.append(feature)
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
         # pass
     output = open(args.out_train, 'wb')
     pickle.dump(features, output)
     output.close()
 
     features = []
-    for i in glob.glob(args.in_val):
-        img = cv2.imread(i)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        feature = get_interpolated(img)
-        features.append(feature)
-        # pass
+    try:
+        for i in glob.glob(args.in_val):
+            img = cv2.imread(i)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            feature = get_interpolated(img)
+            features.append(feature)
+            # pass
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
     output = open(args.out_val, 'wb')
     pickle.dump(features, output)
     output.close()

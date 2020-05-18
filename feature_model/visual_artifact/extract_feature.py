@@ -10,6 +10,7 @@ from feature_model.visual_artifact.pipeline import pipeline_utils
 from feature_model.visual_artifact.pipeline.texture import extract_features_eyes,extract_features_faceborder,extract_features_mouth,extract_features_nose
 import glob
 import pickle
+import traceback
 
 # img = cv2.imread("../prnu/camera.jpg")
 # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -56,24 +57,32 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     features = []
-    for i in glob.glob(args.in_train):
-        print(i)
-        img = cv2.imread(i)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        feature = extract_visual_artifact(img)
-        features.append(feature)
-        # pass
+    try:
+        for i in glob.glob(args.in_train):
+            print(i)
+            img = cv2.imread(i)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            feature = extract_visual_artifact(img)
+            features.append(feature)
+            # pass
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
     output = open(args.out_train, 'wb')
     pickle.dump(features, output)
     output.close()
 
     features = []
-    for i in glob.glob(args.in_val):
-        img = cv2.imread(i)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        feature = extract_visual_artifact(img)
-        features.append(feature)
-        # pass
+    try:
+        for i in glob.glob(args.in_val):
+            img = cv2.imread(i)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            feature = extract_visual_artifact(img)
+            features.append(feature)
+            # pass
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
     output = open(args.out_val, 'wb')
     pickle.dump(features, output)
     output.close()

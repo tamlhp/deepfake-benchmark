@@ -82,8 +82,8 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             optimizer.zero_grad()
 
             img_data = img_data.to(device)
-            img_data = transforms.functional.adjust_brightness(img_data,adj_brightness)
-            img_data = transforms.functional.adjust_contrast(img_data,adj_contrast)
+            # img_data = transforms.functional.adjust_brightness(img_data,adj_brightness)
+            # img_data = transforms.functional.adjust_contrast(img_data,adj_contrast)
             labels_data = labels_data.to(device)
             # if gpu_id >= 0:
             #     img_data = img_data.cuda(gpu_id)
@@ -140,8 +140,8 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
             img_label = labels_data.numpy().astype(np.float)
 
             img_data = img_data.to(device)
-            img_data = transforms.functional.adjust_brightness(img_data, adj_brightness)
-            img_data = transforms.functional.adjust_contrast(img_data, adj_contrast)
+            # img_data = transforms.functional.adjust_brightness(img_data, adj_brightness)
+            # img_data = transforms.functional.adjust_contrast(img_data, adj_contrast)
             labels_data = labels_data.to(device)
             # if gpu_id >= 0:
             #     img_data = img_data.cuda(gpu_id)
@@ -199,8 +199,8 @@ def eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness
     with torch.no_grad():
         for inputs, labels in dataloader_val:
             inputs, labels = inputs.to(device), labels.float().to(device)
-            inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
-            inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
+            # inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
             logps = model.forward(inputs)
             logps = logps.squeeze()
             batch_loss = criterion(logps, labels)
@@ -254,8 +254,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
             #         labels = np.array([labels])
             inputs, labels = inputs.to(device), labels.float().to(device)
             #         inputs, labels = inputs.to(device), labels[1].float().to(device)
-            inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
-            inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
+            # inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
             optimizer.zero_grad()
             logps = model.forward(inputs)
             logps = logps.squeeze()
@@ -338,10 +338,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
             img0, img1,y1,y2, label = img0.to(device), img1.to(device),y1.float().to(device),y2.float().to(device), label.to(device)
             #         img0, img1 , label = img0, img1 , label
             # print(img0.size())
-            img0 = transforms.functional.adjust_brightness(img0,adj_brightness)
-            img0 = transforms.functional.adjust_contrast(img0,adj_contrast)
-            img1 = transforms.functional.adjust_brightness(img1,adj_brightness)
-            img1 = transforms.functional.adjust_contrast(img1,adj_contrast)
+            # img0 = transforms.functional.adjust_brightness(img0,adj_brightness)
+            # img0 = transforms.functional.adjust_contrast(img0,adj_contrast)
+            # img1 = transforms.functional.adjust_brightness(img1,adj_brightness)
+            # img1 = transforms.functional.adjust_contrast(img1,adj_contrast)
             optimizer.zero_grad()
             output1, output2,cls1,cls2 = model(img0, img1)
             loss_contrastive = criterion(output1, output2, label)
@@ -374,10 +374,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
                     for img0,img1,y1,y2, label in dataloader_val:
                         img0,img1, y1, y2, label = img0.to(device), img1.to(device),\
                                                     y1.float().to(device), y2.float().to(device), label.to(device)
-                        img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
-                        img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
-                        img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
-                        img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
+                        # img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
+                        # img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
+                        # img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
+                        # img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
                         output1, output2, cls1, cls2 = model.forward(img0, img1)
                         cls1 = cls1.squeeze()
                         cls2 = cls2.squeeze()
@@ -426,10 +426,10 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
             for img0, img1, y1, y2, label in dataloader_val:
                 img0, img1, y1, y2, label = img0.to(device), img1.to(device), \
                                             y1.float().to(device), y2.float().to(device), label.to(device)
-                img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
-                img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
-                img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
-                img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
+                # img0 = transforms.functional.adjust_brightness(img0, adj_brightness)
+                # img0 = transforms.functional.adjust_contrast(img0, adj_contrast)
+                # img1 = transforms.functional.adjust_brightness(img1, adj_brightness)
+                # img1 = transforms.functional.adjust_contrast(img1, adj_contrast)
                 output1, output2, cls1, cls2 = model.forward(img0, img1)
                 cls1 = cls1.squeeze()
                 cls2 = cls2.squeeze()

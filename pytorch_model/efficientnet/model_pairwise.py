@@ -27,7 +27,7 @@ class EfficientFull(nn.Module):
         self.efficient = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1)
         self.efficient._dropout = Identity()
         self.efficient._fc = Identity()
-        for param in self.cffn.parameters():
+        for param in self.efficient.parameters():
             param.requires_grad = False
         self.classify = nn.Linear(1536,1)
         self.sigmoid = nn.Sigmoid()

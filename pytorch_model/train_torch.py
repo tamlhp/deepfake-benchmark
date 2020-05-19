@@ -317,7 +317,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
+    dataloader_train, dataloader_val = get_generate_fft(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
 

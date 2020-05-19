@@ -130,13 +130,13 @@ class ImageGeneratorFFT(Dataset):
 
         magnitude_spectrum = np.log(np.abs(fshift))
         magnitude_spectrum = np.array([magnitude_spectrum]).T
-        img = np.concatenate([img,magnitude_spectrum],axis=2)
+        # img = np.concatenate([img,magnitude_spectrum],axis=2)
         y = 0
         if 'real' in self.data_path[index]:
             y = 0
         elif 'df' in self.data_path[index]:
             y = 1
-        return img,y
+        return img,magnitude_spectrum,y
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))
@@ -154,8 +154,14 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
 
 
     assert fft_dataset
+    dataset_train = datasets.ImageFolder(train_set,
+                                      transform=transform_fwd)
+    assert dataset_train
+    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
+    weights = torch.DoubleTensor(weights)
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
 
-    dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
+    dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
                                               num_workers=num_workers)
     dataset_val = ImageGeneratorFFT(path=val_set,
                                             transform=transform_fwd

@@ -70,7 +70,12 @@ epsilon = 1e-8
 N = 80
 y = []
 error = []
+from PIL import Image
 
+img = Image.open("1072.png")
+img = np.array(img)
+print(img.shape)
+exit()
 img = cv2.imread("1072.png",0)
 # img = cv2.cvtColor(img)
 f = np.fft.fft2(img)

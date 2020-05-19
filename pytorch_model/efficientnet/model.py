@@ -229,8 +229,34 @@ class Identity(nn.Module):
 
     def forward(self, x):
         return x
+
+class EfficientDual(nn.Module):
+    def __init__(self):
+        super(EfficientDual, self).__init__()
+        self.efficient3 = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1,in_channels = 3)
+        self.efficient3._dropout = Identity()
+        self.efficient3._fc = Identity()
+        self.efficient1 = EfficientNet.from_pretrained('efficientnet-b1', num_classes=1,in_channels = 1)
+        self.efficient1._dropout = Identity()
+        self.efficient1._fc = Identity()
+        self.fc = nn.Linear(1536+1280,1)
+        self.flatten = nn.Flatten()
+        self.sigmoid = nn.Sigmoid()
+    def forward(self, input,input_fft):
+        x3 = self.efficient3(input)
+        # x3 = self.flatten(x3)
+        x1 = self.efficient1(input_fft)
+        # x1 = self.flatten(x1)
+        # print(x3)
+        # print(x1)
+        x = torch.cat([x3,x1],1)
+        x = self.fc(x)
+        x = self.sigmoid(x)
+        return x
+
 if __name__ == "__main__":
-    model = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1)
+    model = EfficientNet.from_pretrained('efficientnet-b1', num_classes=1,in_channels = 3)
+    # model = EfficientDual()
     import torchsummary
     # torchsummary.summary(model,(3,128,128))
     # model2 = nn.Sequential(*(list(model.children())[:-3]))
@@ -241,4 +267,4 @@ if __name__ == "__main__":
     # model._dropout = Identity()
     # model._fc = Identity()
     # print(model)
-    torchsummary.summary(model2, (4, 128, 128))
+    torchsummary.summary(model, [(3, 128, 128),(1,128,128)])

@@ -332,7 +332,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
             #     for inputs, labels in tqdm(testloader):
             steps += 1
             #         labels = np.array([labels])
-            inputs,img_fft, labels = inputs.to(device),img_fft.float().to(device), labels.float().to(device)
+            inputs,img_fft, labels = inputs.float().to(device),img_fft.float().to(device), labels.float().to(device)
             #         inputs, labels = inputs.to(device), labels[1].float().to(device)
             # inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
             # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
@@ -351,10 +351,10 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
                 model.eval()
                 with torch.no_grad():
                     for inputs,img_fft, labels in dataloader_val:
-                        inputs,img_fft, labels = inputs.to(device),img_fft.float().to(device) , labels.float().to(device)
+                        inputs,img_fft, labels = inputs.float().to(device),img_fft.float().to(device) , labels.float().to(device)
                         # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
                         # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
-                        logps = model.forward(inputs)
+                        logps = model.forward(inputs,img_fft)
                         logps = logps.squeeze()
                         batch_loss = criterion(logps, labels)
                         #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)

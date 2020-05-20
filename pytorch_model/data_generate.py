@@ -124,6 +124,7 @@ class ImageGeneratorFFT(Dataset):
 
         img = cv2.imread(self.data_path[index])
         img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
+        img = cv2.resize(img, (128, 128))
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -136,7 +137,7 @@ class ImageGeneratorFFT(Dataset):
             y = 0
         elif 'df' in self.data_path[index]:
             y = 1
-        return img,magnitude_spectrum,y
+        return np.transpose(img,(2,0,1)),np.transpose(magnitude_spectrum,(2,0,1)),y
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))

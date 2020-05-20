@@ -264,16 +264,18 @@ if __name__ == "__main__":
     #     torch.cuda.manual_seed_all(opt.manualSeed)
     #     cudnn.benchmark = True
 
-    if opt.resume > 0:
-        text_writer = open(os.path.join(opt.outf, 'train.csv'), 'a')
-    else:
-        text_writer = open(os.path.join(opt.outf, 'train.csv'), 'w')
+    # if opt.resume > 0:
+    #     text_writer = open(os.path.join(opt.outf, 'train.csv'), 'a')
+    # else:
+    #     text_writer = open(os.path.join(opt.outf, 'train.csv'), 'w')
 
 
     vgg_ext = VggExtractor()
     capnet = CapsuleNet(2)
     capsule_loss = CapsuleLoss()
+    from torchsummary import summary
 
+    summary(capnet, (256, 16, 16))
     optimizer = Adam(capnet.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
     if opt.resume > 0:

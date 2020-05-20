@@ -84,4 +84,4 @@ if __name__ == "__main__":
                           else "cpu")
     model = xception2().to(device)
 
-    summary(model,(3,256,256))
+    summary(model,(3,128,128))

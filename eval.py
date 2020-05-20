@@ -38,6 +38,7 @@ def parse_args():
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
+    parser_efficientdual = subparsers.add_parser('efficientdual', help='Efficient Net')
 
     parser_meso = subparsers.add_parser('meso4', help='Mesonet 4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
@@ -145,6 +146,14 @@ if __name__ == "__main__":
         model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1)
         model = nn.Sequential(model, nn.Sigmoid())
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+
+    elif model == "efficientdual":
+        from pytorch_model.efficientnet import EfficientDual
+        from pytorch_model.eval_torch import eval_dualcnn
+
+        model = EfficientDual()
+        eval_dualcnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
     # ----------------------------------------------------
     elif model == "meso4":

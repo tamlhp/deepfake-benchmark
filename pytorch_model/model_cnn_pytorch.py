@@ -38,3 +38,9 @@ def resnext101(pretrained=True):
     model.fc = nn.Sequential(nn.Linear(2048, 1),
                              nn.Sigmoid())
     return model
+
+
+if __name__ == '__main__':
+    model = resnext50(False)
+    import torchsummary
+    torchsummary.summary(model, (3, 128, 128))

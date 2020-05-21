@@ -125,13 +125,12 @@ class ImageGeneratorFFT(Dataset):
 
         img = cv2.imread(self.data_path[index])
         img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
-        img = cv2.resize(img, (128, 128))
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
 
         magnitude_spectrum = np.log(np.abs(fshift))
-        magnitude_spectrum = np.array([magnitude_spectrum]).T
+        magnitude_spectrum = np.array([magnitude_spectrum])
         # img = np.concatenate([img,magnitude_spectrum],axis=2)
         # img = np.transpose(img,(2,0,1))
         # magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))

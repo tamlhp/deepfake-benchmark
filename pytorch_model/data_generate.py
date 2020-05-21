@@ -133,8 +133,8 @@ class ImageGeneratorFFT(Dataset):
         magnitude_spectrum = np.log(np.abs(fshift))
         magnitude_spectrum = np.array([magnitude_spectrum]).T
         # img = np.concatenate([img,magnitude_spectrum],axis=2)
-        img = np.transpose(img,(2,0,1))
-        magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
+        # img = np.transpose(img,(2,0,1))
+        # magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
         PIL_img = Image.fromarray(img)
         PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
         if self.transform is not None:

@@ -102,9 +102,10 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
 
 class ImageGeneratorFFT(Dataset):
 
-    def __init__(self, path, transform=None, should_invert=True,shuffle=True):
+    def __init__(self, path, transform=None,transformfft = None, should_invert=True,shuffle=True):
         self.path = path
         self.transform = transform
+        self.transformfft = transformfft
         self.should_invert = should_invert
         self.shuffle = shuffle
         data_path = []
@@ -132,12 +133,19 @@ class ImageGeneratorFFT(Dataset):
         magnitude_spectrum = np.log(np.abs(fshift))
         magnitude_spectrum = np.array([magnitude_spectrum]).T
         # img = np.concatenate([img,magnitude_spectrum],axis=2)
+        img = np.transpose(img,(2,0,1))
+        magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
+        if self.transform is not None:
+            img = self.transform(img)
+        if self.transformfft is not None:
+            magnitude_spectrum = self.transformfft(magnitude_spectrum)
+
         y = 0
         if 'real' in self.data_path[index]:
             y = 0
         elif 'df' in self.data_path[index]:
             y = 1
-        return np.transpose(img,(2,0,1)),np.transpose(magnitude_spectrum,(2,0,1)),y
+        return img,magnitude_spectrum,y
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))
@@ -148,8 +156,10 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
+    transform_fft = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                           transforms.ToTensor()])
     fft_dataset = ImageGeneratorFFT(path=train_set,
-                                            transform=transform_fwd
+                                            transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
     print("pairwise_dataset len :   ",fft_dataset.__len__())
 
@@ -178,8 +188,10 @@ def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
+    transform_fft = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                           transforms.ToTensor()])
     fft_dataset = ImageGeneratorFFT(path=train_set,
-                                            transform=transform_fwd
+                                            transform=transform_fwd,transform_fft=transform_fft
                                             , should_invert=False,shuffle=True)
     print("pairwise_dataset len :   ",fft_dataset.__len__())
 

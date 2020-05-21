@@ -102,9 +102,10 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
 
 class ImageGeneratorFFT(Dataset):
 
-    def __init__(self, path, transform=None,transform_fft = None, should_invert=True,shuffle=True):
+    def __init__(self, path,image_size, transform=None,transform_fft = None, should_invert=True,shuffle=True):
         self.path = path
         self.transform = transform
+        self.image_size =image_size
         self.transform_fft = transform_fft
         self.should_invert = should_invert
         self.shuffle = shuffle
@@ -130,23 +131,24 @@ class ImageGeneratorFFT(Dataset):
         fshift += 1e-8
 
         magnitude_spectrum = np.log(np.abs(fshift))
-        magnitude_spectrum = np.array([magnitude_spectrum])
         # img = np.concatenate([img,magnitude_spectrum],axis=2)
         # img = np.transpose(img,(2,0,1))
-        # magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
+        magnitude_spectrum = cv2.resize(magnitude_spectrum,(self.image_size,self.image_size))
+        magnitude_spectrum = np.array([magnitude_spectrum])
+        magnitude_spectrum = np.transpose(magnitude_spectrum, (1,2 , 0))
         PIL_img = Image.fromarray(img)
-        PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
+        # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
         if self.transform is not None:
-            PIL_magnitude_spectrum = self.transform(PIL_img)
+            PIL_img = self.transform(PIL_img)
         if self.transform_fft is not None:
-            PIL_magnitude_spectrum = self.transform_fft(PIL_magnitude_spectrum)
+            magnitude_spectrum = self.transform_fft(magnitude_spectrum)
 
         y = 0
         if 'real' in self.data_path[index]:
             y = 0
         elif 'df' in self.data_path[index]:
             y = 1
-        return PIL_magnitude_spectrum,PIL_magnitude_spectrum,y
+        return PIL_img,magnitude_spectrum,y
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))
@@ -157,9 +159,8 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
-    transform_fft = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.ToTensor()])
-    fft_dataset = ImageGeneratorFFT(path=train_set,
+    transform_fft = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGeneratorFFT(path=train_set,image_size= image_size,
                                             transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
     print("pairwise_dataset len :   ",fft_dataset.__len__())
@@ -175,7 +176,7 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
 
     dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
                                               num_workers=num_workers)
-    dataset_val = ImageGeneratorFFT(path=val_set,
+    dataset_val = ImageGeneratorFFT(path=val_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
     assert dataset_val
@@ -189,9 +190,8 @@ def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
-    transform_fft = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.ToTensor()])
-    fft_dataset = ImageGeneratorFFT(path=train_set,
+    transform_fft = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGeneratorFFT(path=train_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft=transform_fft
                                             , should_invert=False,shuffle=True)
     print("pairwise_dataset len :   ",fft_dataset.__len__())

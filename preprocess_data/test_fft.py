@@ -76,6 +76,7 @@ error = []
 # img = np.array(img)
 # print(img.shape)
 # exit()
+"""
 img = cv2.imread("190.png",0)
 # img = cv2.cvtColor(img)
 f = np.fft.fft2(img)
@@ -86,7 +87,7 @@ magnitude_spectrum = np.log(np.abs(fshift))
 print(magnitude_spectrum.shape)
 plt.imshow(np.log(np.abs(fshift)))
 plt.show()
-
+"""
 img = cv2.imread("1072.png",0)
 # img = cv2.cvtColor(img)
 f = np.fft.fft2(img)
@@ -94,6 +95,15 @@ fshift = np.fft.fftshift(f)
 fshift += epsilon
 
 magnitude_spectrum = np.log(np.abs(fshift))
+# magnitude_spectrum = np.array([magnitude_spectrum])
+# img = np.concatenate([img,magnitude_spectrum],axis=2)
+# img = np.transpose(img,(2,0,1))
+print(magnitude_spectrum.shape)
+
+magnitude_spectrum = cv2.resize(magnitude_spectrum, (128, 128))
+magnitude_spectrum = np.array([magnitude_spectrum])
+# magnitude_spectrum = np.transpose(magnitude_spectrum, (1,2 , 0))
+# print(magnitude_spectrum)
 print(magnitude_spectrum.shape)
 plt.imshow(np.log(np.abs(fshift)))
 plt.show()

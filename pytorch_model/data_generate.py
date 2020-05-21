@@ -135,17 +135,19 @@ class ImageGeneratorFFT(Dataset):
         # img = np.concatenate([img,magnitude_spectrum],axis=2)
         img = np.transpose(img,(2,0,1))
         magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
+        PIL_img = Image.fromarray(img)
+        PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
         if self.transform is not None:
-            img = self.transform(img)
+            PIL_magnitude_spectrum = self.transform(PIL_img)
         if self.transform_fft is not None:
-            magnitude_spectrum = self.transform_fft(magnitude_spectrum)
+            PIL_magnitude_spectrum = self.transform_fft(PIL_magnitude_spectrum)
 
         y = 0
         if 'real' in self.data_path[index]:
             y = 0
         elif 'df' in self.data_path[index]:
             y = 1
-        return img,magnitude_spectrum,y
+        return PIL_magnitude_spectrum,PIL_magnitude_spectrum,y
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))

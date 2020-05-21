@@ -102,10 +102,10 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
 
 class ImageGeneratorFFT(Dataset):
 
-    def __init__(self, path, transform=None,transformfft = None, should_invert=True,shuffle=True):
+    def __init__(self, path, transform=None,transform_fft = None, should_invert=True,shuffle=True):
         self.path = path
         self.transform = transform
-        self.transformfft = transformfft
+        self.transform_fft = transform_fft
         self.should_invert = should_invert
         self.shuffle = shuffle
         data_path = []
@@ -137,8 +137,8 @@ class ImageGeneratorFFT(Dataset):
         magnitude_spectrum = np.transpose(magnitude_spectrum, (2, 0, 1))
         if self.transform is not None:
             img = self.transform(img)
-        if self.transformfft is not None:
-            magnitude_spectrum = self.transformfft(magnitude_spectrum)
+        if self.transform_fft is not None:
+            magnitude_spectrum = self.transform_fft(magnitude_spectrum)
 
         y = 0
         if 'real' in self.data_path[index]:
@@ -175,7 +175,7 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
                                               num_workers=num_workers)
     dataset_val = ImageGeneratorFFT(path=val_set,
-                                            transform=transform_fwd
+                                            transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
     assert dataset_val
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)

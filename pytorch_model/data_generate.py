@@ -99,8 +99,9 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
 
     return dataloader_train,dataloader_val
 
-
-class ImageGeneratorFFT(Dataset):
+#=============================================================
+#**************************************************************
+class ImageGeneratorDualFFT(Dataset):
 
     def __init__(self, path,image_size, transform=None,transform_fft = None, should_invert=True,shuffle=True):
         self.path = path
@@ -125,7 +126,7 @@ class ImageGeneratorFFT(Dataset):
     def __getitem__(self, index):
 
         img = cv2.imread(self.data_path[index])
-        img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
+        img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -152,7 +153,7 @@ class ImageGeneratorFFT(Dataset):
 
     def __len__(self):
         return int(np.floor(len(self.data_path)))
-def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
+def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -160,10 +161,10 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
 
                                            ])
     transform_fft = transforms.Compose([transforms.ToTensor()])
-    fft_dataset = ImageGeneratorFFT(path=train_set,image_size= image_size,
+    fft_dataset = ImageGeneratorDualFFT(path=train_set,image_size= image_size,
                                             transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
-    print("pairwise_dataset len :   ",fft_dataset.__len__())
+    print("fft dual len :   ",fft_dataset.__len__())
 
 
     assert fft_dataset
@@ -176,14 +177,14 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
 
     dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
                                               num_workers=num_workers)
-    dataset_val = ImageGeneratorFFT(path=val_set,image_size=image_size,
+    dataset_val = ImageGeneratorDualFFT(path=val_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft = transform_fft
                                             , should_invert=False,shuffle=True)
     assert dataset_val
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
     return dataloader_train,dataloader_val
 
-def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
+def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -191,10 +192,10 @@ def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
 
                                            ])
     transform_fft = transforms.Compose([transforms.ToTensor()])
-    fft_dataset = ImageGeneratorFFT(path=train_set,image_size=image_size,
+    fft_dataset = ImageGeneratorDualFFT(path=train_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft=transform_fft
                                             , should_invert=False,shuffle=True)
-    print("pairwise_dataset len :   ",fft_dataset.__len__())
+    print("fft dual len :   ",fft_dataset.__len__())
 
 
     assert fft_dataset
@@ -202,3 +203,196 @@ def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
     fft_dataloader = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
                                               num_workers=num_workers)
     return fft_dataloader
+#**************************************************************
+#=============================================================
+
+#=============================================================
+#**************************************************************
+class ImageGeneratorFFT(Dataset):
+
+    def __init__(self, path,image_size,transform_fft = None, should_invert=True,shuffle=True):
+        self.path = path
+        self.image_size =image_size
+        self.transform_fft = transform_fft
+        self.should_invert = should_invert
+        self.shuffle = shuffle
+        data_path = []
+        data_path = data_path + glob.glob(path + "/*/*.jpg")
+        data_path = data_path + glob.glob(path + "/*/*.jpeg")
+        data_path = data_path + glob.glob(path + "/*/*.png")
+        self.data_path = data_path
+
+        self.indexes = range(len(self.data_path))
+        self.on_epoch_end()
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        if self.shuffle == True:
+            np.random.shuffle(self.data_path)
+    def __getitem__(self, index):
+
+        img = cv2.imread(self.data_path[index],0)
+        f = np.fft.fft2(img)
+        fshift = np.fft.fftshift(f)
+        fshift += 1e-8
+
+        magnitude_spectrum = np.log(np.abs(fshift))
+        # img = np.concatenate([img,magnitude_spectrum],axis=2)
+        # img = np.transpose(img,(2,0,1))
+        magnitude_spectrum = cv2.resize(magnitude_spectrum,(self.image_size,self.image_size))
+        magnitude_spectrum = np.array([magnitude_spectrum])
+        min_magnitude_spectrum = np.min(magnitude_spectrum)
+        max_magnitude_spectrum = np.max(magnitude_spectrum)
+        magnitude_spectrum = (magnitude_spectrum -min_magnitude_spectrum ) / (max_magnitude_spectrum-min_magnitude_spectrum)
+        magnitude_spectrum = np.transpose(magnitude_spectrum, (1,2 , 0))
+        # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
+        if self.transform_fft is not None:
+            magnitude_spectrum = self.transform_fft(magnitude_spectrum)
+
+        y = 0
+        if 'real' in self.data_path[index]:
+            y = 0
+        elif 'df' in self.data_path[index]:
+            y = 1
+        return magnitude_spectrum,y
+
+    def __len__(self):
+        return int(np.floor(len(self.data_path)))
+def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
+
+    transform_fft = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGeneratorFFT(path=train_set,image_size= image_size,
+                                            transform_fft = transform_fft
+                                            , should_invert=False,shuffle=True)
+    print("fft dual len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+    dataset_train = datasets.ImageFolder(train_set)
+    assert dataset_train
+    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
+    weights = torch.DoubleTensor(weights)
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+
+    dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
+                                              num_workers=num_workers)
+    dataset_val = ImageGeneratorFFT(path=val_set,image_size=image_size,
+                                           transform_fft = transform_fft
+                                            , should_invert=False,shuffle=True)
+    assert dataset_val
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
+    return dataloader_train,dataloader_val
+
+def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
+
+    transform_fft = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGeneratorFFT(path=train_set,image_size=image_size,
+                                            transform_fft=transform_fft
+                                            , should_invert=False,shuffle=True)
+    print("fft dual len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+
+    fft_dataloader = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
+                                              num_workers=num_workers)
+    return fft_dataloader
+#**************************************************************
+#=============================================================
+
+
+#=============================================================
+#**************************************************************
+class ImageGenerator4dFFT(Dataset):
+
+    def __init__(self, path,image_size,transform = None, should_invert=True,shuffle=True):
+        self.path = path
+        self.image_size =image_size
+        self.transform = transform
+        self.should_invert = should_invert
+        self.shuffle = shuffle
+        data_path = []
+        data_path = data_path + glob.glob(path + "/*/*.jpg")
+        data_path = data_path + glob.glob(path + "/*/*.jpeg")
+        data_path = data_path + glob.glob(path + "/*/*.png")
+        self.data_path = data_path
+
+        self.indexes = range(len(self.data_path))
+        self.on_epoch_end()
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        if self.shuffle == True:
+            np.random.shuffle(self.data_path)
+    def __getitem__(self, index):
+
+        img = cv2.imread(self.data_path[index])
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        f = np.fft.fft2(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
+        fshift = np.fft.fftshift(f)
+        fshift += 1e-8
+
+        magnitude_spectrum = np.log(np.abs(fshift))
+        # img = np.concatenate([img,magnitude_spectrum],axis=2)
+        # img = np.transpose(img,(2,0,1))
+        magnitude_spectrum = cv2.resize(magnitude_spectrum,(self.image_size,self.image_size))
+        magnitude_spectrum = np.array([magnitude_spectrum])
+        min_magnitude_spectrum = np.min(magnitude_spectrum)
+        max_magnitude_spectrum = np.max(magnitude_spectrum)
+        magnitude_spectrum = (magnitude_spectrum -min_magnitude_spectrum ) / (max_magnitude_spectrum-min_magnitude_spectrum)
+        magnitude_spectrum = np.transpose(magnitude_spectrum, (1,2 , 0))
+        img = img/255.0
+        # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
+        img = np.concatenate([img, magnitude_spectrum], axis=2)
+        if self.transform is not None:
+            img = self.transform(img)
+
+        y = 0
+        if 'real' in self.data_path[index]:
+            y = 0
+        elif 'df' in self.data_path[index]:
+            y = 1
+        return img,y
+
+    def __len__(self):
+        return int(np.floor(len(self.data_path)))
+def get_generate_4dfft(train_set,val_set,image_size,batch_size,num_workers):
+
+    transform = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGenerator4dFFT(path=train_set,image_size= image_size,
+                                      transform = transform
+                                            , should_invert=False,shuffle=True)
+    print("fft dual len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+    dataset_train = datasets.ImageFolder(train_set)
+    assert dataset_train
+    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
+    weights = torch.DoubleTensor(weights)
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+
+    dataloader_train = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, sampler=sampler,
+                                              num_workers=num_workers)
+    dataset_val = ImageGenerator4dFFT(path=val_set,image_size=image_size,
+                                      transform = transform
+                                            , should_invert=False,shuffle=True)
+    assert dataset_val
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
+    return dataloader_train,dataloader_val
+
+def get_val_generate_4dfft(train_set,image_size,batch_size,num_workers):
+    transform = transforms.Compose([transforms.ToTensor()])
+    fft_dataset = ImageGenerator4dFFT(path=train_set,image_size=image_size,
+                                      transform=transform
+                                            , should_invert=False,shuffle=True)
+    print("fft dual len :   ",fft_dataset.__len__())
+
+
+    assert fft_dataset
+
+    fft_dataloader = torch.utils.data.DataLoader(fft_dataset, batch_size=batch_size, shuffle=True,
+                                              num_workers=num_workers)
+    return fft_dataloader
+#**************************************************************
+#=============================================================

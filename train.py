@@ -45,26 +45,30 @@ def parse_args():
     parser_pairwise.add_argument("--mode",type=int,required=True,default=0,help="0: train siamese net, 1: train classify net ")
     parser_pairwise.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
 
-
-    parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
-    parser_pairwise.add_argument("--mode",type=int,required=True,default=0,help="0: train siamese net, 1: train classify net ")
-    parser_pairwise.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
+    parser_pairwise_efficient = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
+    parser_pairwise_efficient.add_argument("--mode",type=int,required=True,default=0,help="0: train siamese net, 1: train classify net ")
+    parser_pairwise_efficient.add_argument("--pair_path",type=str,required=False,default="pairwise_0.pt",help="Path to pairwise network ")
 
 
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_train_img",type=float,required=False,default=10000,help="Total image in training set")
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
-    parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
+
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
     parser_efficientdual = subparsers.add_parser('efficientdual', help='Efficient Net')
+    parser_efft = subparsers.add_parser('efft', help='Efficient Net fft')
+    parser_efft.add_argument("--type", type=str, required=False, default="0", help="Type efficient net 0-8")
 
+    parser_e4dfft = subparsers.add_parser('e4dfft', help='Efficient Net 4d fft')
+    parser_e4dfft.add_argument("--type", type=str, required=False, default="0", help="Type efficient net 0-8")
     ## tf
+    parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
-    parser_xception_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
+    parser_siamese_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
 
     ## adjust image
     parser.add_argument('--adj_brightness',type=float, default = 1, help='adj_brightness')
@@ -264,6 +268,30 @@ if __name__ == "__main__":
         model = EfficientDual()
         criterion = get_criterion_torch(args.loss)
         train_dualcnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "efft":
+        from pytorch_model.train_torch import train_fftcnn
+        from pytorch_model.efficientnet import EfficientNet
+
+        model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1,in_channels=1)
+        model = nn.Sequential(model, nn.Sigmoid())
+        criterion = get_criterion_torch(args.loss)
+        train_fftcnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "e4dfft":
+        from pytorch_model.train_torch import train_4dfftcnn
+        from pytorch_model.efficientnet import EfficientNet
+
+        model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1,in_channels=4)
+        model = nn.Sequential(model, nn.Sigmoid())
+        criterion = get_criterion_torch(args.loss)
+        train_4dfftcnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \
                   batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
                   epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)

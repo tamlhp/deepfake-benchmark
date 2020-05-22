@@ -13,7 +13,7 @@ from torch import optim
 import torch.nn as nn
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 from tqdm import tqdm
-from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_fft
+from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_dualfft,get_generate_fft,get_generate_4dfft
 
 
 
@@ -317,7 +317,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    dataloader_train, dataloader_val = get_generate_fft(train_set,val_set,image_size,batch_size,num_workers)
+    dataloader_train, dataloader_val = get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
 
@@ -380,6 +380,169 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
         # eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch_%d.pt' % epoch))
     return
+
+def train_fftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
+              batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
+              adj_brightness=1.0, adj_contrast=1.0):
+    # from pytorch_model.focal_loss import FocalLoss
+    if not os.path.exists(checkpoint):
+        os.makedirs(checkpoint)
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    torch.manual_seed(0)
+    if device == "cuda":
+        torch.cuda.manual_seed_all(0)
+        cudnn.benchmark = True
+    model = model.to(device)
+    # criterion = nn.BCELoss().to(device)
+    # criterion = FocalLoss(gamma=2).to(device)
+    criterion = criterion.to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    dataloader_train, dataloader_val = get_generate_fft(train_set,val_set,image_size,batch_size,num_workers)
+    if resume != '':
+        model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
+
+    # train_losses, test_losses = [], []
+    # import time
+    text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
+    model.train()
+    steps =0
+    running_loss = 0
+    for epoch in range(epochs):
+        for inputs, labels in tqdm(dataloader_train):
+            #     for inputs, labels in tqdm(testloader):
+            steps += 1
+            #         labels = np.array([labels])
+            inputs, labels = inputs.float().to(device), labels.float().to(device)
+            #         inputs, labels = inputs.to(device), labels[1].float().to(device)
+            # inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
+            optimizer.zero_grad()
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
+            loss = criterion(logps, labels)
+            #         loss = F.binary_cross_entropy_with_logits(logps, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+            # time.sleep(0.05)
+            if steps % print_every == 0:
+                test_loss = 0
+                accuracy = 0
+                model.eval()
+                with torch.no_grad():
+                    for inputs, labels in dataloader_val:
+                        inputs, labels = inputs.float().to(device) , labels.float().to(device)
+                        # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                        # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
+                        logps = model.forward(inputs)
+                        logps = logps.squeeze()
+                        batch_loss = criterion(logps, labels)
+                        #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+                        test_loss += batch_loss.item()
+                        #                     print("labels : ",labels)
+                        #                     print("logps  : ",logps)
+                        equals = labels == (logps > 0.5)
+                        #                     print("equals   ",equals)
+                        accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+                #                 train_losses.append(running_loss/len(trainloader))
+                #             test_losses.append(test_loss/len(testloader))
+                print(f"Epoch {epoch+1}/{epochs}.. "
+                      f"Train loss: {running_loss/print_every:.3f}.. "
+                      f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
+                      f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
+                text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
+                epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
+                text_writer.flush()
+
+                running_loss = 0
+                steps = 0
+                model.train()
+        eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
+        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch_%d.pt' % epoch))
+    return
+
+def train_4dfftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
+              batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
+              adj_brightness=1.0, adj_contrast=1.0):
+    # from pytorch_model.focal_loss import FocalLoss
+    if not os.path.exists(checkpoint):
+        os.makedirs(checkpoint)
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    torch.manual_seed(0)
+    if device == "cuda":
+        torch.cuda.manual_seed_all(0)
+        cudnn.benchmark = True
+    model = model.to(device)
+    # criterion = nn.BCELoss().to(device)
+    # criterion = FocalLoss(gamma=2).to(device)
+    criterion = criterion.to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    dataloader_train, dataloader_val = get_generate_4dfft(train_set,val_set,image_size,batch_size,num_workers)
+    if resume != '':
+        model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
+
+    # train_losses, test_losses = [], []
+    # import time
+    text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
+    model.train()
+    steps =0
+    running_loss = 0
+    for epoch in range(epochs):
+        for inputs, labels in tqdm(dataloader_train):
+            #     for inputs, labels in tqdm(testloader):
+            steps += 1
+            #         labels = np.array([labels])
+            inputs, labels = inputs.float().to(device), labels.float().to(device)
+            #         inputs, labels = inputs.to(device), labels[1].float().to(device)
+            # inputs = transforms.functional.adjust_brightness(inputs,adj_brightness)
+            # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
+            optimizer.zero_grad()
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
+            loss = criterion(logps, labels)
+            #         loss = F.binary_cross_entropy_with_logits(logps, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+            # time.sleep(0.05)
+            if steps % print_every == 0:
+                test_loss = 0
+                accuracy = 0
+                model.eval()
+                with torch.no_grad():
+                    for inputs, labels in dataloader_val:
+                        inputs, labels = inputs.float().to(device), labels.float().to(device)
+                        # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                        # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
+                        logps = model.forward(inputs)
+                        logps = logps.squeeze()
+                        batch_loss = criterion(logps, labels)
+                        #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+                        test_loss += batch_loss.item()
+                        #                     print("labels : ",labels)
+                        #                     print("logps  : ",logps)
+                        equals = labels == (logps > 0.5)
+                        #                     print("equals   ",equals)
+                        accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+                #                 train_losses.append(running_loss/len(trainloader))
+                #             test_losses.append(test_loss/len(testloader))
+                print(f"Epoch {epoch+1}/{epochs}.. "
+                      f"Train loss: {running_loss/print_every:.3f}.. "
+                      f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
+                      f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
+                text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
+                epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
+                text_writer.flush()
+
+                running_loss = 0
+                steps = 0
+                model.train()
+        eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
+        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch_%d.pt' % epoch))
+    return
+
 def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
                   length_embed = 1024,batch_size=16,resume = '',lr=0.001,num_workers=8,checkpoint="checkpoint",\
                   epochs=20,print_every=1000,adj_brightness=1.0, adj_contrast=1.0):

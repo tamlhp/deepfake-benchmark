@@ -22,14 +22,14 @@ def parse_args():
     ## torch
     parser_capsule = subparsers.add_parser('capsule', help='Capsule')
     parser_drn = subparsers.add_parser('drn', help='DRN  ')
-    parser_drn = subparsers.add_parser('local_nn', help='Local NN ')
-    parser_drn = subparsers.add_parser('self_attention', help='Self Attention ')
+    parser_local_nn = subparsers.add_parser('local_nn', help='Local NN ')
+    parser_self_attention = subparsers.add_parser('self_attention', help='Self Attention ')
 
-    parser_resnet = subparsers.add_parser('resnext50', help='Resnext50 ')
-    parser_resnet = subparsers.add_parser('resnext101', help='Resnext101 ')
-    parser_resnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
-    parser_resnet = subparsers.add_parser('xception_torch', help='Xception pytorch ')
-    parser_resnet = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
+    parser_resnext50 = subparsers.add_parser('resnext50', help='Resnext50 ')
+    parser_resnext101 = subparsers.add_parser('resnext101', help='Resnext101 ')
+    parser_mnasnet = subparsers.add_parser('mnasnet', help='mnasnet pytorch ')
+    parser_xception_torch = subparsers.add_parser('xception_torch', help='Xception pytorch ')
+    parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
     parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
 
     parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
@@ -39,13 +39,19 @@ def parse_args():
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
     parser_efficientdual = subparsers.add_parser('efficientdual', help='Efficient Net')
+    parser_efft = subparsers.add_parser('efft', help='Efficient Net fft')
+    parser_efft.add_argument("--type", type=str, required=False, default="0", help="Type efficient net 0-8")
 
+    parser_e4dfft = subparsers.add_parser('e4dfft', help='Efficient Net 4d fft')
+    parser_e4dfft.add_argument("--type", type=str, required=False, default="0", help="Type efficient net 0-8")
+
+    ## tf
     parser_meso = subparsers.add_parser('meso4', help='Mesonet 4')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
 
-    ## tf
+
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet')
 
 
@@ -155,6 +161,25 @@ if __name__ == "__main__":
         model = EfficientDual()
         eval_dualcnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+        pass
+    elif model == "efft":
+        from pytorch_model.efficientnet import EfficientNet
+        from pytorch_model.eval_torch import eval_fftcnn
+
+        model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1,in_channels=1)
+        model = nn.Sequential(model, nn.Sigmoid())
+        eval_fftcnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+    elif model == "e4dfft":
+        from pytorch_model.efficientnet import EfficientNet
+        from pytorch_model.eval_torch import eval_4dfftcnn
+
+        model = EfficientNet.from_pretrained('efficientnet-b' + args.type, num_classes=1,in_channels=4)
+        model = nn.Sequential(model, nn.Sigmoid())
+        eval_4dfftcnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time)
+
+
     # ----------------------------------------------------
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4

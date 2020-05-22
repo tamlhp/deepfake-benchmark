@@ -94,7 +94,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
     dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
 
@@ -148,7 +148,7 @@ def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume=""
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
     dataloader_val = get_val_generate_dualfft(val_set,image_size,batch_size,num_workers)
 
@@ -202,7 +202,7 @@ def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
     dataloader_val = get_val_generate_fft(val_set,image_size,batch_size,num_workers)
 
@@ -256,7 +256,7 @@ def eval_4dfftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
     dataloader_val = get_val_generate_4dfft(val_set,image_size,batch_size,num_workers)
 

@@ -127,6 +127,7 @@ class ImageGeneratorDualFFT(Dataset):
 
         img = cv2.imread(self.data_path[index])
         img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img,(self.image_size,self.image_size))
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -232,6 +233,7 @@ class ImageGeneratorFFT(Dataset):
     def __getitem__(self, index):
 
         img = cv2.imread(self.data_path[index],0)
+        img = cv2.resize(img, (self.image_size, self.image_size))
         f = np.fft.fft2(img)
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -327,6 +329,7 @@ class ImageGenerator4dFFT(Dataset):
     def __getitem__(self, index):
 
         img = cv2.imread(self.data_path[index])
+        img = cv2.resize(img, (self.image_size, self.image_size))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         f = np.fft.fft2(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)

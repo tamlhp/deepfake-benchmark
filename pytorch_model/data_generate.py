@@ -115,7 +115,7 @@ class ImageGeneratorDualFFT(Dataset):
         data_path = data_path + glob.glob(path + "/*/*.jpeg")
         data_path = data_path + glob.glob(path + "/*/*.png")
         self.data_path = data_path
-
+        np.random.shuffle(self.data_path)
         self.indexes = range(len(self.data_path))
         self.on_epoch_end()
 
@@ -146,9 +146,9 @@ class ImageGeneratorDualFFT(Dataset):
             magnitude_spectrum = self.transform_fft(magnitude_spectrum)
 
         y = 0
-        if 'real' in self.data_path[index]:
+        if '0_real' in self.data_path[index]:
             y = 0
-        elif 'df' in self.data_path[index]:
+        elif '1_df' in self.data_path[index] or '1_f2f' in self.data_path[index] or '1_fs' in self.data_path[index] or '1_nt' in self.data_path[index]:
             y = 1
         return PIL_img,magnitude_spectrum,y
 
@@ -224,6 +224,7 @@ class ImageGeneratorFFT(Dataset):
         self.data_path = data_path
 
         self.indexes = range(len(self.data_path))
+        np.random.shuffle(self.data_path)
         self.on_epoch_end()
 
     def on_epoch_end(self):
@@ -252,9 +253,11 @@ class ImageGeneratorFFT(Dataset):
             magnitude_spectrum = self.transform_fft(magnitude_spectrum)
 
         y = 0
-        if 'real' in self.data_path[index]:
+        if '0_real' in self.data_path[index]:
             y = 0
-        elif 'df' in self.data_path[index]:
+        elif '1_df' in self.data_path[index] or '1_f2f' in self.data_path[index] or '1_fs' in self.data_path[
+                index] or '1_nt' in self.data_path[index]:
+
             y = 1
         return magnitude_spectrum,y
 
@@ -320,6 +323,7 @@ class ImageGenerator4dFFT(Dataset):
         self.data_path = data_path
 
         self.indexes = range(len(self.data_path))
+        np.random.shuffle(self.data_path)
         self.on_epoch_end()
 
     def on_epoch_end(self):
@@ -351,9 +355,11 @@ class ImageGenerator4dFFT(Dataset):
             img = self.transform(img)
 
         y = 0
-        if 'real' in self.data_path[index]:
+        if '0_real' in self.data_path[index]:
             y = 0
-        elif 'df' in self.data_path[index]:
+        elif '1_df' in self.data_path[index] or '1_f2f' in self.data_path[index] or '1_fs' in self.data_path[
+                index] or '1_nt' in self.data_path[index]:
+
             y = 1
         return img,y
 

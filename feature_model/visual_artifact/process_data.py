@@ -7,13 +7,13 @@ from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
 
-from feature_model.visual_artifact.pipeline import face_utils
+from pipeline import face_utils
 
 
 def parse_args():
     """Parses input arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', dest='input',
+    parser.add_argument('-i', '--input', dest='input',default='',
                         help='Path to input image or folder containting multiple images.')
     parser.add_argument('-o', '--output', dest='output', help='Path to save outputs.',
                         default='./output')
@@ -110,7 +110,7 @@ def main(input_path, output_path, pipeline, save_features):
             # detect and crop faces
             face_crops, final_landmarks = face_utils.get_crops_landmarks(face_detector, sp68, img)
             # call feature extraction, classifier pipeline
-            from feature_model.visual_artifact.pipeline import eyecolor
+            from pipeline import eyecolor
             score_clf, score_HSV, feature_vector, valid_seg = eyecolor.process_faces(classifiers,
                                                                                      face_crops,
                                                                                      final_landmarks,
@@ -136,7 +136,7 @@ def main(input_path, output_path, pipeline, save_features):
             face_crops, final_landmarks = face_utils.get_crops_landmarks(face_detector, sp68, img,
                                                                          roi_delta=extend_roi)
             # call feature extraction, classifier pipeline
-            from feature_model.visual_artifact.pipeline import texture
+            from pipeline import texture
             scores, feature_vectors, valid_seg = texture.process_faces(classifiers,
                                                                        face_crops,
                                                                        final_landmarks,

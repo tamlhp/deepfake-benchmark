@@ -33,7 +33,7 @@ có thể xác phân biệt được ảnh thật giả.
 
 
 ### Visual Arrtifact
-[paper](#./Exploiting visual artifacts to expose deepfakes and face manipulations-annotated.pdf)
+[paper](Exploiting visual artifacts to expose deepfakes and face manipulations-annotated.pdf)
 
 Exploiting Visual Artifacts to Expose Deepfakes and Face Manipulations
 
@@ -45,7 +45,7 @@ Tính toán những đặc điểm trên khuôn mặt:
 
 
 ### frequency domain 
-[paper](#./1911.00686.pdf)
+[paper](1911.00686.pdf)
 
 Unmasking DeepFakes with simple Features
 
@@ -58,7 +58,7 @@ toán này tính trung bình các giá trị có cùng khoảng cách tới tâm
 
 ## Deep learning
 ### Mesonet
-[paper](#./1809.00888.pdf)
+[paper](1809.00888.pdf)
 
 MesoNet: a compact facial video forgery detection network
 
@@ -68,7 +68,7 @@ tầng cao có thể dẫn đến không phân biệt được ảnh khuôn mặ
  thuận lợi cho việc phân biệt các ảnh thật và giả. 
 
 ### Capsule
-[paper](#./Capsule-forensics Using Capsule Networks to Detect Forged Images and Videos-annotated.pdfs)
+[paper](Capsule-forensics Using Capsule Networks to Detect Forged Images and Videos-annotated.pdfs)
 
 Capsule-forensics: Using capsule networks to detect forged images and videos.
 
@@ -79,7 +79,7 @@ Một lớp capsule network được thiết kế phía sau mạng VGG-19 để 
 
 
 ### xception
-[paper](#./1901.08971-annotated.pdf)
+[paper](1901.08971-annotated.pdf)
 
 Faceforensics++: Learning to detect manipulated facial images
 

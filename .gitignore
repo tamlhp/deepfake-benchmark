@@ -139,3 +139,4 @@ events.out.tf*
 *.jpeg
 preprocess_data/test_fft.py
 preprocess_data/test_fft2.py
+test_*.py

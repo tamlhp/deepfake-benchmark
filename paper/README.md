@@ -91,5 +91,8 @@ toán và tăng hiệu quả học. Phương pháp này tiết kiệm tài nguy�
 tính toán so với lớp tích chập thông thường.
 
 
+## Figerprint
+
+[paper](1811.08180.pdf)
 
 

@@ -10,7 +10,7 @@ import torch
 # from tf_model.train import *
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
-    parser.add_argument('--img_path', default="../../extract_raw_img_test/df/aahncigwte.mp4_0.jpg", help='path to image data ')
+    parser.add_argument('--img_path', default="../../data/extract_raw_img_test/df/aahncigwte.mp4_0.jpg", help='path to image data ')
     parser.add_argument('--model_path', default="../../model/xception/model_pytorch_4.pt", help='path to model ')
     parser.add_argument('--gpu_id',type=int, default=-1, help='path to model ')
     parser.add_argument('--image_size',type=int, default=256, help='path to model ')
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     model = model.to(device)
-    model.load_state_dict(torch.load(args.model_path,map_location=torch.device('cpu') ))
+    model.load_state_dict(torch.load(args.model_path))
     model.eval()
     detect_cnn(model, img)
     # for p in glob.glob("../../extract_raw_img/real/*.jpg"):

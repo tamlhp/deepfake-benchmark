@@ -138,7 +138,7 @@ def save_image(im, path):
     im.save(path)
 
 
-def preprocess_image(pil_im, resize_im=True,image_size=255):
+def preprocess_image(pil_im, resize_im=True,image_size=256):
     """
         Processes image for CNNs
 

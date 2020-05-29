@@ -11,11 +11,14 @@ import time
 from tqdm import tqdm
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 from pytorch_model.data_generate import get_val_generate,get_val_generate_dualfft,get_val_generate_fft,get_val_generate_4dfft
+import torchvision.transforms as transforms
 
 
 
 
-def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False):
+def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,\
+                 batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False, \
+                 adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -28,7 +31,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
 
 
-    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     tol_label = np.array([], dtype=np.float)
     tol_pred = np.array([], dtype=np.float)
@@ -87,7 +90,9 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     print(classification_report(y_label,y_pred_label))
     return
 
-def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
+def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+             batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+             adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -96,7 +101,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
 
     model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
-    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     # train_losses, test_losses = [], []
     # import time
@@ -141,7 +146,9 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
 
     return
 
-def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
+def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                 batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                 adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -150,7 +157,7 @@ def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume=""
 
     model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
-    dataloader_val = get_val_generate_dualfft(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate_dualfft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     # train_losses, test_losses = [], []
     # import time
@@ -195,7 +202,9 @@ def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume=""
 
     return
 
-def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
+def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -204,7 +213,7 @@ def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",
 
     model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
-    dataloader_val = get_val_generate_fft(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate_fft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     # train_losses, test_losses = [], []
     # import time
@@ -249,7 +258,9 @@ def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",
 
     return
 
-def eval_4dfftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
+def eval_4dfftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                  batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                  adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -258,7 +269,7 @@ def eval_4dfftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="
 
     model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
-    dataloader_val = get_val_generate_4dfft(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate_4dfft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     # train_losses, test_losses = [], []
     # import time

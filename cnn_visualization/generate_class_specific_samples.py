@@ -31,6 +31,8 @@ class ClassSpecificImageGeneration():
         if not os.path.exists('generated/class_'+str(self.target_class)):
             os.makedirs('generated/class_'+str(self.target_class))
         print("init xong ... ")
+        self.device = torch.device("cuda" if torch.cuda.is_available()
+                              else "cpu")
     def generate(self, iterations=150):
         """Generates class specific image
 
@@ -50,7 +52,7 @@ class ClassSpecificImageGeneration():
             # Define optimizer for the image
             optimizer = SGD([self.processed_image], lr=initial_learning_rate)
             # Forward
-            output = self.model(self.processed_image)
+            output = self.model(self.processed_image.to(self.device))
             # Target specific class
             print(output)
             class_loss = -output[0, self.target_class]

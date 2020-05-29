@@ -1,9 +1,9 @@
 import torch
 import random
 import os
-import torchvision.transforms as transforms
+# import torchvision.transforms as transforms
 from torch.optim import Adam
-import torchvision.datasets as datasets
+# import torchvision.datasets as datasets
 import torch.backends.cudnn as cudnn
 from sklearn import metrics
 import numpy as np

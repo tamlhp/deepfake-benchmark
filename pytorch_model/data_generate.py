@@ -4,7 +4,7 @@ import torchvision.datasets as datasets
 import glob
 from torch.utils.data import Dataset
 import numpy as np
-from PIL import Image
+from PIL import Image,ImageEnhance
 import cv2
 
 # https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3
@@ -53,8 +53,10 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
 
     return dataloader_train,dataloader_val
 
-def get_val_generate(val_set,image_size,batch_size,num_workers):
+def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                        transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
+                                        transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225])
@@ -103,7 +105,7 @@ def get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers):
 #**************************************************************
 class ImageGeneratorDualFFT(Dataset):
 
-    def __init__(self, path,image_size, transform=None,transform_fft = None, should_invert=True,shuffle=True):
+    def __init__(self, path,image_size, transform=None,transform_fft = None, should_invert=True,shuffle=True,adj_brightness=None, adj_contrast=None):
         self.path = path
         self.transform = transform
         self.image_size =image_size
@@ -118,6 +120,8 @@ class ImageGeneratorDualFFT(Dataset):
         np.random.shuffle(self.data_path)
         self.indexes = range(len(self.data_path))
         self.on_epoch_end()
+        self.adj_brightness = adj_brightness
+        self.adj_contrast = adj_contrast
 
     def on_epoch_end(self):
         'Updates indexes after each epoch'
@@ -128,6 +132,13 @@ class ImageGeneratorDualFFT(Dataset):
         img = cv2.imread(self.data_path[index])
         img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         img = cv2.resize(img,(self.image_size,self.image_size))
+        if self.adj_brightness is not None and self.adj_contrast is not None:
+            PIL_img1 = Image.fromarray(img)
+            enhancer = ImageEnhance.Brightness(PIL_img1)
+            img_adj = enhancer.enhance(self.adj_brightness)
+            enhancer = ImageEnhance.Contrast(img_adj)
+            img_adj = enhancer.enhance(self.adj_contrast)
+            img = np.array(img_adj)
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -185,7 +196,7 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
     return dataloader_train,dataloader_val
 
-def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers):
+def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -195,7 +206,7 @@ def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers):
     transform_fft = transforms.Compose([transforms.ToTensor()])
     fft_dataset = ImageGeneratorDualFFT(path=train_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft=transform_fft
-                                            , should_invert=False,shuffle=True)
+                                            , should_invert=False,shuffle=True,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
     print("fft dual len :   ",fft_dataset.__len__())
 
 
@@ -211,7 +222,7 @@ def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers):
 #**************************************************************
 class ImageGeneratorFFT(Dataset):
 
-    def __init__(self, path,image_size,transform_fft = None, should_invert=True,shuffle=True):
+    def __init__(self, path,image_size,transform_fft = None, should_invert=True,shuffle=True,adj_brightness=None, adj_contrast=None):
         self.path = path
         self.image_size =image_size
         self.transform_fft = transform_fft
@@ -226,7 +237,8 @@ class ImageGeneratorFFT(Dataset):
         self.indexes = range(len(self.data_path))
         np.random.shuffle(self.data_path)
         self.on_epoch_end()
-
+        self.adj_brightness = adj_brightness
+        self.adj_contrast = adj_contrast
     def on_epoch_end(self):
         'Updates indexes after each epoch'
         if self.shuffle == True:
@@ -235,6 +247,13 @@ class ImageGeneratorFFT(Dataset):
 
         img = cv2.imread(self.data_path[index],0)
         img = cv2.resize(img, (self.image_size, self.image_size))
+        if self.adj_brightness is not None and self.adj_contrast is not None:
+            PIL_img1 = Image.fromarray(img)
+            enhancer = ImageEnhance.Brightness(PIL_img1)
+            img_adj = enhancer.enhance(self.adj_brightness)
+            enhancer = ImageEnhance.Contrast(img_adj)
+            img_adj = enhancer.enhance(self.adj_contrast)
+            img = np.array(img_adj)
         f = np.fft.fft2(img)
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -288,12 +307,12 @@ def get_generate_fft(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
     return dataloader_train,dataloader_val
 
-def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
+def get_val_generate_fft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
 
     transform_fft = transforms.Compose([transforms.ToTensor()])
     fft_dataset = ImageGeneratorFFT(path=train_set,image_size=image_size,
                                             transform_fft=transform_fft
-                                            , should_invert=False,shuffle=True)
+                                            , should_invert=False,shuffle=True,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
     print("fft dual len :   ",fft_dataset.__len__())
 
 
@@ -310,7 +329,7 @@ def get_val_generate_fft(train_set,image_size,batch_size,num_workers):
 #**************************************************************
 class ImageGenerator4dFFT(Dataset):
 
-    def __init__(self, path,image_size,transform = None, should_invert=True,shuffle=True):
+    def __init__(self, path,image_size,transform = None, should_invert=True,shuffle=True,adj_brightness=None, adj_contrast=None):
         self.path = path
         self.image_size =image_size
         self.transform = transform
@@ -325,7 +344,8 @@ class ImageGenerator4dFFT(Dataset):
         self.indexes = range(len(self.data_path))
         np.random.shuffle(self.data_path)
         self.on_epoch_end()
-
+        self.adj_brightness = adj_brightness
+        self.adj_contrast = adj_contrast
     def on_epoch_end(self):
         'Updates indexes after each epoch'
         if self.shuffle == True:
@@ -335,6 +355,13 @@ class ImageGenerator4dFFT(Dataset):
         img = cv2.imread(self.data_path[index])
         img = cv2.resize(img, (self.image_size, self.image_size))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        if self.adj_brightness is not None and self.adj_contrast is not None:
+            PIL_img1 = Image.fromarray(img)
+            enhancer = ImageEnhance.Brightness(PIL_img1)
+            img_adj = enhancer.enhance(self.adj_brightness)
+            enhancer = ImageEnhance.Contrast(img_adj)
+            img_adj = enhancer.enhance(self.adj_contrast)
+            img = np.array(img_adj)
         f = np.fft.fft2(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -390,11 +417,11 @@ def get_generate_4dfft(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
     return dataloader_train,dataloader_val
 
-def get_val_generate_4dfft(train_set,image_size,batch_size,num_workers):
+def get_val_generate_4dfft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform = transforms.Compose([transforms.ToTensor()])
     fft_dataset = ImageGenerator4dFFT(path=train_set,image_size=image_size,
                                       transform=transform
-                                            , should_invert=False,shuffle=True)
+                                            , should_invert=False,shuffle=True,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
     print("fft dual len :   ",fft_dataset.__len__())
 
 

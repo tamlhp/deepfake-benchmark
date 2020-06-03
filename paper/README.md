@@ -6,15 +6,15 @@ https://github.com/NVlabs/stylegan2
 
 [paper v1](1812.04948.pdf)
 
-[paper v1](1912.04958.pdf)
+[paper v1](stylegan2.pdf)
 
 
 ## starGAN
 https://github.com/clovaai/stargan-v2
 
-[paper v1](1711.09020.pdf)
+[paper v1](stargan.pdf)
 
-[paper v2](1912.01865.pdf)
+[paper v2](stargan2.pdf)
 
 
 
@@ -22,7 +22,7 @@ https://github.com/clovaai/stargan-v2
 # Phương pháp phát hiện ảnh giả mạo
 ## Classic ML
 ### Head pose 
-[paper](1811.00661.pdf)
+[paper](headpose.pdf)
 
 Exposing deep fakes using inconsistent head poses
 
@@ -33,7 +33,7 @@ có thể xác phân biệt được ảnh thật giả.
 
 
 ### Visual Arrtifact
-[paper](Exploiting visual artifacts to expose deepfakes and face manipulations-annotated.pdf)
+[paper](visual_artifacts.pdf)
 
 Exploiting Visual Artifacts to Expose Deepfakes and Face Manipulations
 
@@ -45,7 +45,7 @@ Tính toán những đặc điểm trên khuôn mặt:
 
 
 ### frequency domain 
-[paper](1911.00686.pdf)
+[paper](frequency_domain.pdf)
 
 Unmasking DeepFakes with simple Features
 
@@ -58,7 +58,7 @@ toán này tính trung bình các giá trị có cùng khoảng cách tới tâm
 
 ## Deep learning
 ### Mesonet
-[paper](1809.00888.pdf)
+[paper](mesonet.pdf)
 
 MesoNet: a compact facial video forgery detection network
 
@@ -68,7 +68,7 @@ tầng cao có thể dẫn đến không phân biệt được ảnh khuôn mặ
  thuận lợi cho việc phân biệt các ảnh thật và giả. 
 
 ### Capsule
-[paper](Capsule-forensics Using Capsule Networks to Detect Forged Images and Videos-annotated.pdfs)
+[paper](capsule.pdf)
 
 Capsule-forensics: Using capsule networks to detect forged images and videos.
 
@@ -79,7 +79,7 @@ Một lớp capsule network được thiết kế phía sau mạng VGG-19 để 
 
 
 ### xception
-[paper](1901.08971-annotated.pdf)
+[paper](facefornsic++.pdf)
 
 Faceforensics++: Learning to detect manipulated facial images
 
@@ -93,6 +93,6 @@ tính toán so với lớp tích chập thông thường.
 
 ## Figerprint
 
-[paper](1811.08180.pdf)
+[paper](fingerprint.pdf)
 
 

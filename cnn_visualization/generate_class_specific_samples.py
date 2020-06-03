@@ -43,7 +43,7 @@ class ClassSpecificImageGeneration():
             np.ndarray -- Final maximally activated class image
         """
         print("bat dau generate xong ... ")
-        initial_learning_rate = 6
+        initial_learning_rate = 200
         for i in range(1, iterations):
             print(i)
             # Process image and return variable
@@ -57,9 +57,9 @@ class ClassSpecificImageGeneration():
             print(output)
             class_loss = -output[0, self.target_class]
 
-            if i % 10 == 0 or i == iterations-1:
+            if i % 1 == 0 or i == iterations-1:
                 print('Iteration:', str(i), 'Loss',
-                      "{0:.2f}".format(class_loss.data.numpy()))
+                      "{0:.2f}".format(class_loss.cpu().data.numpy()))
             # Zero grads
             self.model.zero_grad()
             # Backward
@@ -68,8 +68,10 @@ class ClassSpecificImageGeneration():
             optimizer.step()
             # Recreate image
             self.created_image = recreate_image(self.processed_image)
-            if i % 10 == 0 or i == iterations-1:
+            print(self.created_image.size)
+            if i % 1 == 0 or i == iterations-1:
                 # Save image
+                initial_learning_rate /=2
                 im_path = 'generated/class_'+str(self.target_class)+'/c_'+str(self.target_class)+'_'+'iter_'+str(i)+'.png'
                 save_image(self.created_image, im_path)
 
@@ -77,7 +79,7 @@ class ClassSpecificImageGeneration():
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
-    parser.add_argument('--model_path', default="../../model/xception/model_pytorch_4.pt", help='path to model ')
+    parser.add_argument('--model_path', default="../../../model/xception/model_pytorch_4.pt", help='path to model ')
     parser.add_argument('--gpu_id',type=int, default=-1, help='path to model ')
     parser.add_argument('--image_size',type=int, default=256, help='path to model ')
     parser.add_argument('--iterations',type=int, default=256, help='iterations random number')
@@ -171,13 +173,13 @@ if __name__ == '__main__':
         pass
 
 
-    # from pytorch_model.xception import xception
+    from pytorch_model.xception import xception
 
-    # model = xception(pretrained=False)
+    model = xception(pretrained=False)
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     model = model.to(device)
-    model.load_state_dict(torch.load(args.model_path))
+    model.load_state_dict(torch.load(args.model_path,map_location=torch.device('cpu')))
     print("Load xong ... ")
     model.eval()
     csig = ClassSpecificImageGeneration(model, target_class,image_size)

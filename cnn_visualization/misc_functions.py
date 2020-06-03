@@ -45,6 +45,7 @@ def save_gradient_images(gradient, file_name):
     # Normalize
     gradient = gradient - gradient.min()
     gradient /= gradient.max()
+    print(gradient.max())
     # Save image
     path_to_file = os.path.join('../results', file_name + '.jpg')
     save_image(gradient, path_to_file)
@@ -108,6 +109,7 @@ def format_np_output(np_arr):
     """
     # Phase/Case 1: The np arr only has 2 dimensions
     # Result: Add a dimension at the beginning
+    print("format_np_output  :",np_arr.shape)
     if len(np_arr.shape) == 2:
         np_arr = np.expand_dims(np_arr, axis=0)
     # Phase/Case 2: Np arr has only 1 channel (assuming first dim is channel)
@@ -116,12 +118,16 @@ def format_np_output(np_arr):
         np_arr = np.repeat(np_arr, 3, axis=0)
     # Phase/Case 3: Np arr is of shape 3xWxH
     # Result: Convert it to WxHx3 in order to make it saveable by PIL
+    if np_arr.shape[0] > 3:
+        np_arr = np_arr[6:9]
     if np_arr.shape[0] == 3:
         np_arr = np_arr.transpose(1, 2, 0)
     # Phase/Case 4: NP arr is normalized between 0-1
     # Result: Multiply with 255 and change type to make it saveable by PIL
     if np.max(np_arr) <= 1:
         np_arr = (np_arr*255).astype(np.uint8)
+    else:
+        np_arr = (np_arr * 255).astype(np.uint8)
     return np_arr
 
 
@@ -134,11 +140,12 @@ def save_image(im, path):
     """
     if isinstance(im, (np.ndarray, np.generic)):
         im = format_np_output(im)
+        # print(im)
         im = Image.fromarray(im)
     im.save(path)
 
 
-def preprocess_image(pil_im, resize_im=True,image_size=256):
+def preprocess_image(pil_im, resize_im=True,image_size=128):
     """
         Processes image for CNNs
 
@@ -210,6 +217,8 @@ def get_positive_negative_saliency(gradient):
     returns:
         pos_saliency ( )
     """
+    print(gradient.min())
+    print(gradient.max())
     pos_saliency = (np.maximum(0, gradient) / gradient.max())
     neg_saliency = (np.maximum(0, -gradient) / -gradient.min())
     return pos_saliency, neg_saliency
@@ -230,9 +239,15 @@ def get_example_params(example_index):
         pretrained_model(Pytorch model): Model to use for the operations
     """
     # Pick one of the examples
-    example_list = (('../input_images/snake.jpg', 56),
-                    ('../input_images/cat_dog.png', 243),
-                    ('../input_images/spider.png', 72))
+    # example_list = (("../../../data/extract_raw_img_test/real/aansscoqsl.mp4_8.jpg", 0),
+    #                 ("../../../data/extract_raw_img_test/real/aansscoqsl.mp4_10.jpg", 0),
+    #                 ("../../../data/extract_raw_img_test/real/aansscoqsl.mp4_17.jpg", 0))
+    # example_list = (("G:/fake_test/1/fake/1/376.png", 0),
+    #                 ("G:/fake_test/1/fake/1/377.png", 0),
+    #                 ("G:/fake_test/1/fake/1/378.png", 0))
+    example_list = (("G:/real_test/3/real/59/1214.png", 0),
+                    ("G:/real_test/3/real/59/1169.png", 0),
+                    ("G:/real_test/3/real/59/1169.png", 0))
     img_path = example_list[example_index][0]
     target_class = example_list[example_index][1]
     file_name_to_export = img_path[img_path.rfind('/')+1:img_path.rfind('.')]
@@ -241,9 +256,9 @@ def get_example_params(example_index):
     # Process image
     prep_img = preprocess_image(original_image)
     # Define model
-    pretrained_model = models.alexnet(pretrained=True)
+    # pretrained_model = models.alexnet(pretrained=True)
     return (original_image,
             prep_img,
             target_class,
-            file_name_to_export,
-            pretrained_model)
+            file_name_to_export)
+            # pretrained_model)

@@ -76,7 +76,7 @@ class RegularizedClassSpecificImageGeneration():
             optimizer = SGD([self.processed_image],
                             lr=initial_learning_rate, weight_decay=wd)
             # Forward
-            output = self.model(self.processed_image)
+            output = self.model(self.processed_image).cpu()
             # Target specific class
             class_loss = -output[0, self.target_class]
 

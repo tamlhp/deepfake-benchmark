@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     elif model == "meso4_torch":
         from pytorch_model.model_cnn_pytorch import mesonet
-        model = mesonet()
+        model = mesonet(image_size=args.image_size)
     elif model == "dsp_fwa":
         from pytorch_model.DSP_FWA.models.classifier import SPPNet
         model = SPPNet(backbone=50, num_class=1)

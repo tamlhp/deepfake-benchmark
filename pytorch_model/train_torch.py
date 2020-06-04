@@ -709,3 +709,12 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
         model.train()
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
 
+
+if __name__ == "__main__":
+    from pytorch_model.xception import xception
+
+    model = xception(pretrained=False)
+    criterion = nn.BCELoss()
+    train_cnn(model,criterion,train_set='../../../data/extract_raw_img_test', val_set='../../../data/extract_raw_img_test', checkpoint="../../../model/xception/",)
+    # eval_capsule(val_set ='../../../extract_raw_img_test',checkpoint="../../../model/capsule/",resume=6)
+

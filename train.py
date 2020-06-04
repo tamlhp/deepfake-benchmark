@@ -197,7 +197,7 @@ if __name__ == "__main__":
     elif model == "meso4_torch":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.model_cnn_pytorch import mesonet
-        model = mesonet()
+        model = mesonet(image_size=args.image_size)
         criterion = get_criterion_torch(args.loss)
         train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\

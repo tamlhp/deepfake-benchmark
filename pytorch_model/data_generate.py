@@ -6,7 +6,9 @@ from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image,ImageEnhance
 import cv2
-from albumentations.augmentations.transforms import ImageCompression, GaussNoise,GaussianBlur
+from albumentations.augmentations.transforms import ImageCompression, GaussNoise,GaussianBlur,Resize,HorizontalFlip,Rotate,ShiftScaleRotate
+from albumentations import Compose,Normalize
+from albumentations import pytorch as AT
 
 # https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3
 def make_weights_for_balanced_classes(images, nclasses):
@@ -26,10 +28,17 @@ def make_weights_for_balanced_classes(images, nclasses):
 
 
 def get_generate(train_set,val_set,image_size,batch_size,num_workers):
+    # transforms_2 = Compose([Resize(image_size, image_size),
+    #                         ImageCompression(quality_lower=60, quality_upper=100, p=0.5),
+    #                         HorizontalFlip(p=0.5),
+    #                         Rotate(limit=5,p=0.5),
+    #                         ShiftScaleRotate(shift_limit=0,scale_limit=0.05,rotate_limit=5,p=0.5),
+    #                         GaussNoise(p=0.1),
+    #                         GaussianBlur(blur_limit=3, p=0.05),
+    #                         Normalize(mean=[0.485, 0.456, 0.406],
+    #                                             std=[0.229, 0.224, 0.225]),
+    #                         AT.ToTensorV2()])
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                        ImageCompression(quality_lower=60, quality_upper=100, p=0.5),
-                                        GaussNoise(p=0.1),
-                                        GaussianBlur(blur_limit=3, p=0.05),
                                            transforms.RandomHorizontalFlip(p=0.5),
                                            transforms.RandomApply([
                                                transforms.RandomRotation(5),

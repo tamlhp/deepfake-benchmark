@@ -148,7 +148,7 @@ if __name__ == "__main__":
     elif model == "meso4_torch":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.model_cnn_pytorch import mesonet
-        model = mesonet()
+        model = mesonet(image_size=args.image_size)
         eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time, \
                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)

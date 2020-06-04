@@ -42,6 +42,9 @@ import dlib
 import numpy
 
 import sys
+import numpy as np
+import glob
+import matplotlib.pyplot as plt
 
 PREDICTOR_PATH = "../feature_model/shape_predictor_68_face_landmarks.dat"
 SCALE_FACTOR = 1
@@ -140,7 +143,7 @@ def transformation_from_points(points1, points2):
 
     points1 = points1.astype(numpy.float64)
     points2 = points2.astype(numpy.float64)
-    print(points1.shape)
+    # print(points1.shape)
     c1 = numpy.mean(points1, axis=0)
     c2 = numpy.mean(points2, axis=0)
     points1 -= c1
@@ -151,20 +154,20 @@ def transformation_from_points(points1, points2):
     points1 /= s1
     points2 /= s2
     # print(points1)
-    print(points1.T*points1)
+    # print(points1.T*points1)
     U, S, Vt = numpy.linalg.svd(points1.T * points2)
 
-    print((points1.T * points2))
-    print(U.shape)
-    print(S.shape)
-    print(Vt.shape)
+    # print((points1.T * points2))
+    # print(U.shape)
+    # print(S.shape)
+    # print(Vt.shape)
 
     # The R we seek is in fact the transpose of the one given by U * Vt. This
     # is because the above formulation assumes the matrix goes on the right
     # (with row vectors) where as our solution requires the matrix to be on the
     # left (with column vectors).
     R = (U * Vt).T
-    print(R*R.T)
+    # print(R*R.T)
     return numpy.vstack([numpy.hstack(((s2 / s1) * R,
                                        c2.T - (s2 / s1) * R * c1.T)),
                          numpy.matrix([0., 0., 1.])])
@@ -208,36 +211,38 @@ def correct_colours(im1, im2, landmarks1):
 
 
 # im1, landmarks1 = read_im_and_landmarks("C:/Users/Dell/Desktop/00224.png")
-im2, landmarks2 = read_im_and_landmarks("D:/griffith/data/celeba_hq/val/male/001092.jpg")
-import glob
-jj=0
-import matplotlib.pyplot as plt
 
 # M = cv2.getRotationMatrix2D((100/2,100/2),90,1)
 # print(M)
 # exit(0)
-for i in glob.glob("D:/griffith/data/celeba_hq/val/male/*.jpg"):
+list_image = glob.glob("D:/griffith/data/celeba_hq/val/female/*.jpg")
 
-# im2, landmarks2 = read_im_and_landmarks("C:/Users/Dell/Desktop/00056.png")
-    im1, landmarks1 = read_im_and_landmarks(i)
+for i in range(0,15000):
+    im1_name,im2_name = np.random.choice(list_image,2)
+    print(i)
+    try:
+        im2, landmarks2 = read_im_and_landmarks(im2_name)
+        im1, landmarks1 = read_im_and_landmarks(im1_name)
 
-    M = transformation_from_points(landmarks1[ALIGN_POINTS],
-                                   landmarks2[ALIGN_POINTS])
-    print(M)
-    # exit(0)
-    mask = get_face_mask(im2, landmarks2)
-    plt.imshow(mask)
-    plt.show()
-    warped_mask = warp_im(mask, M, im1.shape)
-    plt.imshow(warped_mask)
-    plt.imshow(warped_mask)
-    plt.show()
-    combined_mask = numpy.max([get_face_mask(im1, landmarks1), warped_mask],
-                              axis=0)
+        M = transformation_from_points(landmarks1[ALIGN_POINTS],
+                                       landmarks2[ALIGN_POINTS])
+        # print(M)
+        # exit(0)
+        mask = get_face_mask(im2, landmarks2)
+        # plt.imshow(mask)
+        # plt.show()
+        warped_mask = warp_im(mask, M, im1.shape)
+        # plt.imshow(warped_mask)
+        # plt.imshow(warped_mask)
+        # plt.show()
+        combined_mask = numpy.max([get_face_mask(im1, landmarks1), warped_mask],
+                                  axis=0)
 
-    warped_im2 = warp_im(im2, M, im1.shape)
-    warped_corrected_im2 = correct_colours(im1, warped_im2, landmarks1)
+        warped_im2 = warp_im(im2, M, im1.shape)
+        warped_corrected_im2 = correct_colours(im1, warped_im2, landmarks1)
 
-    output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
-    jj+=1
-    cv2.imwrite('output' +str(jj) +'.jpg', output_im)
+        output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
+    except:
+        continue
+        # jj+=1
+    cv2.imwrite('output/swap1_' +str(i)+"_" + im1_name.split("/")[-1].split("\\")[-1].split(".")[0]+"_"+im2_name.split("/")[-1].split("\\")[-1].split(".")[0] +'.jpg', output_im)

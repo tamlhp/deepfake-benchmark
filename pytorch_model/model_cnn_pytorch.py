@@ -90,6 +90,7 @@ class Meso4(nn.Module):
         x = self.leakyrelu(x)
         x = self.dropout(x)
         x = self.fc2(x)
+        x = nn.Sigmoid()(x)
         return x
 def mesonet(image_size=256):
     model = Meso4(image_size=image_size)

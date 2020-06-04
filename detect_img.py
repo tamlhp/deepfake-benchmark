@@ -28,6 +28,7 @@ def parse_args():
     parser_xception_torch = subparsers.add_parser('xception_torch', help='Xception pytorch ')
     parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
     parser_dsp_fwa = subparsers.add_parser('dsp_fwa', help='DSP_SWA pytorch ')
+    parser_meso = subparsers.add_parser('meso4_torch', help='Mesonet4')
 
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
@@ -93,6 +94,10 @@ if __name__ == "__main__":
     elif model == "xception2_torch":
         from pytorch_model.xception import xception2
         model = xception2(pretrained=False)
+
+    elif model == "meso4_torch":
+        from pytorch_model.model_cnn_pytorch import mesonet
+        model = mesonet()
     elif model == "dsp_fwa":
         from pytorch_model.DSP_FWA.models.classifier import SPPNet
         model = SPPNet(backbone=50, num_class=1)

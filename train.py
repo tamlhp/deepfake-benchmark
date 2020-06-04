@@ -39,6 +39,7 @@ def parse_args():
     parser_dsp_fwa = subparsers.add_parser('dsp_fwa', help='DSP_SWA pytorch ')
     parser_siamese_torch = subparsers.add_parser('siamese_torch', help='Siamese pytorch ')
     parser_siamese_torch.add_argument("--length_embed",type=int,required=False,default=1024,help="Length of embed vector")
+    parser_meso = subparsers.add_parser('meso4_torch', help='Mesonet4')
 
 
     parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
@@ -192,6 +193,17 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
+
+    elif model == "meso4_torch":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.model_cnn_pytorch import mesonet
+        model = mesonet()
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model,criterion=criterion,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
+                  batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
+                  epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+
     elif model == "dsp_fwa":
         from pytorch_model.train_torch import train_cnn
         from pytorch_model.DSP_FWA.models.classifier import SPPNet

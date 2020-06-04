@@ -35,6 +35,9 @@ def parse_args():
     parser_xception2_torch = subparsers.add_parser('xception2_torch', help='Xception2 pytorch ')
     parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
 
+    parser_meso = subparsers.add_parser('meso4_torch', help='Mesonet4')
+
+
     parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
@@ -140,6 +143,17 @@ if __name__ == "__main__":
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time, \
                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)
         pass
+
+
+    elif model == "meso4_torch":
+        from pytorch_model.eval_torch import eval_cnn
+        from pytorch_model.model_cnn_pytorch import mesonet
+        model = mesonet()
+        eval_cnn(model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint,show_time=args.time, \
+                 adj_brightness=adj_brightness, adj_contrast=adj_contrast)
+        pass
+
     elif model == "gan":
         from tf_model.eval_tf import eval_gan
         eval_gan(val_set=args.val_set,checkpoint=args.checkpoint,total_val_img=args.total_val_img,show_time=args.time, \

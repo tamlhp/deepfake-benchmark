@@ -140,7 +140,7 @@ def transformation_from_points(points1, points2):
 
     points1 = points1.astype(numpy.float64)
     points2 = points2.astype(numpy.float64)
-
+    print(points1.shape)
     c1 = numpy.mean(points1, axis=0)
     c2 = numpy.mean(points2, axis=0)
     points1 -= c1
@@ -150,15 +150,21 @@ def transformation_from_points(points1, points2):
     s2 = numpy.std(points2)
     points1 /= s1
     points2 /= s2
-
+    # print(points1)
+    print(points1.T*points1)
     U, S, Vt = numpy.linalg.svd(points1.T * points2)
+
+    print((points1.T * points2))
+    print(U.shape)
+    print(S.shape)
+    print(Vt.shape)
 
     # The R we seek is in fact the transpose of the one given by U * Vt. This
     # is because the above formulation assumes the matrix goes on the right
     # (with row vectors) where as our solution requires the matrix to be on the
     # left (with column vectors).
     R = (U * Vt).T
-
+    print(R*R.T)
     return numpy.vstack([numpy.hstack(((s2 / s1) * R,
                                        c2.T - (s2 / s1) * R * c1.T)),
                          numpy.matrix([0., 0., 1.])])
@@ -202,9 +208,14 @@ def correct_colours(im1, im2, landmarks1):
 
 
 # im1, landmarks1 = read_im_and_landmarks("C:/Users/Dell/Desktop/00224.png")
-im2, landmarks2 = read_im_and_landmarks("D:/griffith/data/celeba_hq/val/male/000080.jpg")
+im2, landmarks2 = read_im_and_landmarks("D:/griffith/data/celeba_hq/val/male/001092.jpg")
 import glob
 jj=0
+import matplotlib.pyplot as plt
+
+# M = cv2.getRotationMatrix2D((100/2,100/2),90,1)
+# print(M)
+# exit(0)
 for i in glob.glob("D:/griffith/data/celeba_hq/val/male/*.jpg"):
 
 # im2, landmarks2 = read_im_and_landmarks("C:/Users/Dell/Desktop/00056.png")
@@ -212,9 +223,15 @@ for i in glob.glob("D:/griffith/data/celeba_hq/val/male/*.jpg"):
 
     M = transformation_from_points(landmarks1[ALIGN_POINTS],
                                    landmarks2[ALIGN_POINTS])
-
+    print(M)
+    # exit(0)
     mask = get_face_mask(im2, landmarks2)
+    plt.imshow(mask)
+    plt.show()
     warped_mask = warp_im(mask, M, im1.shape)
+    plt.imshow(warped_mask)
+    plt.imshow(warped_mask)
+    plt.show()
     combined_mask = numpy.max([get_face_mask(im1, landmarks1), warped_mask],
                               axis=0)
 

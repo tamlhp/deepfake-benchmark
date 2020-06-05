@@ -216,6 +216,7 @@ def correct_colours(im1, im2, landmarks1):
 # print(M)
 # exit(0)
 list_image = glob.glob("D:/griffith/data/celeba_hq/val/female/*.jpg")
+np.random.seed(0)
 
 for i in range(0,15000):
     im1_name,im2_name = np.random.choice(list_image,2)

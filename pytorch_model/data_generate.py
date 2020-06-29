@@ -10,6 +10,9 @@ from albumentations.augmentations.transforms import ImageCompression, GaussNoise
 from albumentations import Compose,Normalize
 from albumentations import pytorch as AT
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3
 def make_weights_for_balanced_classes(images, nclasses):
     count = [0] * nclasses

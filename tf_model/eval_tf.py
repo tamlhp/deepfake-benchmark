@@ -5,7 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import keras
 import os
 from PIL import ImageEnhance,Image
-
+import tensorflow as tf
 def image_contrast_adjusment(img):
     # print(img.shape)
     # print(type(img))
@@ -17,7 +17,7 @@ def image_contrast_adjusment(img):
     # print(np.min(img))
     # print(np.max(img))
     contrast = ImageEnhance.Contrast(Image.fromarray(img))
-    img = contrast.enhance(1.0)
+    img = contrast.enhance(2.0)
     return np.array(img,dtype='float64')
 def get_generate(val_set,image_size,batch_size,adj_brightness=1.0,adj_contrast=1.0):
     dataGenerator = ImageDataGenerator(rescale=1./255,
@@ -35,13 +35,37 @@ def get_generate(val_set,image_size,batch_size,adj_brightness=1.0,adj_contrast=1
 
     return generator_val
 
+class Metrics(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self._data = []
+
+    def on_epoch_end(self, batch, logs={}):
+        X_val, y_val = self.validation_data[0], self.validation_data[1]
+        y_predict = np.asarray(model.predict(X_val))
+
+        y_val = np.argmax(y_val, axis=1)
+        y_predict = np.argmax(y_predict, axis=1)
+
+        self._data.append({
+            'val_recall': recall_score(y_val, y_predict),
+            'val_precision': precision_score(y_val, y_predict),
+        })
+        print(self._data)
+        return
+
+    def get_data(self):
+        return self._data
+
 def eval_cnn(model,loss,val_set ='../../extract_raw_img',image_size=256,batch_size=16,adj_brightness=1.0,adj_contrast=1.0):
 
     #### Load data
     generator_val = get_generate(val_set,image_size,batch_size,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
     ### Compile model
+    metrics = Metrics()
+
     model.compile(optimizer="adam", loss=loss, metrics=['accuracy',keras.metrics.Recall(),keras.metrics.Precision()])
-    result = model.evaluate_generator(generator_val, len(generator_val),verbose=1)
+    #model.compile(optimizer="adam", loss=loss, metrics=['accuracy'])
+    result = model.evaluate_generator(generator_val, len(generator_val),verbose=1, callbacks=[metrics])
     print(result)
 
 def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_img=1000,show_time=False, adj_brightness=1.0, adj_contrast=1.0):

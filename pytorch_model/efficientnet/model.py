@@ -233,13 +233,13 @@ class Identity(nn.Module):
 class EfficientDual(nn.Module):
     def __init__(self):
         super(EfficientDual, self).__init__()
-        self.efficient3 = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1,in_channels = 3)
+        self.efficient3 = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 3)
         self.efficient3._dropout = Identity()
         self.efficient3._fc = Identity()
-        self.efficient1 = EfficientNet.from_pretrained('efficientnet-b1', num_classes=1,in_channels = 1)
+        self.efficient1 = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 1)
         self.efficient1._dropout = Identity()
         self.efficient1._fc = Identity()
-        self.fc = nn.Linear(1536+1280,1)
+        self.fc = nn.Linear(1280+1280,1)
         self.flatten = nn.Flatten()
         self.sigmoid = nn.Sigmoid()
     def forward(self, input,input_fft):

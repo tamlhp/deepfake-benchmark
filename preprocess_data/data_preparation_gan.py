@@ -14,6 +14,9 @@ import PIL.Image
 
 import scipy.ndimage
 from PIL import ImageEnhance,Image
+from PIL import ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 #----------------------------------------------------------------------------
 
@@ -160,4 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('--export_labels', type=int, default=1) # Export image source labels?
     parser.add_argument('--percentage_samples', type=int, default=100) # The percentage of images used for data preparation
     args = parser.parse_args()
+    import time
+    begin = time.time()
     data_preparation(args.in_dir, args.out_dir, args.resolution, args.shuffle, args.export_labels, args.percentage_samples)
+    print("Time : ", time.time()-begin)

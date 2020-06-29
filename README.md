@@ -18,10 +18,43 @@ Extract fame from video and detect face in frame to save *.jpg image.
 
 `--duration` : number of frame skip each extract time
 
+Preprocess for GAN-fingerprint
+
+`python data_preparation_gan.py in_dir /hdd/tam/df_in_the_wild/image/train --out_dir /hdd/tam/df_in_the_wild/gan/train resolution 128`
+
+Preprocess for visual model
+
+`python -m feature_model.visual_artifact.process_data --input_real /hdd/tam/df_in_the_wild/image/train/0_real --input_fake /hdd/tam/df_in_the_wild/image/train/1_df --output /hdd/tam/df_in_the_wild/train_visual.pkl --number_iter 1000`
+
+Preprocess for headpose model
+
+`python -m feature_model.headpose_forensic.process_data --input_real /hdd/tam/df_in_the_wild/image/train/0_real --input_fake /hdd/tam/df_in_the_wild/image/train/1_df --output /hdd/tam/df_in_the_wild/train_visual.pkl --number_iter 1000`
+
+Preprocess for spectrum 
+
+`python -m feature_model.spectrum.process_data --input_real /hdd/tam/df_in_the_wild/image/train/0_real --input_fake /hdd/tam/df_in_the_wild/image/train/1_df --output /hdd/tam/df_in_the_wild/train_visual.pkl --number_iter 1000`
+
+
 #  Train
 
-`python train.py --train_set data/Celeb-DF/image/train/ --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint resnext50_celeb_checkpoint/ --gpu_id 0 --resume model_pytorch_1.pt --print_every 10000000 resnext50`
+Train for cnn 
 
+`python train.py --train_set data/Celeb-DF/image/train/ --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 128 --workers 16 --checkpoint xception_128_df_inthewild_checkpoint/ --gpu_id 0 --resume model_pytorch_1.pt --print_every 10000000 xception_torch`
+
+Train for feature model
+
+`python train.py --train_set /hdd/tam/df_in_the_wild/train_visual.pkl   --checkpoint spectrum_128_df_inthewild_checkpoint/ --gpu_id 0 --resume model_pytorch_1.pt spectrum`
+
+
+# Eval
+
+Eval for cnn
+
+`python eval.py  --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 128 --workers 16 --checkpoint xception_128_df_inthewild_checkpoint/ --resume model_1.pt xception_torch`
+
+Eval for feature model
+
+`python eval.py --val_set /hdd/tam/df_in_the_wild/val_visual.pkl   --checkpoint spectrum_128_df_inthewild_checkpoint/ --resume model_1.pt spectrum`
 
 
 # References

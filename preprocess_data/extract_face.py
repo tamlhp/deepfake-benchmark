@@ -20,8 +20,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Deepfake detection")
-    parser.add_argument('--in_dir', default="data/train/", help='path to train data ')
-    parser.add_argument('--out_dir', default="data/test/", help='path to test data ')
+    parser.add_argument('--in_dir', default='../../../data/download_df_2', help='path to train data ')
+    parser.add_argument('--out_dir', default='../../../data/extract_download', help='path to test data ')
     parser.add_argument('--workers', type=int, default=4, help='number wokers for dataloader ')
     parser.add_argument('--duration',type=int, default = 4, help='Resume from checkpoint ')
 
@@ -29,6 +29,27 @@ def parse_args():
 
 detector = MTCNN(device=device)
 margin = 0.2
+def extract_face_img(image,output):
+    # output = args.out_dir
+        #         face_positions = face_recognition.face_locations(img)
+    face_positions = detector.detect(image)
+    try:
+        # face_position = face_positions[0][0]
+        face_position = face_positions[0][np.argmax(face_positions[1])]
+    except:
+        # print(face_positions)
+        return
+    x, y, x2, y2 = face_position
+    x, y, w, h = int(x), int(y), int(x2 - x), int(y2 - y)
+    offsetx = round(margin * (w))
+    offsety = round(margin * (h))
+    y0 = round(max(y - offsety, 0))
+    x1 = round(min(x + w + offsetx, image.shape[1]))
+    y1 = round(min(y + h + offsety, image.shape[0]))
+    x0 = round(max(x - offsetx, 0))
+    #         print(x0,x1,y0,y1)
+    face = image[y0:y1, x0:x1]
+    plt.imsave(join(output, name_vi + "_" + str(id_frame) + ".jpg"), face, format='jpg')
 
 def extract_face(vi):
     output = args.out_dir

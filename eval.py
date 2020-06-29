@@ -60,6 +60,10 @@ def parse_args():
 
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet')
 
+    ##############  gc
+    parser_spectrum = subparsers.add_parser('spectrum', help='siamese tensorflow')
+    parser_headpose = subparsers.add_parser('heapose', help='siamese tensorflow')
+    parser_visual = subparsers.add_parser('visual', help='siamese tensorflow')
 
     return parser.parse_args()
 
@@ -235,4 +239,18 @@ if __name__ == "__main__":
         loss = BinaryFocalLoss(gamma=2)
         eval_cnn(model,loss=loss, val_set=args.val_set, image_size=args.image_size, \
                  batch_size=args.batch_size,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+
+    ###############
+    elif model == "spectrum":
+        from feature_model.spectrum.eval_spectrum import eval_spectrum
+        eval_spectrum(args.val_set,model_file=args.checkpoint)
+        pass
+    elif model == "headpose":
+        from feature_model.headpose_forensic.eval_headpose import eval_headposes
+        eval_headposes(args.val_set,model_file=args.checkpoint)
+        pass
+    elif model == "visual":
+        from feature_model.visual_artifact.eval_visual import eval_visual
+        eval_visual(args.val_set,model_file=args.checkpoint)
         pass

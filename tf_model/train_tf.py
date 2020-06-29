@@ -6,6 +6,7 @@ import keras
 import os
 from keras.optimizers import Adam
 from PIL import ImageEnhance,Image
+import matplotlib.pyplot as plt
 def image_contrast_adjusment(img):
     # print(img.shape)
     # print(type(img))
@@ -18,7 +19,9 @@ def image_contrast_adjusment(img):
     # print(np.max(img))
     contrast = ImageEnhance.Contrast(Image.fromarray(img))
     img = contrast.enhance(1.0)
-    return np.array(img,dtype='float64')
+    img = np.array(img,dtype='float64')
+    # print(img)
+    return img
 def get_generate(train_set,val_set,image_size,batch_size,adj_brightness=1.0, adj_contrast=1.0):
     dataGenerator = ImageDataGenerator(rescale=1. / 255, rotation_range=5,
                                        width_shift_range=0.05,
@@ -44,7 +47,7 @@ def get_generate(train_set,val_set,image_size,batch_size,adj_brightness=1.0, adj
 
     return generator_train,generator_val
 
-def train_cnn(model,loss,train_set = '../../../extract_raw_img',val_set ='../../../extract_raw_img',image_size=256,\
+def train_cnn(model,loss,train_set = '../../../data/extract_raw_img',val_set ='../../../data/extract_raw_img',image_size=256,\
               batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20, \
               adj_brightness=1.0, adj_contrast=1.0):
 
@@ -75,7 +78,7 @@ def train_cnn(model,loss,train_set = '../../../extract_raw_img',val_set ='../../
 
 
 def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
-                  batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20):
+                  batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20, adj_brightness=1.0, adj_contrast=1.0):
     from tf_model.siamese import DataGenerator
     generator_train = DataGenerator(path=train_set, batch_size=batch_size,image_size=image_size)
     generator_val = DataGenerator(path=val_set, batch_size=batch_size,image_size=image_size)
@@ -97,7 +100,7 @@ def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../..
                         # callbacks=[tensorboard_callback, checkpoints])
 def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test',training_seed=0,image_size=256,\
               batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20,total_train_img = 15000,\
-              total_val_img = 1000):
+              total_val_img = 1000, adj_brightness=1.0, adj_contrast=1.0):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc

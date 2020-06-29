@@ -50,18 +50,6 @@ def process_training_data(data):
 
     return sorted(set(videos_real)), sorted(set(videos_fake)), video_list, label_list, R_vec_feat, R_mat_feat, R_mat_full_feat, t_vec_feat
 
-def main(args):
-
-    with open(args.headpose_path, 'rb') as f:
-        data = pickle.load(f)
-    videos_real, videos_fake, video_list, label_list, R_vec_feat, R_mat_feat, R_mat_full_feat, t_vec_feat\
-        = process_training_data(data)
-    features = [np.concatenate([R_mat_full_feat[i], t_vec_feat[i]]) for i in range(len(R_mat_feat))]
-    classifier, scaler = train_model(features, label_list)
-    model = [classifier, scaler]
-    with open(args.model_save_path, 'wb') as f:
-        pickle.dump(model, f)
-
 
 def train_model(features, label_list, random_state=0):
     X_train, y_train = shuffle(features, label_list, random_state=random_state)
@@ -71,11 +59,27 @@ def train_model(features, label_list, random_state=0):
     clf.fit(X_train, y_train)
     return clf, scaler
 
+def train_headpose(data,model_file):
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="headpose forensic: train step 3")
-    parser.add_argument('--headpose_path', type=str, default='headpose_data.p')
-    parser.add_argument('--model_save_path', type=str, default='svm_model.p')
+    with open(data, 'rb') as f:
+        data = pickle.load(f)
+    videos_real, videos_fake, video_list, label_list, R_vec_feat, R_mat_feat, R_mat_full_feat, t_vec_feat\
+        = process_training_data(data)
+    features = [np.concatenate([R_mat_full_feat[i], t_vec_feat[i]]) for i in range(len(R_mat_feat))]
+    classifier, scaler = train_model(features, label_list)
+    model = [classifier, scaler]
+    with open(model_file, 'wb') as f:
+        pickle.dump(model_file, f)
+
+def parse_args():
+    """Parses input arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--data', dest='input',default='',
+                        help='Path to pkl data file.')
+    parser.add_argument('-o', '--model', dest='output', help='path to save model.')
     args = parser.parse_args()
-    main(args)
+    return args
 
+if __name__ == "__name__":
+    args_in = parse_args()
+    train_headpose(args_in.data,args_in.model)

@@ -61,13 +61,13 @@ JAW_POINTS = list(range(0, 17))
 
 # Points used to line up the images.
 ALIGN_POINTS = (LEFT_BROW_POINTS + RIGHT_EYE_POINTS + LEFT_EYE_POINTS +
-                RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS + FACE_POINTS )
+                RIGHT_BROW_POINTS + NOSE_POINTS + MOUTH_POINTS + FACE_POINTS+JAW_POINTS )
 
 # Points from the second image to overlay on the first. The convex hull of each
 # element will be overlaid.
 OVERLAY_POINTS = [
     LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS,
-    NOSE_POINTS + MOUTH_POINTS +FACE_POINTS ,
+    NOSE_POINTS + MOUTH_POINTS +FACE_POINTS+JAW_POINTS ,
 ]
 
 # Amount of blur to use during colour correction, as a fraction of the
@@ -210,17 +210,18 @@ def correct_colours(im1, im2, landmarks1):
             im2_blur.astype(numpy.float64))
 
 
-# im1, landmarks1 = read_im_and_landmarks("C:/Users/Dell/Desktop/00224.png")
+# im1, landmarks1 = read_im_and_landmarks("C:/Users/Dell/Desktop/00056.png")
 
 # M = cv2.getRotationMatrix2D((100/2,100/2),90,1)
 # print(M)
 # exit(0)
 list_image = glob.glob("D:/griffith/data/celeba_hq/val/female/*.jpg")
 np.random.seed(0)
-
+im1_name = 'C:/Users/Dell/Desktop/seed6623.png'
+im2_name = 'C:/Users/Dell/Desktop/00056.png'
 for i in range(0,15000):
-    im1_name,im2_name = np.random.choice(list_image,2)
-    print(i)
+    # im1_name,im2_name = np.random.choice(list_image,2)
+    # print(i)
     try:
         im2, landmarks2 = read_im_and_landmarks(im2_name)
         im1, landmarks1 = read_im_and_landmarks(im1_name)
@@ -230,20 +231,31 @@ for i in range(0,15000):
         # print(M)
         # exit(0)
         mask = get_face_mask(im2, landmarks2)
-        # plt.imshow(mask)
-        # plt.show()
+        plt.imshow(cv2.cvtColor((im2*mask).astype(np.uint8),cv2.COLOR_BGR2RGB))
+        plt.show()
         warped_mask = warp_im(mask, M, im1.shape)
         # plt.imshow(warped_mask)
-        # plt.imshow(warped_mask)
-        # plt.show()
+        plt.imshow(warped_mask)
+        plt.show()
         combined_mask = numpy.max([get_face_mask(im1, landmarks1), warped_mask],
                                   axis=0)
-
+        # plt.imshow(combined_mask)
+        # plt.show()
         warped_im2 = warp_im(im2, M, im1.shape)
         warped_corrected_im2 = correct_colours(im1, warped_im2, landmarks1)
-
+        plt.imshow(warped_im2)
+        plt.show()
+        plt.imshow(cv2.cvtColor(warped_corrected_im2.astype(np.uint8),cv2.COLOR_BGR2RGB))
+        plt.show()
+        plt.imshow(cv2.cvtColor((warped_corrected_im2*combined_mask).astype(np.uint8),cv2.COLOR_BGR2RGB))
+        plt.show()
         output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
+        print(output_im)
+        plt.imshow(cv2.cvtColor(output_im.astype(np.uint8),cv2.COLOR_BGR2RGB))
+        plt.show()
+        exit(0)
     except:
+        exit(0)
         continue
         # jj+=1
-    cv2.imwrite('output/swap1_' +str(i)+"_" + im1_name.split("/")[-1].split("\\")[-1].split(".")[0]+"_"+im2_name.split("/")[-1].split("\\")[-1].split(".")[0] +'.jpg', output_im)
+    cv2.imwrite('swap1_' +str(i)+"_" + im1_name.split("/")[-1].split("\\")[-1].split(".")[0]+"_"+im2_name.split("/")[-1].split("\\")[-1].split(".")[0] +'.jpg', output_im)

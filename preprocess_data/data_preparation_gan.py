@@ -13,6 +13,7 @@ import tensorflow as tf
 import PIL.Image
 
 import scipy.ndimage
+from PIL import ImageEnhance,Image
 
 #----------------------------------------------------------------------------
 
@@ -126,6 +127,11 @@ def data_preparation(image_dir, tfrecord_dir, resolution=128, shuffle=1, export_
                 img = img[:, :, np.newaxis] # HW => HWC
             img = PIL.Image.fromarray(img, 'RGB')
             img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
+
+            contrast = ImageEnhance.Contrast(img)
+            img = contrast.enhance(1.0)
+            brightness = ImageEnhance.Brightness(img)
+            img = brightness.enhance(1.0)
             img = np.asarray(img)
             img = img.transpose(2, 0, 1) # HWC => CHW
             tfr.add_image(img)

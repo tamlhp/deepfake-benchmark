@@ -71,6 +71,11 @@ def parse_args():
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
     parser_siamese_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
 
+    ##############  gc
+    parser_spectrum = subparsers.add_parser('spectrum', help='siamese tensorflow')
+    parser_headpose = subparsers.add_parser('heapose', help='siamese tensorflow')
+    parser_visual = subparsers.add_parser('visual', help='siamese tensorflow')
+
     ## adjust image
     parser.add_argument('--adj_brightness',type=float, default = 1, help='adj_brightness')
     parser.add_argument('--adj_contrast',type=float, default = 1, help='adj_contrast')
@@ -343,3 +348,17 @@ if __name__ == "__main__":
         train_siamese(model,loss = loss,train_set = args.train_set,val_set = args.val_set,image_size=args.image_size,resume=args.resume, \
                   batch_size=args.batch_size,num_workers=args.workers,checkpoint=args.checkpoint,epochs=args.niter, \
                       adj_brightness=adj_brightness, adj_contrast=adj_contrast)
+    ###############
+    elif model == "spectrum":
+        from feature_model.spectrum.train_spectrum import train_spectrum
+
+        train_spectrum(args.train_set,model_file=args.checkpoint + args.resume)
+        pass
+    elif model == "headpose":
+        from feature_model.headpose_forensic.train_headpose import train_headpose
+        train_headpose(args.train_set,model_file=args.checkpoint + args.resume)
+        pass
+    elif model == "visual":
+        from feature_model.visual_artifact.train_visual import train_visual
+        train_visual(args.train_set,model_file=args.checkpoint + args.resume)
+        pass

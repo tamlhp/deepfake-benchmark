@@ -21,7 +21,7 @@ def image_contrast_adjusment(img):
     return np.array(img,dtype='float64')
 def get_generate(val_set,image_size,batch_size,adj_brightness=1.0,adj_contrast=1.0):
     dataGenerator = ImageDataGenerator(rescale=1./255,
-                        brightness_range = [adj_brightness - 1e-6, adj_brightness + 1e-6],
+                        brightness_range = (adj_brightness - 1e-6, adj_brightness + 1e-6),
                        preprocessing_function = image_contrast_adjusment
     )
 
@@ -44,7 +44,7 @@ def eval_cnn(model,loss,val_set ='../../extract_raw_img',image_size=256,batch_si
     result = model.evaluate_generator(generator_val, len(generator_val),verbose=1)
     print(result)
 
-def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_img=1000,show_time=False):
+def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_img=1000,show_time=False, adj_brightness=1.0, adj_contrast=1.0):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc

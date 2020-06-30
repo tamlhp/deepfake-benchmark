@@ -124,5 +124,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args_in = parse_args()
-    main(args_in.input_real,args_in.input_fake, args_in.output,args_in.number_iter)
+    main(args_in.input_real,args_in.input_fake, args_in.output,int(args_in.number_iter))
 

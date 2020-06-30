@@ -112,5 +112,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args_in = parse_args()
-    main1(args_in.input_real,args_in.input_fake,"temp.p", args_in.number_iter)
+    main1(args_in.input_real,args_in.input_fake,"temp.p", int(args_in.number_iter))
     main2("temp.p", args_in.output)

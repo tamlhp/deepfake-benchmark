@@ -100,9 +100,9 @@ def main2(main1_file,main2_file):
 def parse_args():
     """Parses input arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-ir', '--input_real', dest='input',default='',
+    parser.add_argument('-ir', '--input_real', dest='input_real',default='',
                         help='Path to input image or folder containting multiple images.')
-    parser.add_argument('-if', '--input_fake', dest='input',default='',
+    parser.add_argument('-if', '--input_fake', dest='input_fake',default='',
                         help='Path to input image or folder containting multiple images.')
     parser.add_argument('-o', '--output', dest='output', help='Path to save outputs.',
                         default='./output')

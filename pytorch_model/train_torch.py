@@ -378,7 +378,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
                 steps = 0
                 model.train()
         # eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
-        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch_%d.pt' % epoch))
+        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch3_%d.pt' % epoch))
     return
 
 def train_fftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\

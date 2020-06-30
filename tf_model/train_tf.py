@@ -7,6 +7,9 @@ import os
 from keras.optimizers import Adam
 from PIL import ImageEnhance,Image
 import matplotlib.pyplot as plt
+
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 def image_contrast_adjusment(img):
     # print(img.shape)
     # print(type(img))
@@ -100,7 +103,7 @@ def train_siamese(model,loss,train_set = '../../extract_raw_img',val_set ='../..
                         # callbacks=[tensorboard_callback, checkpoints])
 def train_gan(train_set = 'checkpoint/data/test',val_set ='checkpoint/data/test',training_seed=0,image_size=256,\
               batch_size=16,num_workers=1,checkpoint="checkpoint",resume="",epochs=20,total_train_img = 15000,\
-              total_val_img = 1000, adj_brightness=1.0, adj_contrast=1.0):
+              total_val_img = 1000 , adj_brightness=1.0, adj_contrast=1.0):
     import tf_model.gan_fingerprint.config as config
     import tf_model.gan_fingerprint.tfutil as tfutil
     from tf_model.gan_fingerprint import misc

@@ -15,7 +15,7 @@ def detect_capsule(img,gpu_id=-1,model_path="checkpoint"):
 
     capnet.load_state_dict(torch.load(model_path))
 
-    input_v = Variable(img)
+    input_v = Variable(img.float().to(device))
 
     x = vgg_ext(input_v)
     classes, class_ = capnet(x, random=False)
@@ -33,7 +33,7 @@ def detect_capsule(img,gpu_id=-1,model_path="checkpoint"):
 
 def detect_cnn(model,img):
 
-    logps = model.forward(img)
+    logps = model.forward(img.float().to(device))
     logps = logps.squeeze()
     logps_cpu = logps.detach().cpu().numpy()
     print(logps_cpu)

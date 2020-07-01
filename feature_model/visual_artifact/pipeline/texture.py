@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-import pipeline.pipeline_utils as pipeline_utils
-import pipeline.face_utils as face_utils
-import pipeline.laws_texture as laws_texture
+import feature_model.visual_artifact.pipeline.pipeline_utils as pipeline_utils
+import feature_model.visual_artifact.pipeline.face_utils as face_utils
+import feature_model.visual_artifact.pipeline.laws_texture as laws_texture
 
 
 # laws texture

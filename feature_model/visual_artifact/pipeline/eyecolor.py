@@ -8,8 +8,8 @@ from skimage.transform import hough_circle, hough_circle_peaks
 from skimage.feature import canny
 from skimage import exposure
 
-import pipeline.pipeline_utils as pipeline_utils
-import pipeline.face_utils as face_utils
+import feature_model.visual_artifact.pipeline.pipeline_utils as pipeline_utils
+import feature_model.visual_artifact.pipeline.face_utils as face_utils
 
 
 def extract_reflection(img, mask):

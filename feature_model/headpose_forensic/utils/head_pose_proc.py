@@ -16,7 +16,7 @@ class PoseEstimator(object):
     2 methods are available here. It could use 6 landmarks (self.model_points) or all
     68 landmarks (self.model_points_68)'''
 
-    def __init__(self, img_size, model_path='models/model_landmark.txt'):
+    def __init__(self, img_size, model_path='feature_model/headpose_forensic/models/model_landmark.txt'):
         # initialzize image size
         self.size = img_size
         self.model_path = model_path

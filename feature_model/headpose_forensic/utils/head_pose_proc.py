@@ -4,8 +4,8 @@ modified from work by yinguobing'''
 import numpy as np
 import cv2
 import dlib
-import utils.face_utils
-from utils import pose_utils as pu
+import feature_model.headpose_forensic.utils.face_utils
+from feature_model.headpose_forensic.utils import pose_utils as pu
 import argparse
 import os
 

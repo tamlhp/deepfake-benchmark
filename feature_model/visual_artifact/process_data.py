@@ -79,6 +79,7 @@ def main(input_real,input_fake, output_path,number_iter):
     video_dir_dict['real'] = input_real
     video_dir_dict['fake'] = input_fake
     for tag in video_dir_dict:
+        cont = 0
         if tag == 'real':
             label = 0
         else:

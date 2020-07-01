@@ -49,7 +49,7 @@ def detect_dualcnn(model,img,img_fft,model_path="checkpoint"):
     model = model.to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()
-    logps = model.forward(img,img_fft)
+    logps = model.forward(img.float().to(device),img_fft.float().to(device))
     logps = logps.squeeze()
     logps_cpu = logps.detach().numpy()
     pred_label = (logps_cpu > 0.5)

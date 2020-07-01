@@ -140,7 +140,7 @@ if __name__ == "__main__":
         # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
         PIL_img = transform(PIL_img)
         magnitude_spectrum = transform_fft(magnitude_spectrum)
-
+        magnitude_spectrum = magnitude_spectrum.unsqueeze(0)
         detect_dualcnn(model,PIL_img,magnitude_spectrum,model_path=args.model_path)
         exit(0)
     from pytorch_model.detect_torch import detect_cnn

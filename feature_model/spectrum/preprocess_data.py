@@ -92,7 +92,7 @@ def main(input_real,input_fake,number_iter,output_path):
             contrast = ImageEnhance.Contrast(Image.fromarray(img))
             img = contrast.enhance(1.0)
             brightness = ImageEnhance.Brightness(img)
-            img = brightness.enhance(2.0)
+            img = brightness.enhance(1.0)
             img = np.array(img, dtype='float64')
 
             # we crop the center

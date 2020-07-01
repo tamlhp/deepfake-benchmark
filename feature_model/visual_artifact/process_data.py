@@ -42,26 +42,28 @@ def extract_visual_artifact(img):
     scale = 768
 
     if (len(face_crop_list) == 1):
+        try:
+            face_crop = face_crop_list[0]
+            landmarks = landmarks_list[0].copy()
 
-        face_crop = face_crop_list[0]
-        landmarks = landmarks_list[0].copy()
+            out_size = pipeline_utils.new_size(face_crop.shape[1], face_crop.shape[0], large_dim=scale)
+            scale_x = float(out_size[1]) / face_crop.shape[1]
+            scale_y = float(out_size[0]) / face_crop.shape[0]
 
-        out_size = pipeline_utils.new_size(face_crop.shape[1], face_crop.shape[0], large_dim=scale)
-        scale_x = float(out_size[1]) / face_crop.shape[1]
-        scale_y = float(out_size[0]) / face_crop.shape[0]
+            landmarks_resize = landmarks.copy()
+            landmarks_resize[:, 0] = landmarks_resize[:, 0] * scale_x
+            landmarks_resize[:, 1] = landmarks_resize[:, 1] * scale_y
 
-        landmarks_resize = landmarks.copy()
-        landmarks_resize[:, 0] = landmarks_resize[:, 0] * scale_x
-        landmarks_resize[:, 1] = landmarks_resize[:, 1] * scale_y
+            face_crop_resize = cv2.resize(face_crop, (int(out_size[1]), int(out_size[0])), interpolation=cv2.INTER_LINEAR)
 
-        face_crop_resize = cv2.resize(face_crop, (int(out_size[1]), int(out_size[0])), interpolation=cv2.INTER_LINEAR)
-
-        feature_eyecolor, distance_HSV, valid_seg = extract_eyecolor_features(landmarks_resize, face_crop_resize)
-        features_eyes = extract_features_eyes(landmarks, face_crop, scale=scale)
-        features_mounth = extract_features_mouth(landmarks, face_crop, scale=scale)
-        features_nose = extract_features_nose(landmarks, face_crop, scale=scale)
-        features_face = extract_features_faceborder(landmarks, face_crop, scale=scale)
-        feature = np.concatenate([feature_eyecolor, features_eyes, features_mounth, features_nose, features_face], axis=0)
+            feature_eyecolor, distance_HSV, valid_seg = extract_eyecolor_features(landmarks_resize, face_crop_resize)
+            features_eyes = extract_features_eyes(landmarks, face_crop, scale=scale)
+            features_mounth = extract_features_mouth(landmarks, face_crop, scale=scale)
+            features_nose = extract_features_nose(landmarks, face_crop, scale=scale)
+            features_face = extract_features_faceborder(landmarks, face_crop, scale=scale)
+            feature = np.concatenate([feature_eyecolor, features_eyes, features_mounth, features_nose, features_face], axis=0)
+        except:
+            feature = np.array([0])
     else:
         feature = np.array([0])
 #     print(feature)
@@ -90,7 +92,7 @@ def main(input_real,input_fake, output_path,number_iter):
 
             img = img.astype("uint8")
             contrast = ImageEnhance.Contrast(Image.fromarray(img))
-            img = contrast.enhance(2.0)
+            img = contrast.enhance(1.0)
             brightness = ImageEnhance.Brightness(img)
             img = brightness.enhance(1.0)
             img = np.array(img, dtype='uint8')

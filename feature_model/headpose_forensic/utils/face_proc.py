@@ -17,7 +17,7 @@ class FaceProc(object):
 
     def __init__(self):
         # Set up dlib face detector and landmark estimator
-        self.landmark_estimatior= dlib.shape_predictor("../shape_predictor_68_face_landmarks.dat")
+        self.landmark_estimatior= dlib.shape_predictor("./shape_predictor_68_face_landmarks.dat")
         self.face_detector = dlib.get_frontal_face_detector()
     
     def get_landmarks(self, img):   

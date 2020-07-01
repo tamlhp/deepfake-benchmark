@@ -141,7 +141,7 @@ if __name__ == "__main__":
         PIL_img = transform(PIL_img)
         magnitude_spectrum = transform_fft(magnitude_spectrum)
 
-        detect_dualcnn(model,img,magnitude_spectrum,model_path=args.model_path)
+        detect_dualcnn(model,PIL_img,magnitude_spectrum,model_path=args.model_path)
         exit(0)
     from pytorch_model.detect_torch import detect_cnn
     device = torch.device("cuda" if torch.cuda.is_available()

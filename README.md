@@ -50,11 +50,11 @@ Train for feature model
 
 Eval for cnn
 
-`python eval.py  --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 128 --workers 16 --checkpoint xception_128_df_inthewild_checkpoint/ --resume model_1.pt xception_torch`
+`python eval.py  --val_set /hdd/tam/df_in_the_wild/image/test/ --batch_size 32 --image_size 128 --workers 16 --checkpoint efficientdual_128_df_inthewild_checkpoint/ --resume model_dualpytorch3_1.pt efficientdual`
 
 Eval for feature model
 
-`python eval.py --val_set /hdd/tam/df_in_the_wild/val_visual.pkl   --checkpoint spectrum_128_df_inthewild_checkpoint/ --resume model_1.pt spectrum`
+`python eval.py --val_set ../DeepFakeDetection/Experiments_DeepFakeDetection/test_dfinthewild.pkl   --checkpoint ../DeepFakeDetection/Experiments_DeepFakeDetection/model_df_inthewild.pkl --resume model_df_inthewild.pkl spectrum`
 
 
 # References

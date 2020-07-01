@@ -7,8 +7,8 @@ Face related processing class:
 
 import numpy as np
 import dlib
-from utils.proc_vid import parse_vid
-from utils.face_utils import shape_to_np
+from feature_model.headpose_forensic.utils.proc_vid import parse_vid
+from feature_model.headpose_forensic.utils.face_utils import shape_to_np
 from tqdm import tqdm
 
 

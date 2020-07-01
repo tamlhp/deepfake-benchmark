@@ -32,7 +32,7 @@ Preprocess for headpose model
 
 Preprocess for spectrum 
 
-`python -m feature_model.spectrum.process_data --input_real /hdd/tam/df_in_the_wild/image/train/0_real --input_fake /hdd/tam/df_in_the_wild/image/train/1_df --output /hdd/tam/df_in_the_wild/train_visual.pkl --number_iter 1000`
+`python -m feature_model.spectrum.process_data --input_real /hdd/tam/df_in_the_wild/image/train/0_real --input_fake /hdd/tam/df_in_the_wild/image/train/1_df --output /hdd/tam/df_in_the_wild/train_spectrum.pkl --number_iter 1000`
 
 
 #  Train
@@ -56,6 +56,13 @@ Eval for feature model
 
 `python eval.py --val_set ../DeepFakeDetection/Experiments_DeepFakeDetection/test_dfinthewild.pkl   --checkpoint ../DeepFakeDetection/Experiments_DeepFakeDetection/model_df_inthewild.pkl --resume model_df_inthewild.pkl spectrum`
 
+# Detect
+
+`python detect_img.py --img_path /hdd/tam/extend_data/image/test/1_df/reference_0_113.jpg --model_path efficientdual_mydata_checkpoint/model_dualpytorch3_1.pt --gpu_id 0 efficientdual`
+
+`python detect_img.py --img_path /hdd/tam/extend_data/image/test/1_df/reference_0_113.jpg --model_path xception_mydata_checkpoint/model_pytorch_0.pt --gpu_id 0 xception_torch`
+
+`python detect_img.py --img_path /hdd/tam/extend_data/image/test/1_df/reference_0_113.jpg --model_path capsule_mydata_checkpoint/capsule_1.pt  --gpu_id 0 capsule`
 
 # References
 [1] https://github.com/nii-yamagishilab/Capsule-Forensics-v2

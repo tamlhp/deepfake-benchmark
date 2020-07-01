@@ -19,7 +19,7 @@ def detect_capsule(img,gpu_id=-1,model_path="checkpoint"):
 
     x = vgg_ext(input_v)
     classes, class_ = capnet(x, random=False)
-    output_dis = class_.data.detach().numpy()
+    output_dis = class_.data.detach().cpu().numpy()
     output_pred = np.zeros((output_dis.shape[0]), dtype=np.float)
 
     for i in range(output_dis.shape[0]):
@@ -35,7 +35,7 @@ def detect_cnn(model,img):
 
     logps = model.forward(img)
     logps = logps.squeeze()
-    logps_cpu = logps.detach().numpy()
+    logps_cpu = logps.detach().cpu().numpy()
     print(logps_cpu)
     pred_label = (logps_cpu > 0.5)
 
@@ -51,7 +51,7 @@ def detect_dualcnn(model,img,img_fft,model_path="checkpoint"):
     model.eval()
     logps = model.forward(img.float().to(device),img_fft.float().to(device))
     logps = logps.squeeze()
-    logps_cpu = logps.detach().numpy()
+    logps_cpu = logps.detach().cpu().numpy()
     pred_label = (logps_cpu > 0.5)
     print(pred_label)
 

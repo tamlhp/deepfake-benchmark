@@ -54,6 +54,7 @@ def detect_dualcnn(model,img,img_fft,model_path="checkpoint"):
     logps = logps.squeeze()
     logps_cpu = logps.detach().cpu().numpy()
     pred_label = (logps_cpu > 0.5)
+    print(logps_cpu)
     print(pred_label)
 
     return pred_label

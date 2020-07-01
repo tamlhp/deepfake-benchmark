@@ -27,7 +27,7 @@ def detect_capsule(img,gpu_id=-1,model_path="checkpoint"):
             output_pred[i] = 1.0
         else:
             output_pred[i] = 0.0
-
+    print(class_)
     print(output_pred)
     return output_pred
 

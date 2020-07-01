@@ -32,7 +32,8 @@ def detect_capsule(img,gpu_id=-1,model_path="checkpoint"):
     return output_pred
 
 def detect_cnn(model,img):
-
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
     logps = model.forward(img.float().to(device))
     logps = logps.squeeze()
     logps_cpu = logps.detach().cpu().numpy()

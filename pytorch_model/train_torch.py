@@ -14,13 +14,17 @@ import torch.nn as nn
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
 from tqdm import tqdm
 from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_dualfft,get_generate_fft,get_generate_4dfft
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
-
+es_patience = 3  # Early Stopping patience - for how many epochs with no improvements to wait
+best_accuracy = 0.0
 
 def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume="",\
                   beta1=0.9,dropout=0.05,image_size=256,batch_size=16,lr=0.003,num_workers=1,checkpoint="checkpoint",\
                   epochs=20,adj_brightness=1.0, adj_contrast=1.0):
+    patience = es_patience
+    best_accuracy = 0.0
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
 
@@ -185,6 +189,16 @@ def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_ra
         text_writer.write('%d,%.4f,%.2f,%.4f,%.2f , %.4f\n'
         % (epoch, loss_train, acc_train*100, loss_test, acc_test*100,log_loss_metric))
 
+        accuracy_score__ = accuracy_score(y_label,y_pred_label)
+        if accuracy_score__ >= best_accuracy:
+            best_accuracy = accuracy_score__
+            patience = es_patience  # Resetting patience since we have new best validation accuracy
+            print("best : at epoch  ",epoch, 'with accuracy ', best_accuracy)
+        else:
+            patience -= 1
+            if patience == 0:
+                print('Early stopping. Best Val roc_auc: {:.3f}'.format(best_accuracy))
+                break
         text_writer.flush()
         capnet.train()
 
@@ -220,9 +234,12 @@ def eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness
         test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
     text_writer.flush()
     model.train()
+    return accuracy
 def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
               batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
               adj_brightness=1.0, adj_contrast=1.0):
+    patience = es_patience
+    best_accuracy = 0.0
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
@@ -297,12 +314,24 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 running_loss = 0
                 steps = 0
                 model.train()
-        eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
+        accuracy_score__= eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
+
+        if accuracy_score__ >= best_accuracy:
+            best_accuracy = accuracy_score__
+            patience = es_patience  # Resetting patience since we have new best validation accuracy
+            print("best : at epoch  ",epoch, 'with accuracy ', best_accuracy)
+        else:
+            patience -= 1
+            if patience == 0:
+                print('Early stopping. Best Val roc_auc: {:.3f}'.format(best_accuracy))
+                break
     return
 def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
               batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
               adj_brightness=1.0, adj_contrast=1.0):
+    patience = es_patience
+    best_accuracy = 0.0
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)
@@ -370,6 +399,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
                       f"Train loss: {running_loss/print_every:.3f}.. "
                       f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
                       f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
+                accuracy_score__ = accuracy/len(dataloader_val)
                 text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
                 epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
                 text_writer.flush()
@@ -379,11 +409,21 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
                 model.train()
         # eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch3_%d.pt' % epoch))
+        if accuracy_score__ >= best_accuracy:
+            best_accuracy = accuracy_score__
+            patience = es_patience  # Resetting patience since we have new best validation accuracy
+            print("best : at epoch  ",epoch, 'with accuracy ', best_accuracy)
+        else:
+            patience -= 1
+            if patience == 0:
+                print('Early stopping. Best Val roc_auc: {:.3f}'.format(best_accuracy))
+                break
     return
 
 def train_fftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
               batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
               adj_brightness=1.0, adj_contrast=1.0):
+    patience = es_patience
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)

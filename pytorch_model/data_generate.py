@@ -1,5 +1,7 @@
 import torch
-import torchvision.transforms as transforms
+import torchvision.transforms as transforms_ori
+import torchtoolbox.transform as transforms
+
 import torchvision.datasets as datasets
 import glob
 from torch.utils.data import Dataset
@@ -71,8 +73,11 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
 
 def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                        transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
-                                        transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
+                                        # transforms.Resize((int(image_size/2), int(image_size/2))),
+                                        # transforms.Resize((image_size, image_size)),
+                                        # transforms.RandomGaussianNoise(p=0.0),
+                                        transforms.Lambda(lambda img :transforms_ori.functional.adjust_brightness(img,adj_brightness)),
+                                        transforms.Lambda(lambda img :transforms_ori.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225])
@@ -155,6 +160,12 @@ class ImageGeneratorDualFFT(Dataset):
             enhancer = ImageEnhance.Contrast(img_adj)
             img_adj = enhancer.enhance(self.adj_contrast)
             img = np.array(img_adj)
+
+        # PIL_img = Image.fromarray(img)
+        # if self.transform is not None:
+        #     PIL_img = self.transform(PIL_img)
+        #     img = np.array(transforms_ori.ToPILImage()(PIL_img))
+
         f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
@@ -183,6 +194,11 @@ class ImageGeneratorDualFFT(Dataset):
         return int(np.floor(len(self.data_path)))
 def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+
+                                        # transforms.Resize((int(image_size/2), int(image_size/2))),
+                                        # transforms.Resize((image_size, image_size)),
+                                        # transforms.RandomGaussianNoise(p=0.0),
+
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225])

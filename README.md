@@ -50,7 +50,11 @@ Train for feature model
 
 Eval for cnn
 
-`python eval.py  --val_set /hdd/tam/df_in_the_wild/image/test/ --batch_size 32 --image_size 128 --workers 16 --checkpoint efficientdual_128_df_inthewild_checkpoint/ --resume model_dualpytorch3_1.pt efficientdual`
+`python eval.py  --val_set /hdd/tam/df_in_the_wild/image/test/ --adj_brightness 1.0 --adj_contrast 1.0 --batch_size 32 --image_size 128 --workers 16 --checkpoint efficientdual_128_df_inthewild_checkpoint/ --resume model_dualpytorch3_1.pt efficientdual`
+
+`python eval.py  --val_set /hdd/tam/df_in_the_wild/image/test/ --adj_brightness 1.0 --adj_contrast 1.5 --batch_size 32 --image_size 128 --workers 16 --checkpoint capsule_128_df_inthewild_checkpoint/ --resume 4 capsule`
+
+``
 
 Eval for feature model
 

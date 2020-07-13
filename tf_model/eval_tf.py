@@ -2,22 +2,37 @@
 import numpy as np
 from sklearn.utils import class_weight
 from keras.preprocessing.image import ImageDataGenerator
+import torchtoolbox.transform as transforms
+
 import keras
 import os
 from PIL import ImageEnhance,Image
 import tensorflow as tf
 def image_contrast_adjusment(img):
-    # print(img.shape)
-    # print(type(img))
+    # print(img.shape)   # 256,256,3
+    # print(type(img))   # <class 'numpy.ndarray'>
     # print(img)
-    # print(np.max(img))
+    # # [[[128. 118. 119.]
+    # #   [127. 117. 118.]
+    # #  [127. 117. 118.]
+    # print(np.max(img))   # 255.0
+    #
     # print(img.astype(int).astype("int16"))
+    # # [[[128 118 119]
+    # #   [127 117 118]
+    # #  [127 117 118]
+
     img = img.astype("uint8")
     # print(img)
-    # print(np.min(img))
-    # print(np.max(img))
+    # print(np.min(img))  # 0
+    # print(np.max(img))  # 255
     contrast = ImageEnhance.Contrast(Image.fromarray(img))
-    img = contrast.enhance(2.0)
+    img = contrast.enhance(1.0)
+    img = transforms.Compose([transforms.RandomGaussianNoise(p=0.0)
+                        ])(img)
+    # print(img)  # <PIL.Image.Image image mode=RGB size=256x256 at 0x1DB637F0438>
+    # print(np.min(img))  #0
+    # print(np.max(img))  # 255
     return np.array(img,dtype='float64')
 def get_generate(val_set,image_size,batch_size,adj_brightness=1.0,adj_contrast=1.0):
     dataGenerator = ImageDataGenerator(rescale=1./255,
@@ -88,3 +103,7 @@ def eval_gan(val_set ='../../extract_raw_img',checkpoint="checkpoint",total_val_
                           total_val_img=total_val_img,show_time=show_time)
 
     tfutil.call_func_by_name(**app)
+
+if __name__ == "__main__":
+    generator_val = get_generate("../../data/extract_raw_img", 256, 1)
+    print(generator_val.__next__())

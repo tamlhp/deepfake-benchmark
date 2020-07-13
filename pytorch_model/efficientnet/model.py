@@ -255,8 +255,8 @@ class EfficientDual(nn.Module):
         return x
 
 if __name__ == "__main__":
-    model = EfficientNet.from_pretrained('efficientnet-b1', num_classes=1,in_channels = 3)
-    # model = EfficientDual()
+    # model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 3)
+    model = EfficientDual()
     import torchsummary
     # torchsummary.summary(model,(3,128,128))
     # model2 = nn.Sequential(*(list(model.children())[:-3]))
@@ -267,5 +267,5 @@ if __name__ == "__main__":
     # model._dropout = Identity()
     # model._fc = Identity()
     # print(model)
-    torchsummary.summary(model, (3, 128, 128))
+    torchsummary.summary(model, [(3, 128, 128),(1, 128, 128)])
     # torchsummary.summary(model, (3, 128, 128))

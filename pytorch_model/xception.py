@@ -82,6 +82,6 @@ if __name__ == "__main__":
     from torchsummary import summary
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
-    model = xception2().to(device)
+    model = xception().to(device)
 
     summary(model,(3,128,128))

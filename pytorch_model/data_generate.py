@@ -1,6 +1,6 @@
 import torch
-import torchvision.transforms as transforms_ori
-import torchtoolbox.transform as transforms
+import torchvision.transforms as transforms
+# import torchtoolbox.transform as transforms
 
 import torchvision.datasets as datasets
 import glob
@@ -30,6 +30,18 @@ def make_weights_for_balanced_classes(images, nclasses):
     for idx, val in enumerate(images):
         weight[idx] = weight_per_class[val[1]]
     return weight
+
+
+class AddGaussianNoise(object):
+    def __init__(self, mean=0., std=1.):
+        self.std = std
+        self.mean = mean
+
+    def __call__(self, tensor):
+        return tensor + torch.randn(tensor.size()) * self.std + self.mean
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 
 def get_generate(train_set,val_set,image_size,batch_size,num_workers):
@@ -76,8 +88,8 @@ def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.
                                         # transforms.Resize((int(image_size/2), int(image_size/2))),
                                         # transforms.Resize((image_size, image_size)),
                                         # transforms.RandomGaussianNoise(p=0.0),
-                                        transforms.Lambda(lambda img :transforms_ori.functional.adjust_brightness(img,adj_brightness)),
-                                        transforms.Lambda(lambda img :transforms_ori.functional.adjust_contrast(img,adj_contrast)),
+                                        transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
+                                        transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225])
@@ -201,7 +213,8 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
 
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
+                                                                std=[0.229, 0.224, 0.225]),
+                                        AddGaussianNoise(0,10)
 
                                            ])
     transform_fft = transforms.Compose([transforms.ToTensor()])

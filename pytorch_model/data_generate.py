@@ -88,6 +88,7 @@ def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.
                                         # transforms.Resize((int(image_size/2), int(image_size/2))),
                                         # transforms.Resize((image_size, image_size)),
                                         # transforms.RandomGaussianNoise(p=0.0),
+                                        AddGaussianNoise(0, 10),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
@@ -214,7 +215,7 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225]),
-                                        AddGaussianNoise(0,10)
+
 
                                            ])
     transform_fft = transforms.Compose([transforms.ToTensor()])

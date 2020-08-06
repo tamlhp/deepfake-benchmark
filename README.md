@@ -1,11 +1,11 @@
-# dfd_benchmark
-Deep Fake Detection Benchmark
+# A dual benchmarking study of visual forgery and visual forensics techniques
+In the recent years, the significant emerge of image forgery have reached to such level that human cannot tell apart the fraud. The high quality and straightforward usage of these generative model poses a great threat to information security with fake news and malicious applications, e.g. defamation or blackmailing of celebrities, impersonation of politicians in political warfare, spreading of incorrect rumors for attracting views. As a result, a rich body of fake image detection techniques has been proposed in an attempt to stop this dangerous trend. In this paper, we present a benchmark that provides an in-depth insight of fake image creation and detection techniques in a comprehensive and empirical manner. Specifically, we develop an independent framework that integrates state-of-the-arts fake image generators and detectors, then measure the performance of these techniques with various settings. We also perform an exhaustive analysis of benchmark results to discover the characteristics of the techniques, which serves as a comparative references for this never-ending war between measures and countermeasures.
 
-# Enviroment
+## Enviroment
 ` pip install -r requirement.txt` 
 
 
-# Preprocess data
+## Preprocess data
 Extract fame from video and detect face in frame to save *.jpg image.
 
 `python extrac_face.py --inp in/ --output out/ --worker 1 --duration 4`
@@ -18,13 +18,13 @@ Extract fame from video and detect face in frame to save *.jpg image.
 
 `--duration` : number of frame skip each extract time
 
-#  Train
+##  Train
 
 `python train.py --train_set data/Celeb-DF/image/train/ --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint resnext50_celeb_checkpoint/ --gpu_id 0 --resume model_pytorch_1.pt --print_every 10000000 resnext50`
 
 
 
-# References
+## References
 [1] https://github.com/nii-yamagishilab/Capsule-Forensics-v2
 
 [2] Nguyen, H. H., Yamagishi, J., & Echizen, I. (2019). Capsule-forensics: Using Capsule Networks to Detect Forged Images and Videos. ICASSP, IEEE International Conference on Acoustics, Speech and Signal Processing - Proceedings, 2019-May, 2307–2311.
@@ -53,4 +53,5 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 [13] Neves, J. C., Tolosana, R., Vera-Rodriguez, R., Lopes, V., & Proença, H. (2019). Real or Fake? Spoofing State-Of-The-Art Face Synthesis Detection Systems. 13(9), 1–8.
 
 [14] https://github.com/danmohaha/DSP-FWA
+
 

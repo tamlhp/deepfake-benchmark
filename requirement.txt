@@ -1,0 +1,13 @@
+numpy
+scikit-learn
+tqdm
+pickle-mixin
+matplotlib
+pandas
+Pillow
+pytorch
+torchvision
+tensorflow==1.14
+keras
+pytorchcv
+facenet-pytorch

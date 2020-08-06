@@ -124,6 +124,16 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
+*.pt
+*.pth
 # Pyre type checker
 .pyre/
+.idea/
+checkpoint/
+*checkpoint/
+events.out.tf*
+*tfrecords*
+*labels
+*.png
+*.jpg
+*.jpeg

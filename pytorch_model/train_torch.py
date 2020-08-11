@@ -332,6 +332,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
               adj_brightness=1.0, adj_contrast=1.0):
     patience = es_patience
     best_accuracy = 0.0
+    accuracy_score__ = -1.0
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
         os.makedirs(checkpoint)

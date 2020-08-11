@@ -131,6 +131,7 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
             #                     print("logps  : ",logps)
             equals = labels == (logps > 0.5)
             pred_label = (logps_cpu > 0.5)
+            #pred_label = 1 - pred_label
             y_pred_label.extend(pred_label)
             #                     print("equals   ",equals)
             accuracy += torch.mean(equals.type(torch.FloatTensor)).item()

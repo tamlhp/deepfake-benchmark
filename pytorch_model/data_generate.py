@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image,ImageEnhance
 import cv2
-from albumentations.augmentations.transforms import ImageCompression, GaussNoise,GaussianBlur,Resize,HorizontalFlip,Rotate,ShiftScaleRotate
+from albumentations.augmentations.transforms import ImageCompression
 from albumentations import Compose,Normalize
 from albumentations import pytorch as AT
 
@@ -82,18 +82,28 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
 
     return dataloader_train,dataloader_val
-
+def get_jpeg_augmentation():
+    train_transform = [
+        ImageCompression(quality_lower=50, quality_upper=51, p=1.0)
+    ]
+    transforms =  Compose(train_transform)
+    return lambda img:transforms(image=np.array(img))['image']
 def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
-    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+    transform_fwd = transforms.Compose([
+                                        #transforms.Resize((32,32)),
+                                        transforms.Resize((image_size,image_size)),
                                         # transforms.Resize((int(image_size/2), int(image_size/2))),
                                         # transforms.Resize((image_size, image_size)),
                                         # transforms.RandomGaussianNoise(p=0.0),
-                                        AddGaussianNoise(0, 10),
-                                        transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
-                                        transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
+                                        #AddGaussianNoise(0, 0.05),
+                                        # transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
+                                        # transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
+                                        # transforms.Lambda(get_jpeg_augmentation()),
                                            transforms.ToTensor(),
+                                           # AddGaussianNoise(0, 0.15),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
+                                                                std=[0.229, 0.224, 0.225]),
+                                           #transforms.RandomErasing(p=1.0,scale=(0.5,0.5001),ratio=(1,1.0001))
                                            ])
 
     dataset_val = datasets.ImageFolder(val_set,

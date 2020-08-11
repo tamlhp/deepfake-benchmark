@@ -239,7 +239,8 @@ class EfficientDual(nn.Module):
         self.efficient1 = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 1)
         self.efficient1._dropout = Identity()
         self.efficient1._fc = Identity()
-        self.fc = nn.Linear(1280+1280,1)
+        # self.fc = nn.Linear(1280+1280,1)
+        self.fc = nn.Linear(1280,1)
         self.flatten = nn.Flatten()
         self.sigmoid = nn.Sigmoid()
     def forward(self, input,input_fft):
@@ -249,7 +250,8 @@ class EfficientDual(nn.Module):
         # x1 = self.flatten(x1)
         # print(x3)
         # print(x1)
-        x = torch.cat([x3,x1],1)
+        # x = torch.cat([x3,x1],1)
+        x = x3+x1
         x = self.fc(x)
         x = self.sigmoid(x)
         return x

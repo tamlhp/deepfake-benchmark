@@ -1,0 +1,9 @@
+python eval.py --val_set /hdd/tam/Celeb-DF/image/test/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_celeb_checkpoint/ --resume model_pytorch_0.pt --gpu_id 0 efficient --type 0
+python eval.py --val_set /hdd/tam/UADFV/image/test/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_uadfv_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_df/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_ff_df_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_f2f/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_ff_f2f_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py --val_set /hdd/tam/extend_data/images/test_fs/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_ff_fs_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py  --val_set /hdd/tam/ff/images/test_nt/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efficient0_ff_nt_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py  --val_set /hdd/tam/ff/images/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efficient0_ff_full_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py --val_set /hdd/tam/df_timit/image/test/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efficient0_df_timit_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0
+python eval.py --val_set /hdd/tam/kaggle/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efficient0_dfdc_checkpoint/ --gpu_id 0 --resume model_pytorch_0.pt  efficient --type 0

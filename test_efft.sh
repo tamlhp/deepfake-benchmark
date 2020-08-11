@@ -1,0 +1,9 @@
+python eval.py --val_set /hdd/tam/Celeb-DF/image/test/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efft0_celeb_checkpoint/ --gpu_id 1 --resume model_fft_0.pt efft --type 0
+python eval.py --val_set /hdd/tam/UADFV/image/test/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efft0_uadfv_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_df/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efft0_ff_df_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_f2f/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efft0_ff_f2f_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_fs/ --batch_size 32  --image_size 256 --workers 16 --checkpoint efft0_ff_fs_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/ff/images/test_nt/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efft0_ff_nt_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/ff/images/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efft0_ff_full_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0
+python eval.py --val_set /hdd/tam/df_timit/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efft0_df_timit_checkpoint/ --gpu_id 1 --resume model_fft_0.pt efft --type 0
+python eval.py --val_set /hdd/tam/kaggle/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint efft0_dfdc_checkpoint/ --gpu_id 1 --resume model_fft_0.pt  efft --type 0

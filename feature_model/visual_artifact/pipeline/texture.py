@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-import pipeline_utils
-import face_utils
-import laws_texture
+import feature_model.visual_artifact.pipeline.pipeline_utils as pipeline_utils
+import feature_model.visual_artifact.pipeline.face_utils as face_utils
+import feature_model.visual_artifact.pipeline.laws_texture as laws_texture
 
 
 # laws texture
@@ -18,7 +18,7 @@ def extract_features_mask(img, mask):
     law_energy = laws_texture.compute_energy(law_images, 10)
 
     energy_features_list = []
-    for type, energy in law_energy.iteritems():
+    for type, energy in law_energy.items():
         # extract features for mask
         energy_masked = energy[np.where(mask != 0)]
         energy_feature = np.mean(energy_masked, dtype=np.float32)
@@ -174,7 +174,7 @@ def process_faces(classifiers, face_crop_list, landmarks_list, pipeline, scale=2
             features_0 = extract_features_nose(landmarks, face_crop, scale=scale)
             features_1 = extract_features_faceborder(landmarks, face_crop, scale=scale)
         else:
-            print 'Unknown pipeline argument.'
+            print ('Unknown pipeline argument.')
             return 0.0, None, False
 
         if features_0 is not None and features_1 is not None:

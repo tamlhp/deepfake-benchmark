@@ -63,8 +63,9 @@ class VggExtractor(nn.Module):
         super(VggExtractor, self).__init__()
 
         self.vgg_1 = self.Vgg(models.vgg19(pretrained=True), 0, 18)
-        self.vgg_1.eval()
-
+        # self.vgg_1.eval()
+        for param in self.vgg_1.parameters():
+            param.requires_grad = True
     def Vgg(self, vgg, begin, end):
         features = nn.Sequential(*list(vgg.features.children())[begin:(end + 1)])
         return features
@@ -110,6 +111,7 @@ class FeatureExtractor(nn.Module):
 
 class RoutingLayer(nn.Module):
     def __init__(self,gpu_id,  num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
+        # gpu_id = 0, num_input_capsules = 10, num_output_capsules = 2, data_in = 8, data_out = 4, num_iterations = 2)
         super(RoutingLayer, self).__init__()
 
         self.gpu_id = gpu_id
@@ -136,7 +138,7 @@ class RoutingLayer(nn.Module):
             route_weights = self.route_weights
 
         priors = route_weights[:, None, :, :, :] @ x[None, :, :, :, None]
-
+        # print(priors.shape)     # torch.Size([2, 2, 10, 4, 1])
         # route_weights [out_caps , 1 , in_caps , data_out , data_in]
         # x             [   1     , b , in_caps , data_in ,    1    ]
         # priors        [out_caps , b , in_caps , data_out,    1    ]
@@ -205,10 +207,11 @@ class CapsuleNet(nn.Module):
 
         classes = F.softmax(z, dim=-1)
 
-        class_ = classes.detach()
-        class_ = class_.mean(dim=1)
-
-        return classes, class_
+        class_ = classes
+        class_ = class_.mean(dim=1)[0][1:].unsqueeze_(1)
+        print(class_)
+        # return classes, class_
+        return class_
 
 
 
@@ -264,16 +267,21 @@ if __name__ == "__main__":
     #     torch.cuda.manual_seed_all(opt.manualSeed)
     #     cudnn.benchmark = True
 
-    if opt.resume > 0:
-        text_writer = open(os.path.join(opt.outf, 'train.csv'), 'a')
-    else:
-        text_writer = open(os.path.join(opt.outf, 'train.csv'), 'w')
+    # if opt.resume > 0:
+    #     text_writer = open(os.path.join(opt.outf, 'train.csv'), 'a')
+    # else:
+    #     text_writer = open(os.path.join(opt.outf, 'train.csv'), 'w')
 
 
     vgg_ext = VggExtractor()
     capnet = CapsuleNet(2)
     capsule_loss = CapsuleLoss()
+    from torchsummary import summary
 
+    summary(vgg_ext, (3, 256, 256))
+    summary(capnet, (256, 32, 32))
+
+    exit(0)
     optimizer = Adam(capnet.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 
     if opt.resume > 0:

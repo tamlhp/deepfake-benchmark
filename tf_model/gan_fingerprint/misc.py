@@ -19,6 +19,7 @@ import PIL.Image
 from tf_model.gan_fingerprint import config
 from tf_model.gan_fingerprint import dataset
 from tf_model.gan_fingerprint import legacy
+import torchtoolbox.transform.functional as F
 
 #----------------------------------------------------------------------------
 # Convenience wrappers for pickle that are able to load data produced by
@@ -36,6 +37,16 @@ def save_pkl(obj, filename):
 # Image utils.
 
 def adjust_dynamic_range(data, drange_in, drange_out):
+    data2 = []
+
+    for i in data:
+        img_temp = F.adjust_brightness(i, 1.0)
+    # print(img_temp.shape)
+        img_temp = np.transpose(F.adjust_contrast(np.transpose(img_temp, (1, 2, 0)), 1.0), (2, 0, 1))
+        data2.append(img_temp)
+        data = np.array(data2)
+        # print(data)
+
     if drange_in != drange_out:
         scale = (np.float32(drange_out[1]) - np.float32(drange_out[0])) / (np.float32(drange_in[1]) - np.float32(drange_in[0]))
         bias = (np.float32(drange_out[0]) - np.float32(drange_in[0]) * scale)

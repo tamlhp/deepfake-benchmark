@@ -82,6 +82,12 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
 
     return dataloader_train,dataloader_val
+def get_jpeg_augmentation():
+    train_transform = [
+        ImageCompression(quality_lower=50, quality_upper=51, p=1.0)
+    ]
+    transforms =  Compose(train_transform)
+    return lambda img:transforms(image=np.array(img))['image']
 
 def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
@@ -94,7 +100,8 @@ def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.
                                         transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
+                                                                std=[0.229, 0.224, 0.225]),
+                                           #transforms.RandomErasing(p=1.0,scale=(0.5,0.5001),ratio=(1,1.0001))
                                            ])
 
     dataset_val = datasets.ImageFolder(val_set,
@@ -291,7 +298,6 @@ class ImageGeneratorFFT(Dataset):
         if self.shuffle == True:
             np.random.shuffle(self.data_path)
     def __getitem__(self, index):
-
         img = cv2.imread(self.data_path[index],0)
         img = cv2.resize(img, (self.image_size, self.image_size))
         if self.adj_brightness is not None and self.adj_contrast is not None:

@@ -3,6 +3,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+#import os, logging
+
+#os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+#import tensorflow as tf
+#tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 import argparse
 import torch.nn as nn

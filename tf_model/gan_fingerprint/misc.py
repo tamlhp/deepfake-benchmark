@@ -19,6 +19,10 @@ import PIL.Image
 from tf_model.gan_fingerprint import config
 from tf_model.gan_fingerprint import dataset
 from tf_model.gan_fingerprint import legacy
+import torchtoolbox.transform.functional as F
+import torchtoolbox.transform as transforms
+import cv2
+from albumentations.augmentations.functional import image_compression
 
 #----------------------------------------------------------------------------
 # Convenience wrappers for pickle that are able to load data produced by
@@ -35,7 +39,55 @@ def save_pkl(obj, filename):
 #----------------------------------------------------------------------------
 # Image utils.
 
+def get_random_eraser(p=1.0, s_l=0.5, s_h=0.50001, r_1=1.0, r_2=1.000001, v=0, pixel_level=False):
+    def eraser(input_img):
+        img_h, img_w, img_c = input_img.shape
+        p_1 = np.random.rand()
+
+        if p_1 > p:
+            return input_img
+
+        while True:
+            s = np.random.uniform(s_l, s_h) * img_h * img_w
+            r = np.random.uniform(r_1, r_2)
+            w = int(np.sqrt(s / r))
+            h = int(np.sqrt(s * r))
+            left = np.random.randint(0, img_w)
+            top = np.random.randint(0, img_h)
+
+            if left + w <= img_w and top + h <= img_h:
+                break
+
+
+        input_img[top:top + h, left:left + w, :] = v
+
+        return input_img
+
+    return eraser
+
+
+
+
 def adjust_dynamic_range(data, drange_in, drange_out):
+    
+    data2 = []
+
+    for i in data:
+        img_temp = F.adjust_brightness(i, 1.0)
+    # print(img_temp.shape)
+        #img_temp = np.transpose(F.adjust_contrast(np.transpose(img_temp, (1, 2, 0)), 1.0), (2, 0, 1))
+        #img_temp  = transforms.RandomGaussianNoise(p=0.0,mean=0,std=3000)(img_temp)
+        #img_temp = np.transpose(img_temp, (1, 2, 0))
+        #img_temp = get_random_eraser()(img_temp)
+        #img_temp = np.transpose(img_temp, (2,0,1))
+        # img_temp = np.transpose(cv2.resize(np.transpose(img_temp, (1, 2, 0)),(16,16)), (2, 0, 1))
+        # img_temp = np.transpose(cv2.resize(np.transpose(img_temp, (1, 2, 0)),(256,256)), (2, 0, 1))
+
+        img_temp =  np.transpose(image_compression(np.transpose(img_temp, (1, 2, 0)),50 , image_type=".jpg"), (2, 0, 1))
+        data2.append(img_temp)
+    data = np.array(data2)
+    #print(data)
+    
     if drange_in != drange_out:
         scale = (np.float32(drange_out[1]) - np.float32(drange_out[0])) / (np.float32(drange_in[1]) - np.float32(drange_in[0]))
         bias = (np.float32(drange_out[0]) - np.float32(drange_in[0]) * scale)

@@ -186,3 +186,7 @@ class MesoInception4():
         y = Dense(1, activation='sigmoid')(y)
 
         return KerasModel(inputs=x, outputs=y)
+
+if __name__ == "__main__":
+    model = Meso4().model
+    model.summary()

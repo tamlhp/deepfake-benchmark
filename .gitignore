@@ -134,6 +134,17 @@ checkpoint/
 events.out.tf*
 *tfrecords*
 *labels
+*.png
+*.jpg
+*.jpeg
+preprocess_data/test_fft.py
+preprocess_data/test_fft2.py
+test_*.py
+output/*
+generated/*
+shape_predictor_68_face_landmarks.dat
+*.pkl
+
 
 #*.png
 #*.jpg

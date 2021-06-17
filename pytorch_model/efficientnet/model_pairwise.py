@@ -16,8 +16,8 @@ class EfficientPairwise(nn.Module):
         return output
 
     def forward(self, input1, input2):
-        output1,_ = self.forward_once(input1)
-        output2,_ = self.forward_once(input2)
+        output1 = self.forward_once(input1)
+        output2 = self.forward_once(input2)
 
         return output1, output2
 
@@ -27,7 +27,7 @@ class EfficientFull(nn.Module):
         self.efficient = EfficientNet.from_pretrained('efficientnet-b3', num_classes=1)
         self.efficient._dropout = Identity()
         self.efficient._fc = Identity()
-        for param in self.cffn.parameters():
+        for param in self.efficient.parameters():
             param.requires_grad = False
         self.classify = nn.Linear(1536,1)
         self.sigmoid = nn.Sigmoid()

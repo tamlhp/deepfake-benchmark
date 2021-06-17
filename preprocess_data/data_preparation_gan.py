@@ -13,6 +13,10 @@ import tensorflow as tf
 import PIL.Image
 
 import scipy.ndimage
+from PIL import ImageEnhance,Image
+from PIL import ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 #----------------------------------------------------------------------------
 
@@ -126,6 +130,11 @@ def data_preparation(image_dir, tfrecord_dir, resolution=128, shuffle=1, export_
                 img = img[:, :, np.newaxis] # HW => HWC
             img = PIL.Image.fromarray(img, 'RGB')
             img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
+
+            contrast = ImageEnhance.Contrast(img)
+            img = contrast.enhance(1.0)
+            brightness = ImageEnhance.Brightness(img)
+            img = brightness.enhance(1.0)
             img = np.asarray(img)
             img = img.transpose(2, 0, 1) # HWC => CHW
             tfr.add_image(img)
@@ -154,4 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('--export_labels', type=int, default=1) # Export image source labels?
     parser.add_argument('--percentage_samples', type=int, default=100) # The percentage of images used for data preparation
     args = parser.parse_args()
+    import time
+    begin = time.time()
     data_preparation(args.in_dir, args.out_dir, args.resolution, args.shuffle, args.export_labels, args.percentage_samples)
+    print("Time : ", time.time()-begin)

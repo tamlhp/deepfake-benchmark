@@ -12,3 +12,4 @@ keras
 pytorchcv
 facenet-pytorch
 albumentations
+einops

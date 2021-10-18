@@ -1,0 +1,1 @@
+python train.py --train_set /hdd/tam/dfd_benmark/extend_data_train/all/train/ --val_set /hdd/tam/dfd_benmark/extend_data_train/all/test/ --batch_size 32 --niter 10 --image_size 256 --workers 16 --checkpoint wavelet_checkpoint/ --gpu_id 1 --print_every 1250000 wavelet

@@ -58,6 +58,9 @@ def parse_args():
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
+    parser_wavelet = subparsers.add_parser('wavelet', help='Wavelet Net')
+    parser_vit = subparsers.add_parser('vit', help='ViT transformer Net')
+
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
     parser_efficientdual = subparsers.add_parser('efficientdual', help='Efficient Net')
@@ -309,6 +312,39 @@ if __name__ == "__main__":
         model = nn.Sequential(model, nn.Sigmoid())
         criterion = get_criterion_torch(args.loss)
         train_4dfftcnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "wavelet":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.wavelet_model.model_wavelet import WaveletModel
+
+        model = WaveletModel(in_channel=3)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "vit":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.transformer.model_vit import ViT
+
+        model = ViT(
+            image_size=args.image_size,
+            patch_size=64,
+            num_classes=1,
+            dim=512,
+            depth=6,
+            heads=16,
+            mlp_dim=1024,
+            dropout=0.1,
+            emb_dropout=0.1
+        )
+        model = nn.Sequential(model, nn.Sigmoid())
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \
                   batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
                   epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)

@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .utils import (
+from pytorch_model.efficientnet.utils import (
     round_filters,
     round_repeats,
     drop_connect,
@@ -239,13 +239,8 @@ class EfficientDual(nn.Module):
         self.efficient1 = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 1)
         self.efficient1._dropout = Identity()
         self.efficient1._fc = Identity()
-<<<<<<< HEAD
         self.fc = nn.Linear(1280+1280,1)
-=======
-        # self.fc = nn.Linear(1280+1280,1)
-        self.fc = nn.Linear(1280,1)
->>>>>>> temp
-        self.flatten = nn.Flatten()
+
         self.sigmoid = nn.Sigmoid()
     def forward(self, input,input_fft):
         x3 = self.efficient3(input)
@@ -254,26 +249,21 @@ class EfficientDual(nn.Module):
         # x1 = self.flatten(x1)
         # print(x3)
         # print(x1)
-<<<<<<< HEAD
         x = torch.cat([x3,x1],1)
-=======
         # x = torch.cat([x3,x1],1)
-        x = x3+x1
->>>>>>> temp
+        # x = x3+x1
+        # print(x.size())
         x = self.fc(x)
         x = self.sigmoid(x)
         return x
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 1)
+    # model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 1)
     # model = EfficientDual()
-=======
     # model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=1,in_channels = 3)
     model = EfficientDual()
->>>>>>> temp
     import torchsummary
-    torchsummary.summary(model,(1,128,128))
+    # torchsummary.summary(model,(1,128,128))
     # model2 = nn.Sequential(*(list(model.children())[:-3]))
     # model2 = nn.Sequential(nn.Conv2d(4, 3, kernel_size=1, bias=False),
     #                        model)

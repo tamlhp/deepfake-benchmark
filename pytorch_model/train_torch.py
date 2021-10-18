@@ -1,6 +1,7 @@
 import torch
 import random
 import os
+import sys
 # import torchvision.transforms as transforms
 from torch.optim import Adam
 # import torchvision.datasets as datasets
@@ -15,9 +16,10 @@ from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss
 from tqdm import tqdm
 from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_dualfft,get_generate_fft,get_generate_4dfft
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torchsummary
 
 
-es_patience = 3  # Early Stopping patience - for how many epochs with no improvements to wait
+es_patience = 10  # Early Stopping patience - for how many epochs with no improvements to wait
 best_accuracy = 0.0
 
 def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume="",\
@@ -260,7 +262,12 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
 
     # train_losses, test_losses = [], []
     # import time
-    text_writer = open(os.path.join(checkpoint, 'train.csv'), 'a')
+    text_writer = open(os.path.join(checkpoint, 'train.csv'), 'w')
+    sys.stdout = open(os.path.join(checkpoint, 'model.txt'), "w")
+    torchsummary.summary(model, (3, image_size, image_size))
+    sys.stdout.close()
+    sys.stdout = sys.__stdout__
+
     model.train()
     steps =0
     running_loss = 0
@@ -275,6 +282,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
             # inputs = transforms.functional.adjust_contrast(inputs,adj_contrast)
             optimizer.zero_grad()
             logps = model.forward(inputs)
+            # print(labels)
+            # print(logps)
             logps = logps.squeeze()
             loss = criterion(logps, labels)
             #         loss = F.binary_cross_entropy_with_logits(logps, labels)

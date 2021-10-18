@@ -66,6 +66,12 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
                                                                 std=[0.229, 0.224, 0.225])
 
                                            ])
+    transform_fwd_test = transforms.Compose([transforms.Resize((image_size, image_size)),
+                                        transforms.ToTensor(),
+                                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                             std=[0.229, 0.224, 0.225])
+
+                                        ])
     dataset_train = datasets.ImageFolder(train_set,
                                       transform=transform_fwd)
     assert dataset_train
@@ -77,7 +83,7 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
                                               num_workers=num_workers)
 
     dataset_val = datasets.ImageFolder(val_set,
-                                     transform=transform_fwd)
+                                     transform=transform_fwd_test)
     assert dataset_val
     dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, num_workers=num_workers)
 

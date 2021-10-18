@@ -10,12 +10,15 @@ import torch.nn as nn
 import time
 from tqdm import tqdm
 from sklearn.metrics import recall_score,accuracy_score,precision_score,log_loss,classification_report
-from pytorch_model.data_generate import get_val_generate
+from pytorch_model.data_generate import get_val_generate,get_val_generate_dualfft,get_val_generate_fft,get_val_generate_4dfft
+import torchvision.transforms as transforms
 
 
 
 
-def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False):
+def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=256,\
+                 batch_size=16,num_workers=1,checkpoint="checkpoint",show_time=False, \
+                 adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
@@ -28,7 +31,7 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
 
 
-    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     tol_label = np.array([], dtype=np.float)
     tol_pred = np.array([], dtype=np.float)
@@ -87,16 +90,18 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     print(classification_report(y_label,y_pred_label))
     return
 
-def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False):
+def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+             batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+             adj_brightness=1.0, adj_contrast=1.0):
 
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
 
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume),map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
 
-    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers)
+    dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
     # train_losses, test_losses = [], []
     # import time
@@ -112,6 +117,175 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",bat
             # print(labels)
             y_label.extend(labels.cpu().numpy().astype(np.float64))
             inputs, labels = inputs.to(device), labels.float().to(device)
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
+            # print(logps)
+            logps_cpu = logps.cpu().numpy()
+            y_pred.extend(logps_cpu.astype(np.float64))
+            if show_time:
+                print("Time : ", time.time() - begin)
+            batch_loss = criterion(logps, labels)
+            #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+            test_loss += batch_loss.item()
+            #                     print("labels : ",labels)
+            #                     print("logps  : ",logps)
+            equals = labels == (logps > 0.5)
+            pred_label = (logps_cpu > 0.5)
+            #pred_label = 1 - pred_label
+            y_pred_label.extend(pred_label)
+            #                     print("equals   ",equals)
+            accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+    #                 train_losses.append(running_loss/len(trainloader))
+    #             test_losses.append(test_loss/len(testloader))
+    print(f"Test loss: {test_loss/len(dataloader_val):.3f}.. \n" +
+          f"Test accuracy: {accuracy/len(dataloader_val):.3f}\n" +
+          f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
+
+    return
+
+def eval_dualcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                 batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                 adj_brightness=1.0, adj_contrast=1.0):
+
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    model = model.to(device)
+    criterion = nn.BCELoss().to(device)
+
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+
+    dataloader_val = get_val_generate_dualfft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+
+    # train_losses, test_losses = [], []
+    # import time
+    test_loss = 0
+    accuracy = 0
+    model.eval()
+    y_label = []
+    y_pred = []
+    y_pred_label = []
+    with torch.no_grad():
+        for inputs,img_fft, labels in tqdm(dataloader_val):
+            begin = time.time()
+            # print(labels)
+            y_label.extend(labels.cpu().numpy().astype(np.float64))
+            inputs,img_fft, labels = inputs.float().to(device),img_fft.float().to(device), labels.float().to(device)
+            logps = model.forward(inputs,img_fft)
+            logps = logps.squeeze()
+            # print(logps)
+            logps_cpu = logps.cpu().numpy()
+            y_pred.extend(logps_cpu.astype(np.float64))
+            if show_time:
+                print("Time : ", time.time() - begin)
+            batch_loss = criterion(logps, labels)
+            #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+            test_loss += batch_loss.item()
+            #                     print("labels : ",labels)
+            #                     print("logps  : ",logps)
+            equals = labels == (logps > 0.5)
+            pred_label = (logps_cpu > 0.5)
+            y_pred_label.extend(pred_label)
+            #                     print("equals   ",equals)
+            accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+    #                 train_losses.append(running_loss/len(trainloader))
+    #             test_losses.append(test_loss/len(testloader))
+    print(f"Test loss: {test_loss/len(dataloader_val):.3f}.. \n" +
+          f"Test accuracy: {accuracy/len(dataloader_val):.3f}\n" +
+          f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
+
+    return
+
+def eval_fftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                adj_brightness=1.0, adj_contrast=1.0):
+
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    model = model.to(device)
+    criterion = nn.BCELoss().to(device)
+
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+
+    dataloader_val = get_val_generate_fft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+
+    # train_losses, test_losses = [], []
+    # import time
+    test_loss = 0
+    accuracy = 0
+    model.eval()
+    y_label = []
+    y_pred = []
+    y_pred_label = []
+    with torch.no_grad():
+        for inputs, labels in tqdm(dataloader_val):
+            begin = time.time()
+            # print(labels)
+            y_label.extend(labels.cpu().numpy().astype(np.float64))
+            inputs, labels = inputs.float().to(device), labels.float().to(device)
+            logps = model.forward(inputs)
+            logps = logps.squeeze()
+            # print(logps)
+            logps_cpu = logps.cpu().numpy()
+            y_pred.extend(logps_cpu.astype(np.float64))
+            if show_time:
+                print("Time : ", time.time() - begin)
+            batch_loss = criterion(logps, labels)
+            #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+            test_loss += batch_loss.item()
+            #                     print("labels : ",labels)
+            #                     print("logps  : ",logps)
+            equals = labels == (logps > 0.5)
+            pred_label = (logps_cpu > 0.5)
+            y_pred_label.extend(pred_label)
+            #                     print("equals   ",equals)
+            accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+    #                 train_losses.append(running_loss/len(trainloader))
+    #             test_losses.append(test_loss/len(testloader))
+    print(f"Test loss: {test_loss/len(dataloader_val):.3f}.. \n" +
+          f"Test accuracy: {accuracy/len(dataloader_val):.3f}\n" +
+          f"Test log_loss: {log_loss(y_label,y_pred,labels=np.array([0.,1.])):.3f}\n" +
+          f"Test accuracy_score: {accuracy_score(y_label,y_pred_label):.3f}\n" +
+          f"Test precision_score: {precision_score(y_label,y_pred_label):.3f}\n" +
+          f"Test recall: {recall_score(y_label,y_pred_label):.3f}\n")
+    print(classification_report(y_label,y_pred_label))
+
+    return
+
+def eval_4dfftcnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
+                  batch_size=16,num_workers=8,checkpoint="checkpoint",show_time=False, \
+                  adj_brightness=1.0, adj_contrast=1.0):
+
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          else "cpu")
+    model = model.to(device)
+    criterion = nn.BCELoss().to(device)
+
+    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+
+    dataloader_val = get_val_generate_4dfft(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+
+    # train_losses, test_losses = [], []
+    # import time
+    test_loss = 0
+    accuracy = 0
+    model.eval()
+    y_label = []
+    y_pred = []
+    y_pred_label = []
+    with torch.no_grad():
+        for inputs, labels in tqdm(dataloader_val):
+            begin = time.time()
+            # print(labels)
+            y_label.extend(labels.cpu().numpy().astype(np.float64))
+            inputs, labels = inputs.float().to(device), labels.float().to(device)
             logps = model.forward(inputs)
             logps = logps.squeeze()
             # print(logps)

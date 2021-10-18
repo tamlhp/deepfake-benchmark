@@ -43,7 +43,6 @@ Preprocess for spectrum
 
 
 #  Train
-`python train.py --train_set data/Celeb-DF/image/train/ --val_set data/Celeb-DF/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint resnext50_celeb_checkpoint/ --gpu_id 0 --resume model_pytorch_1.pt --print_every 10000000 resnext50`
 
 Train for cnn 
 

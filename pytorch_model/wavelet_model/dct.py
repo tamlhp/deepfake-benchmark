@@ -197,11 +197,28 @@ def apply_linear_3d(x, linear_layer):
     return X3.transpose(-1, -3).transpose(-1, -2)
 
 if __name__ == '__main__':
-    x = torch.Tensor(1000,4096)
-    x.normal_(0,1)
-    linear_dct = LinearDCT(4096, 'dct')
-    error = torch.abs(dct(x) - linear_dct(x))
-    assert error.max() < 1e-3, (error, error.max())
-    linear_idct = LinearDCT(4096, 'idct')
-    error = torch.abs(idct(x) - linear_idct(x))
-    assert error.max() < 1e-3, (error, error.max())
+    # x = torch.Tensor(1000,4096)
+    # x.normal_(0,1)
+    # linear_dct = LinearDCT(4096, 'dct')
+    # error = torch.abs(dct(x) - linear_dct(x))
+    # assert error.max() < 1e-3, (error, error.max())
+    # linear_idct = LinearDCT(4096, 'idct')
+    # error = torch.abs(idct(x) - linear_idct(x))
+    # assert error.max() < 1e-3, (error, error.max())
+    import cv2
+    im = cv2.imread("/home/dell/Downloads/IMG_0192.jpeg",cv2.IMREAD_GRAYSCALE)/255.0
+    im_t = torch.tensor(im)
+    # print(im_t)
+    # im_t = im_t.permute(2,0,1)
+    # im_four = dct_2d(im_t)
+    im_four = torch.fft.rfft2(im_t)
+    print(im_four)
+    # ft_full = np.zeros_like(image, dtype=np.complex128)
+
+    # im_four = im_four.permute(1,2,0)
+    im_four = (im_four -torch.min(im_four))/(torch.max(im_four)-torch.min(im_four))
+    im_four = im_four.numpy()
+    import matplotlib.pyplot as plt
+    plt.imshow(im_four,cmap='gray')
+    print(im_four)
+    plt.show()

@@ -330,11 +330,13 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
             best_accuracy = accuracy_score__
             patience = es_patience  # Resetting patience since we have new best validation accuracy
             print("best : at epoch  ",epoch, 'with accuracy ', best_accuracy)
+            torch.save(model.state_dict(), os.path.join(checkpoint, 'model_best.pt'))
         else:
             patience -= 1
             if patience == 0:
                 print('Early stopping. Best Val roc_auc: {:.3f}'.format(best_accuracy))
                 break
+        torch.save(model.state_dict(), os.path.join(checkpoint, 'model_last.pt'))
     return
 def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',image_size=256,\
               batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \

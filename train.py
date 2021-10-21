@@ -59,6 +59,8 @@ def parse_args():
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
     parser_wavelet = subparsers.add_parser('wavelet', help='Wavelet Net')
+    parser_wavelet = subparsers.add_parser('wavelet_res', help='WaveletRes Net')
+    parser_normal = subparsers.add_parser('normal', help='Normal Wavelet Net')
     parser_vit = subparsers.add_parser('vit', help='ViT transformer Net')
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
@@ -321,6 +323,28 @@ if __name__ == "__main__":
         from pytorch_model.wavelet_model.model_wavelet import WaveletModel
 
         model = WaveletModel(in_channel=3)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "wavelet_res":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.wavelet_model.model_wavelet_res import WaveletResModel
+
+        model = WaveletResModel(in_channel=3)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "normal":
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.wavelet_model.model_normal import NormalModel
+
+        model = NormalModel(in_channel=3)
         criterion = get_criterion_torch(args.loss)
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \

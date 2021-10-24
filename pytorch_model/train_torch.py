@@ -269,9 +269,10 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
     sys.stdout = sys.__stdout__
 
     model.train()
-    steps =0
+
     running_loss = 0
     for epoch in range(epochs):
+        steps = 0
         for inputs, labels in tqdm(dataloader_train):
             #     for inputs, labels in tqdm(testloader):
             steps += 1
@@ -320,8 +321,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
                 text_writer.flush()
 
-                running_loss = 0
-                steps = 0
+                # running_loss = 0
+                # steps = 0
                 model.train()
         print("Epoch  ", epoch, " running loss : ",
               running_loss / len(dataloader_train))

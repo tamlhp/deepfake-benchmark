@@ -256,6 +256,7 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [3, 6, 9, 12, 15, 18], gamma = 0.8)
     dataloader_train, dataloader_val = get_generate(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
@@ -324,6 +325,7 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 # running_loss = 0
                 # steps = 0
                 model.train()
+        scheduler.step()
         print("Epoch  ", epoch, " running loss : ",
               running_loss / len(dataloader_train))
         text_writer.write('Epoch %.4f, running loss  %.4f \n' % (
@@ -363,6 +365,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [3, 6, 9, 12, 15, 18], gamma = 0.8)
     dataloader_train, dataloader_val = get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
@@ -424,6 +427,7 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
                 running_loss = 0
                 steps = 0
                 model.train()
+        scheduler.step()
         # eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch3_%d.pt' % epoch))
         if accuracy_score__ >= best_accuracy:
@@ -455,6 +459,7 @@ def train_fftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='.
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [3, 6, 9, 12, 15, 18], gamma = 0.8)
     dataloader_train, dataloader_val = get_generate_fft(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
@@ -515,6 +520,7 @@ def train_fftcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='.
                 running_loss = 0
                 steps = 0
                 model.train()
+        scheduler.step()
         eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_fft_%d.pt' % epoch))
     return
@@ -536,6 +542,7 @@ def train_4dfftcnn(model,criterion,train_set = '../../extract_raw_img',val_set =
     # criterion = FocalLoss(gamma=2).to(device)
     criterion = criterion.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [3, 6, 9, 12, 15, 18], gamma = 0.8)
     dataloader_train, dataloader_val = get_generate_4dfft(train_set,val_set,image_size,batch_size,num_workers)
     if resume != '':
         model.load_state_dict(torch.load( os.path.join(checkpoint, resume)))
@@ -596,6 +603,7 @@ def train_4dfftcnn(model,criterion,train_set = '../../extract_raw_img',val_set =
                 running_loss = 0
                 steps = 0
                 model.train()
+        scheduler.step()
         eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_4dfft_%d.pt' % epoch))
     return
@@ -618,7 +626,7 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
     criterion = ContrastiveLoss(device=device).to(device)
     criterion2 = nn.BCELoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [3, 6, 9, 12, 15, 18], gamma = 0.8)
 
     dataloader_train, dataloader_val = get_generate_siamese(train_set,val_set,image_size,batch_size,num_workers)
 
@@ -714,6 +722,7 @@ def train_siamese(model,train_set = '../../extract_raw_img',val_set ='../../extr
                 running_loss_contrastive = 0
                 running_loss_cls = 0
                 model.train()
+        scheduler.step()
         test_loss_contrastive = 0
         test_loss_cls = 0
         accuracy1 = 0

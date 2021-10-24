@@ -323,6 +323,11 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 running_loss = 0
                 steps = 0
                 model.train()
+        print("Epoch  ", epoch, " running loss : ",
+              running_loss / len(dataloader_train))
+        text_writer.write('Epoch %.4f, running loss  %.4f \n' % (
+            epoch, running_loss / len(dataloader_train)))
+        running_loss = 0
         accuracy_score__= eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_pytorch_%d.pt' % epoch))
 

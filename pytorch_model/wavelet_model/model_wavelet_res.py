@@ -11,10 +11,10 @@ class WaveletResModel(nn.Module):
         # self.dct = dct.dct
         self.pool = WaveletPool()
         # self.pool = nn.MaxPool2d(kernel_size=(2, 2))
-        self.out1 = 16
+        self.out1 = 32
         self.conv1 = BasicConv(in_planes=4*in_channel,out_planes=self.out1)
         # self.dab1 = DAB(self.out1,kernel_size=3,reduction=4)
-        self.out2 = 8
+        self.out2 = 16
         self.conv2 = BasicConv(in_planes=4*self.out1,out_planes=self.out2)
         self.out2_1 = 16
         self.conv2_1 = BasicConv(in_planes=4*4*4*in_channel,out_planes=self.out2_1)
@@ -58,14 +58,14 @@ class WaveletResModel(nn.Module):
         # print(x2.size())
 
         x3 = torch.cat([x2,self.conv2_1(self.pool(self.pool(x0)))],1)
-        x3 = self.dab3(x3)
+        # x3 = self.dab3(x3)
         x3 = self.conv3(x3)
         # x = self.dab3(x)
         x3 = self.pool(x3)
 
 
         x4 = torch.cat([x3, self.conv3_1(self.pool(self.pool(x1)))], 1)
-        x4 = self.dab4(x4)
+        # x4 = self.dab4(x4)
         x4 = self.conv4(x4)
         # x = self.dab4(x)
         x4 = self.pool(x4)

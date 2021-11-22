@@ -100,8 +100,8 @@ def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.
                                         # transforms.Resize((int(image_size/2), int(image_size/2))),
                                         # transforms.Resize((image_size, image_size)),
                                         # transforms.RandomGaussianNoise(p=0.0),
-                                        AddGaussianNoise(0, 10),
-                                        transforms.RandomErasing(),
+                                        # AddGaussianNoise(0, 10),
+                                        # transforms.RandomErasing(),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
@@ -192,8 +192,13 @@ class ImageGeneratorDualFFT(Dataset):
         # if self.transform is not None:
         #     PIL_img = self.transform(PIL_img)
         #     img = np.array(transforms_ori.ToPILImage()(PIL_img))
-
-        f = np.fft.fft2(cv2.cvtColor(img,cv2.COLOR_RGB2GRAY))
+        PIL_img = Image.fromarray(img)
+        # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
+        if self.transform is not None:
+            PIL_img = self.transform(PIL_img)
+        img2 = transforms.ToPILImage()(PIL_img)
+        img2 = np.array(img2)
+        f = np.fft.fft2(cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY))
         fshift = np.fft.fftshift(f)
         fshift += 1e-8
 
@@ -203,10 +208,7 @@ class ImageGeneratorDualFFT(Dataset):
         magnitude_spectrum = cv2.resize(magnitude_spectrum,(self.image_size,self.image_size))
         magnitude_spectrum = np.array([magnitude_spectrum])
         magnitude_spectrum = np.transpose(magnitude_spectrum, (1,2 , 0))
-        PIL_img = Image.fromarray(img)
-        # PIL_magnitude_spectrum = Image.fromarray(magnitude_spectrum)
-        if self.transform is not None:
-            PIL_img = self.transform(PIL_img)
+
         if self.transform_fft is not None:
             magnitude_spectrum = self.transform_fft(magnitude_spectrum)
 
@@ -258,11 +260,15 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
 
 def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                           transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                std=[0.229, 0.224, 0.225])
+                                        # transforms.Resize((int(image_size/16), int(image_size/16))),
+                                        # transforms.Resize((image_size, image_size)),
+                                        transforms.ToTensor(),
+                                        # AddGaussianNoise(0, 0.3),
+                                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                std=[0.229, 0.224, 0.225]),
+                                        # transforms.RandomErasing(p=1.0,scale=(0.5,0.5001),ratio=(1,1.0001))
 
-                                           ])
+                                        ])
     transform_fft = transforms.Compose([transforms.ToTensor()])
     fft_dataset = ImageGeneratorDualFFT(path=train_set,image_size=image_size,
                                             transform=transform_fwd,transform_fft=transform_fft

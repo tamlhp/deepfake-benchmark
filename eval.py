@@ -12,8 +12,8 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 import argparse
 import torch.nn as nn
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# import tensorflow as tf
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 # from pytorch_model.train import *
 # from tf_model.train import *
@@ -47,6 +47,7 @@ def parse_args():
     parser_pairwise = subparsers.add_parser('pairwise', help='Pairwises pytorch ')
 
     parser_meso = subparsers.add_parser('meso4_torch', help='Mesonet4')
+    parser_wavelet = subparsers.add_parser('wavelet', help='Wavelet Net')
 
 
     parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
@@ -230,6 +231,22 @@ if __name__ == "__main__":
                       adj_brightness=adj_brightness, adj_contrast=adj_contrast)
 
 
+    elif model == "wavelet":
+        from pytorch_model.eval_torch import eval_cnn
+        from pytorch_model.wavelet_model.model_wavelet import WaveletModel
+        model = WaveletModel(in_channel=3)
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time, \
+                 adj_brightness=adj_brightness, adj_contrast=adj_contrast)
+    elif model == "normal":
+        from pytorch_model.eval_torch import eval_cnn
+        from pytorch_model.wavelet_model.model_normal import NormalModel
+
+        model = NormalModel(in_channel=3)
+        criterion = get_criterion_torch(args.loss)
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time, \
+                 adj_brightness=adj_brightness, adj_contrast=adj_contrast)
     # ----------------------------------------------------
     elif model == "meso4":
         from tf_model.mesonet.model import Meso4

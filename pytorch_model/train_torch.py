@@ -394,39 +394,39 @@ def train_dualcnn(model,criterion,train_set = '../../extract_raw_img',val_set ='
             optimizer.step()
             running_loss += loss.item()
             # time.sleep(0.05)
-            if steps % print_every == 0:
-                test_loss = 0
-                accuracy = 0
-                model.eval()
-                with torch.no_grad():
-                    for inputs,img_fft, labels in dataloader_val:
-                        inputs,img_fft, labels = inputs.float().to(device),img_fft.float().to(device) , labels.float().to(device)
-                        # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
-                        # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
-                        logps = model.forward(inputs,img_fft)
-                        logps = logps.squeeze()
-                        batch_loss = criterion(logps, labels)
-                        #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
-                        test_loss += batch_loss.item()
-                        #                     print("labels : ",labels)
-                        #                     print("logps  : ",logps)
-                        equals = labels == (logps > 0.5)
-                        #                     print("equals   ",equals)
-                        accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
-                #                 train_losses.append(running_loss/len(trainloader))
-                #             test_losses.append(test_loss/len(testloader))
-                print(f"Epoch {epoch+1}/{epochs}.. "
-                      f"Train loss: {running_loss/print_every:.3f}.. "
-                      f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
-                      f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
-                accuracy_score__ = accuracy/len(dataloader_val)
-                text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
-                epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
-                text_writer.flush()
+        if True:
+            test_loss = 0
+            accuracy = 0
+            model.eval()
+            with torch.no_grad():
+                for inputs,img_fft, labels in dataloader_val:
+                    inputs,img_fft, labels = inputs.float().to(device),img_fft.float().to(device) , labels.float().to(device)
+                    # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                    # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
+                    logps = model.forward(inputs,img_fft)
+                    logps = logps.squeeze()
+                    batch_loss = criterion(logps, labels)
+                    #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+                    test_loss += batch_loss.item()
+                    #                     print("labels : ",labels)
+                    #                     print("logps  : ",logps)
+                    equals = labels == (logps > 0.5)
+                    #                     print("equals   ",equals)
+                    accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+            #                 train_losses.append(running_loss/len(trainloader))
+            #             test_losses.append(test_loss/len(testloader))
+            print(f"Epoch {epoch+1}/{epochs}.. "
+                  f"Train loss: {running_loss/print_every:.3f}.. "
+                  f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
+                  f"Test accuracy: {accuracy/len(dataloader_val):.3f}")
+            accuracy_score__ = accuracy/len(dataloader_val)
+            text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
+            epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
+            text_writer.flush()
 
-                running_loss = 0
-                steps = 0
-                model.train()
+            running_loss = 0
+            steps = 0
+            model.train()
         scheduler.step()
         # eval_train(model ,dataloader_val,device,criterion,text_writer,adj_brightness=adj_brightness, adj_contrast=adj_brightness)
         torch.save(model.state_dict(), os.path.join(checkpoint, 'model_dualpytorch3_%d.pt' % epoch))

@@ -48,6 +48,8 @@ def parse_args():
 
     parser_meso = subparsers.add_parser('meso4_torch', help='Mesonet4')
     parser_wavelet = subparsers.add_parser('wavelet', help='Wavelet Net')
+    parser_wavelet = subparsers.add_parser('normal', help='Normal Net')
+    parser_wavelet = subparsers.add_parser('waveletnoatt', help='WaveletNoAtt Net')
 
 
     parser_pairwise = subparsers.add_parser('pairwise_efficient', help='Pairwises Efficient pytorch ')
@@ -238,12 +240,18 @@ if __name__ == "__main__":
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time, \
                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)
+    elif model == "waveletnoatt":
+        from pytorch_model.eval_torch import eval_cnn
+        from pytorch_model.wavelet_model.model_wavelet_noatt import WaveletModelNoAtt
+        model = WaveletModelNoAtt(in_channel=3)
+        eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
+                 batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time, \
+                 adj_brightness=adj_brightness, adj_contrast=adj_contrast)
     elif model == "normal":
         from pytorch_model.eval_torch import eval_cnn
         from pytorch_model.wavelet_model.model_normal import NormalModel
 
         model = NormalModel(in_channel=3)
-        criterion = get_criterion_torch(args.loss)
         eval_cnn(model=model, val_set=args.val_set, image_size=args.image_size, resume=args.resume, \
                  batch_size=args.batch_size, num_workers=args.workers, checkpoint=args.checkpoint, show_time=args.time, \
                  adj_brightness=adj_brightness, adj_contrast=adj_contrast)

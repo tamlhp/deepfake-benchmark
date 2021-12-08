@@ -11,29 +11,29 @@ class NormalModel(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=(2, 2))
         self.out1 = 16
         self.conv1 = BasicConv(in_planes=in_channel,out_planes=self.out1)
-        self.dab1 = DAB(self.out1,kernel_size=3,reduction=4)
-        self.out2 = 128
+        # self.dab1 = DAB(self.out1,kernel_size=3,reduction=4)
+        self.out2 = 64
         self.conv2 = BasicConv(in_planes=self.out1,out_planes=self.out2)
-        self.dab2 = DAB(self.out2,kernel_size=3,reduction=4)
+        # self.dab2 = DAB(self.out2,kernel_size=3,reduction=4)
         self.out3 = 128
         self.conv3 = BasicConv(in_planes=self.out2,out_planes=self.out3)
-        self.dab3 = DAB(self.out3,kernel_size=3,reduction=8)
-        self.out4 = 256
+        # self.dab3 = DAB(self.out3,kernel_size=3,reduction=8)
+        self.out4 = 128
         self.conv4 = BasicConv(in_planes=self.out3,out_planes=self.out4)
         self.dab4 = DAB(self.out4,kernel_size=3,reduction=8)
 
         self.conv5 = BasicConv(in_planes=self.out4,out_planes=self.out4)
         self.dab5 = DAB(self.out4,kernel_size=3,reduction=8)
 
-        self.conv6 = BasicConv(in_planes=self.out4, out_planes=self.out4)
-        self.dab6 = DAB(self.out4, kernel_size=3, reduction=16)
-        self.out7 = 512
-        self.conv7 = BasicConv(in_planes=self.out4, out_planes=self.out7)
-        self.dab7 = DAB(self.out7, kernel_size=3, reduction=16)
+        # self.conv6 = BasicConv(in_planes=self.out4, out_planes=self.out4)
+        # self.dab6 = DAB(self.out4, kernel_size=3, reduction=16)
+        # self.out7 = 512
+        # self.conv7 = BasicConv(in_planes=self.out4, out_planes=self.out7)
+        # self.dab7 = DAB(self.out7, kernel_size=3, reduction=16)
 
         self._avg_pooling = nn.AdaptiveAvgPool2d(1)
-        self.fc1 = nn.Linear(self.out7,self.out2)
-        self.fc2 = nn.Linear(self.out2,1)
+        self.fc1 = nn.Linear(self.out4,1)
+        # self.fc2 = nn.Linear(self.out4,1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, inputs):
@@ -42,29 +42,29 @@ class NormalModel(nn.Module):
         # print(inputs.size())
         # x = self.pool(inputs)
         x = self.conv1(inputs)
-        x = self.dab1(x)
+        # x = self.dab1(x)
         x = self.pool(x)
         x = self.conv2(x)
-        x = self.dab2(x)
+        # x = self.dab2(x)
         x = self.pool(x)
         x = self.conv3(x)
-        x = self.dab3(x)
+        # x = self.dab3(x)
         x = self.pool(x)
         x = self.conv4(x)
         x = self.dab4(x)
         x = self.conv5(x)
         x = self.dab5(x)
 
-        x = self.pool(x)
-        x = self.conv6(x)
-        x = self.dab6(x)
-        x = self.pool(x)
-        x = self.conv7(x)
-        x = self.dab7(x)
+        # x = self.pool(x)
+        # x = self.conv6(x)
+        # x = self.dab6(x)
+        # x = self.pool(x)
+        # x = self.conv7(x)
+        # x = self.dab7(x)
         out = self._avg_pooling(x)
         out = out.view(bs, -1)
         out = self.fc1(out)
-        out = self.fc2(out)
+        # out = self.fc2(out)
         out = self.sigmoid(out)
         return out
 # import torch

@@ -1,0 +1,10 @@
+python eval.py --val_set /hdd/tam/dfd_benmark/df_in_the_wild/image_jpg/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_df_inthewild_checkpoint --resume model_best.pt  --gpu_id 1   normal
+python eval.py --val_set /hdd/tam/dfd_benmark/Celeb-DF/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_celebdf_checkpoint --resume model_best.pt  --gpu_id 1   normal
+python eval.py --val_set /hdd/tam/dfd_benmark/UADFV/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_uadfv_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/df_timit/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_dftimit_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/dfdc/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_dfdc_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_df/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_ff_df_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_f2f/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_ff_f2f_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_fs/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_ff_fs_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_nt/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_ff_nt_checkpoint --resume model_best.pt  --gpu_id 1    normal
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_all/ --batch_size 32 --image_size 256 --workers 16 --checkpoint normal_ff_all_checkpoint --resume model_best.pt  --gpu_id 1    normal

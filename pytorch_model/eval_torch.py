@@ -27,9 +27,11 @@ def eval_capsule(val_set ='../../extract_raw_img',gpu_id=-1,resume=0,image_size=
     capnet = capnet.to(device)
     capsule_loss = CapsuleLoss().to(device)
     # optimizer = Adam(capnet.parameters(), lr=0.003, betas=(0.9, 0.999))
-
-    capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
-
+    try:
+        capnet.load_state_dict(torch.load(os.path.join(checkpoint,'capsule_' + str(resume) + '.pt')))
+    except:
+        print("ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("model khong ton tai : ", os.path.join(checkpoint,'capsule_' + str(resume) + '.pt'))
 
     dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 
@@ -98,8 +100,11 @@ def eval_cnn(model,val_set ='../../extract_raw_img',image_size=256,resume="",\
                           else "cpu")
     model = model.to(device)
     criterion = nn.BCELoss().to(device)
-
-    model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+    try:
+        model.load_state_dict(torch.load(os.path.join(checkpoint, resume)))
+    except:
+        print("ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("model khong ton tai : ", os.path.join(checkpoint,'capsule_' + str(resume) + '.pt'))
 
     dataloader_val = get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
 

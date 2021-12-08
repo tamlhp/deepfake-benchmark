@@ -90,24 +90,27 @@ def get_generate(train_set,val_set,image_size,batch_size,num_workers):
     return dataloader_train,dataloader_val
 def get_jpeg_augmentation():
     train_transform = [
-        ImageCompression(quality_lower=50, quality_upper=51, p=1.0)
+        ImageCompression(quality_lower=90, quality_upper=90, p=1.0)
     ]
     transforms =  Compose(train_transform)
-    return lambda img:transforms(image=np.array(img))['image']
+    return lambda img:Image.fromarray(transforms(image=np.array(img))['image'])
 
 def get_val_generate(val_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
-    transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                        # transforms.Resize((int(image_size/2), int(image_size/2))),
+    transform_fwd = transforms.Compose([
+                                        transforms.Resize((image_size,image_size)),
+                                        # get_jpeg_augmentation(),
+                                        # transforms.Resize((int(image_size/16), int(image_size/16))),
                                         # transforms.Resize((image_size, image_size)),
                                         # transforms.RandomGaussianNoise(p=0.0),
-                                        # AddGaussianNoise(0, 10),
+                                        # AddGaussianNoise(0, int(255*0.5)),
                                         # transforms.RandomErasing(),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_brightness(img,adj_brightness)),
                                         transforms.Lambda(lambda img :transforms.functional.adjust_contrast(img,adj_contrast)),
                                            transforms.ToTensor(),
-                                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                        # AddGaussianNoise(0, 0.25),
+                                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                 std=[0.229, 0.224, 0.225]),
-                                           #transforms.RandomErasing(p=1.0,scale=(0.5,0.5001),ratio=(1,1.0001))
+                                           # transforms.RandomErasing(p=1.0,scale=(0.5,0.5001),ratio=(1,1.0001))
                                            ])
 
     dataset_val = datasets.ImageFolder(val_set,
@@ -260,6 +263,7 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
 
 def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
+                                        get_jpeg_augmentation(),
                                         # transforms.Resize((int(image_size/16), int(image_size/16))),
                                         # transforms.Resize((image_size, image_size)),
                                         transforms.ToTensor(),

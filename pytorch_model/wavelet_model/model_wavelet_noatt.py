@@ -4,9 +4,9 @@ from pytorch_model.wavelet_model.conv_block import BasicConv,\
 import torch.nn as nn
 from pytorch_model.wavelet_model import dct
 from pytorch_model.wavelet_model.ffc import *
-class WaveletModel(nn.Module):
+class WaveletModelNoAtt(nn.Module):
     def __init__(self,in_channel):
-        super(WaveletModel, self).__init__()
+        super(WaveletModelNoAtt, self).__init__()
         self.in_channel = in_channel
         # self.dct = dct.dct
         self.pool = WaveletPool()
@@ -28,10 +28,10 @@ class WaveletModel(nn.Module):
         self.out4 = 128
         self.conv4 = BasicConv(in_planes=4*self.out3,out_planes=self.out4)
         # self.ffc4 = FFC_BN_ACT(in_channels=self.out4,out_channels=self.out4)
-        self.dab4 = DAB(self.out4,kernel_size=3,reduction=8)
+        # self.dab4 = DAB(self.out4,kernel_size=3,reduction=8)
 
         self.conv5 = BasicConv(in_planes=self.out4,out_planes=self.out4)
-        self.dab5 = DAB(self.out4,kernel_size=3,reduction=8)
+        # self.dab5 = DAB(self.out4,kernel_size=3,reduction=8)
 
         self._avg_pooling = nn.AdaptiveAvgPool2d(1)
         # self._max_pooling = nn.AdaptiveMaxPool2d(1)
@@ -61,9 +61,9 @@ class WaveletModel(nn.Module):
         # x = self.dab3(x)
         x = self.pool(x)
         x = self.conv4(x)
-        x = self.dab4(x)
+        # x = self.dab4(x)
         x = self.conv5(x)
-        x = self.dab5(x)
+        # x = self.dab5(x)
         out = self._avg_pooling(x)
         # out = self._max_pooling(x)
         out = out.view(bs, -1)
@@ -76,7 +76,7 @@ class WaveletModel(nn.Module):
 # import torch
 if __name__ == "__main__":
 
-    model = WaveletModel(in_channel=3)
+    model = WaveletModelNoAtt(in_channel=3)
     # from torchsummary import summary_string
     import torchsummary
     import sys

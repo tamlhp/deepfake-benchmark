@@ -206,12 +206,14 @@ class CapsuleNet(nn.Module):
         # z[b, data, out_caps]
 
         classes = F.softmax(z, dim=-1)
+        class_ = classes.detach()
+        class_ = class_.mean(dim=1)
 
-        class_ = classes
-        class_ = class_.mean(dim=1)[0][1:].unsqueeze_(1)
-        print(class_)
-        # return classes, class_
-        return class_
+        # class_ = classes
+        # class_ = class_.mean(dim=1)[0][1:].unsqueeze_(1)
+        # print(class_)
+        return classes, class_
+        # return class_
 
 
 

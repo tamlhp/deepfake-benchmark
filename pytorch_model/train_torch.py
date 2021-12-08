@@ -19,7 +19,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchsummary
 
 
-es_patience = 10  # Early Stopping patience - for how many epochs with no improvements to wait
+es_patience = 4  # Early Stopping patience - for how many epochs with no improvements to wait
 best_accuracy = 0.0
 
 def train_capsule(train_set = '../../extract_raw_img',val_set ='../../extract_raw_img',gpu_id=-1,manualSeed=0,resume="",\

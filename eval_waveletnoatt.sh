@@ -1,0 +1,10 @@
+python eval.py --val_set /hdd/tam/dfd_benmark/df_in_the_wild/image_jpg/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_df_inthewild_checkpoint --resume model_last.pt  --gpu_id 1   waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/Celeb-DF/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_celebdf_checkpoint --resume model_best.pt  --gpu_id 1   waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/UADFV/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_uadfv_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/df_timit/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_dftimit_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/dfdc/image/test/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_dfdc_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_df/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_ff_df_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_f2f/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_ff_f2f_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_fs/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_ff_fs_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_nt/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_ff_nt_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt
+python eval.py --val_set /hdd/tam/dfd_benmark/ff/images/test_all/ --batch_size 32 --image_size 256 --workers 16 --checkpoint waveletnoatt_ff_all_checkpoint --resume model_best.pt  --gpu_id 1    waveletnoatt

@@ -263,7 +263,7 @@ def get_generate_dualfft(train_set,val_set,image_size,batch_size,num_workers):
 
 def get_val_generate_dualfft(train_set,image_size,batch_size,num_workers,adj_brightness=1.0, adj_contrast=1.0):
     transform_fwd = transforms.Compose([transforms.Resize((image_size,image_size)),
-                                        get_jpeg_augmentation(),
+                                        # get_jpeg_augmentation(),
                                         # transforms.Resize((int(image_size/16), int(image_size/16))),
                                         # transforms.Resize((image_size, image_size)),
                                         transforms.ToTensor(),

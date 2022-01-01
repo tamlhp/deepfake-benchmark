@@ -1,5 +1,3 @@
-!attention_zip.png
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -136,7 +134,10 @@ checkpoint/
 events.out.tf*
 *tfrecords*
 *labels
+
 *.png
+!attention_zip.png
+
 *.jpg
 *.jpeg
 preprocess_data/test_fft.py

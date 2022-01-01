@@ -1,7 +1,12 @@
+# A dual benchmarking study of facial forgery and facial forensics
+[![arXiv](https://img.shields.io/badge/arXiv-2112.11641-b31b1b.svg)](https://arxiv.org/abs/2111.12912)
+
+![](paper/attention_zip.png)
+
 This is the official implementation of 
 >Pham, M.T., Huynh, T.T., Tong, V.V., Nguyen, T.T., Nguyen, T.T., Yin, H. and Nguyen, Q.V.H., 2021. A dual benchmarking study of facial forgery and facial forensics. arXiv preprint arXiv:2111.12912.
 
-# Citation
+## Citation
 
 ```
 @article{pham2021dual,
@@ -12,7 +17,7 @@ This is the official implementation of
 }
 ```
 
-# A dual benchmarking study of facial forgery and facial forensics
+## Abstract
 In recent years, visual forgery has reached a level of sophistication that humans cannot identify fraud, which poses a significant threat to information security. A wide range of malicious applications have emerged, such as fake news, defamation or blackmailing of celebrities, impersonation of politicians in political warfare, and the spreading of rumours to attract views. As a result, a rich body of visual forensic techniques has been proposed in an attempt to stop this dangerous trend. In this paper, we present a benchmark that provides in-depth insights into visual forgery and visual forensics, using a comprehensive and empirical approach. More specifically, we develop an independent framework that integrates state-of-the-arts counterfeit generators and detectors, and measure the performance of these techniques using various criteria. We also perform an exhaustive analysis of the benchmarking results, to determine the characteristics of the methods that serve as a comparative reference in this never-ending war between measures and countermeasures. 
 
 ## Framework
@@ -40,7 +45,7 @@ python extrac_face.py --inp in/ --output out/ --worker 1 --duration 4
 
 `--duration` : number of frame skip each extract time
 
-##  Train
+## Train
 Preprocess for GAN-fingerprint
 
 ```
@@ -66,7 +71,7 @@ python -m feature_model.spectrum.process_data --input_real /hdd/tam/df_in_the_wi
 ```
 
 
-#  Train
+## Train
 
 Train for cnn 
 
@@ -81,7 +86,7 @@ python train.py --train_set /hdd/tam/df_in_the_wild/train_visual.pkl   --checkpo
 ```
 
 
-# Eval
+## Eval
 
 Eval for cnn
 
@@ -99,7 +104,7 @@ Eval for feature model
 python eval.py --val_set ../DeepFakeDetection/Experiments_DeepFakeDetection/test_dfinthewild.pkl   --checkpoint ../DeepFakeDetection/Experiments_DeepFakeDetection/model_df_inthewild.pkl --resume model_df_inthewild.pkl spectrum
 ```
 
-# Detect
+## Detect
 
 ```
 python detect_img.py --img_path /hdd/tam/extend_data/image/test/1_df/reference_0_113.jpg --model_path efficientdual_mydata_checkpoint/model_dualpytorch3_1.pt --gpu_id 0 efficientdual

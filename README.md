@@ -1,6 +1,8 @@
-This is the official implementation of our paper:
+This is the official implementation of our paper. Please cite:
 
+```
 Pham, M.T., Huynh, T.T., Tong, V.V., Nguyen, T.T., Nguyen, T.T., Yin, H. and Nguyen, Q.V.H., 2021. A dual benchmarking study of facial forgery and facial forensics. arXiv preprint arXiv:2111.12912.
+```
 
 # A dual benchmarking study of facial forgery and facial forensics
 In recent years, visual forgery has reached a level of sophistication that humans cannot identify fraud, which poses a significant threat to information security. A wide range of malicious applications have emerged, such as fake news, defamation or blackmailing of celebrities, impersonation of politicians in political warfare, and the spreading of rumours to attract views. As a result, a rich body of visual forensic techniques has been proposed in an attempt to stop this dangerous trend. In this paper, we present a benchmark that provides in-depth insights into visual forgery and visual forensics, using a comprehensive and empirical approach. More specifically, we develop an independent framework that integrates state-of-the-arts counterfeit generators and detectors, and measure the performance of these techniques using various criteria. We also perform an exhaustive analysis of the benchmarking results, to determine the characteristics of the methods that serve as a comparative reference in this never-ending war between measures and countermeasures. 

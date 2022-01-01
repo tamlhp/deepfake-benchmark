@@ -1,7 +1,15 @@
-This is the official implementation of our paper. Please cite:
+This is the official implementation of 
+>Pham, M.T., Huynh, T.T., Tong, V.V., Nguyen, T.T., Nguyen, T.T., Yin, H. and Nguyen, Q.V.H., 2021. A dual benchmarking study of facial forgery and facial forensics. arXiv preprint arXiv:2111.12912.
+
+# Citation
 
 ```
-Pham, M.T., Huynh, T.T., Tong, V.V., Nguyen, T.T., Nguyen, T.T., Yin, H. and Nguyen, Q.V.H., 2021. A dual benchmarking study of facial forgery and facial forensics. arXiv preprint arXiv:2111.12912.
+@article{pham2021dual,
+  title={A dual benchmarking study of facial forgery and facial forensics},
+  author={Pham, Minh Tam and Huynh, Thanh Trung and Tong, Van Vinh and Nguyen, Thanh Tam and Nguyen, Thanh Thi and Yin, Hongzhi and Nguyen, Quoc Viet Hung},
+  journal={arXiv preprint arXiv:2111.12912},
+  year={2021}
+}
 ```
 
 # A dual benchmarking study of facial forgery and facial forensics

@@ -63,6 +63,7 @@ def parse_args():
     parser_wavelet = subparsers.add_parser('wavelet_res', help='WaveletRes Net')
     parser_normal = subparsers.add_parser('normal', help='Normal Wavelet Net')
     parser_vit = subparsers.add_parser('vit', help='ViT transformer Net')
+    parser_crossvit = subparsers.add_parser('crossvit', help='CrossViT transformer Net')
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
@@ -384,6 +385,18 @@ if __name__ == "__main__":
                   image_size=args.image_size, resume=args.resume, \
                   batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
                   epochs=args.niter, print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
+        pass
+    elif model == "crossvit":
+        from pytorch_model.transformer.crossvit import CrossViT
+        from pytorch_model.train_torch import train_cnn
+
+        model = CrossViT(image_size = args.image_size, channels=3, num_classes=1,patch_size_small=14, patch_size_large=16)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
         pass
 # ---------------------------------------------------------------------------------------------
     elif model == "gan":

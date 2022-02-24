@@ -11,5 +11,5 @@ tensorflow==1.14
 keras
 pytorchcv
 facenet-pytorch
-albumentations
+albumentations==0.4.6
 einops

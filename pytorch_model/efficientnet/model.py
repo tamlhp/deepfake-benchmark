@@ -223,6 +223,32 @@ class EfficientNet(nn.Module):
         if model_name not in valid_models:
             raise ValueError('model_name should be one of: ' + ', '.join(valid_models))
 
+    def extract_features_at_block(self, inputs, selected_block):
+        """use convolution layer to extract feature .
+        Args:
+            inputs (tensor): Input tensor.
+        Returns:
+            Output of the final convolution
+            layer in the efficientnet model.
+        """
+        # Stem
+        x = self._swish(self._bn0(self._conv_stem(inputs)))
+
+        # Blocks
+        for idx, block in enumerate(self._blocks):
+            drop_connect_rate = self._global_params.drop_connect_rate
+            if drop_connect_rate:
+                drop_connect_rate *= float(idx) / len(self._blocks)  # scale drop connect_rate
+            x = block(x, drop_connect_rate=drop_connect_rate)
+
+            if idx > selected_block:
+                break
+
+        # Head
+        if selected_block >= len(self._blocks):
+            x = self._swish(self._bn1(self._conv_head(x)))
+
+        return x
 class Identity(nn.Module):
     def __init__(self):
         super().__init__()

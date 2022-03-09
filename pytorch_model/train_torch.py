@@ -17,7 +17,7 @@ from tqdm import tqdm
 from pytorch_model.data_generate import get_generate,get_generate_siamese,get_generate_dualfft,get_generate_fft,get_generate_4dfft
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchsummary
-
+from utils.pytorch_utils.logging import Logger
 
 es_patience = 4  # Early Stopping patience - for how many epochs with no improvements to wait
 best_accuracy = 0.0
@@ -241,6 +241,7 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
               batch_size=16,resume = '',lr=0.003,num_workers=8,checkpoint="checkpoint",epochs=20,print_every=1000, \
               adj_brightness=1.0, adj_contrast=1.0):
     patience = es_patience
+    log = Logger(os.path.join(checkpoint,"logs"))
     best_accuracy = 0.0
     # from pytorch_model.focal_loss import FocalLoss
     if not os.path.exists(checkpoint):
@@ -272,8 +273,8 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
     model.train()
 
     running_loss = 0
+    steps = 0
     for epoch in range(epochs):
-        steps = 0
         for inputs, labels in tqdm(dataloader_train):
             #     for inputs, labels in tqdm(testloader):
             steps += 1
@@ -295,7 +296,9 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
             # time.sleep(0.05)
             if steps % print_every == 0:
                 test_loss = 0
+                train_loss = 0
                 accuracy = 0
+                accuracy_train = 0
                 model.eval()
                 with torch.no_grad():
                     for inputs, labels in dataloader_val:
@@ -314,6 +317,21 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                         accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
                 #                 train_losses.append(running_loss/len(trainloader))
                 #             test_losses.append(test_loss/len(testloader))
+                    ################################################################################
+                    for inputs, labels in dataloader_train:
+                        inputs, labels = inputs.float().to(device), labels.float().to(device)
+                        # inputs = transforms.functional.adjust_brightness(inputs, adj_brightness)
+                        # inputs = transforms.functional.adjust_contrast(inputs, adj_contrast)
+                        logps = model.forward(inputs)
+                        logps = logps.squeeze()
+                        batch_loss = criterion(logps, labels)
+                        #                 batch_loss = F.binary_cross_entropy_with_logits(logps, labels)
+                        train_loss += batch_loss.item()
+                        #                     print("labels : ",labels)
+                        #                     print("logps  : ",logps)
+                        equals = labels == (logps > 0.5)
+                        #                     print("equals   ",equals)
+                        accuracy_train += torch.mean(equals.type(torch.FloatTensor)).item()
                 print(f"Epoch {epoch+1}/{epochs}.. "
                       f"Train loss: {running_loss/print_every:.3f}.. "
                       f"Test loss: {test_loss/len(dataloader_val):.3f}.. "
@@ -321,10 +339,13 @@ def train_cnn(model,criterion,train_set = '../../extract_raw_img',val_set ='../.
                 text_writer.write('Epoch %d, Train loss %.4f, Test loss %.4f, Test accuracy  %.4f \n' % (
                 epoch, running_loss / print_every, test_loss / len(dataloader_val), accuracy / len(dataloader_val)))
                 text_writer.flush()
-
+                scalar_dict = {"Loss/train": train_loss/len(dataloader_train),"Loss/test": test_loss/len(dataloader_val),"Acc/train": accuracy_train/len(dataloader_train),"Acc/test": accuracy/len(dataloader_val)}
+                log.write_scalar(scalar_dict=scalar_dict, global_step=steps)
                 # running_loss = 0
                 # steps = 0
                 model.train()
+            scalar_dict = {"Loss/train_step": loss.item()}
+            log.write_scalar(scalar_dict=scalar_dict, global_step=steps)
         scheduler.step()
         print("Epoch  ", epoch, " running loss : ",
               running_loss / len(dataloader_train))

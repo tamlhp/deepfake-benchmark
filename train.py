@@ -2,7 +2,7 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 import torch.nn as nn
 import argparse
-
+import json
 # from pytorch_model.train import *
 # from tf_model.train import *
 def parse_args():
@@ -65,6 +65,7 @@ def parse_args():
     parser_vit = subparsers.add_parser('vit', help='ViT transformer Net')
     parser_crossvit = subparsers.add_parser('crossvit', help='CrossViT transformer Net')
     parser_efficientvit = subparsers.add_parser('efficientvit', help='CrossViT transformer Net')
+    parser_efficientvit.add_argument("--patch_size",type=int,default=7,help="patch_size in vit")
     parser_cross_efficientvit = subparsers.add_parser('crossefficientvit', help='CrossViT transformer Net')
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
@@ -117,6 +118,10 @@ if __name__ == "__main__":
     gpu_id = 0 if int(args.gpu_id) >=0 else -1
     adj_brightness = float(args.adj_brightness)
     adj_contrast = float(args.adj_contrast)
+    if not os.path.exists(args.checkpoint):
+        os.makedirs(args.checkpoint)
+    with open(os.path.join(args.checkpoint, 'args.txt'), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
     if model== "capsule":
         from pytorch_model.train_torch import train_capsule
         train_capsule(train_set = args.train_set,val_set = args.val_set,gpu_id=gpu_id,manualSeed=args.seed,resume=args.resume,beta1=args.beta1, \
@@ -404,7 +409,7 @@ if __name__ == "__main__":
         from pytorch_model.transformer.efficient_vit import EfficientViT
         from pytorch_model.train_torch import train_cnn
 
-        model = EfficientViT(image_size = args.image_size)
+        model = EfficientViT(image_size = args.image_size,patch_size=int(args.patch_size))
         criterion = get_criterion_torch(args.loss)
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \

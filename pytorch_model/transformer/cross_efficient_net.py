@@ -1,3 +1,17 @@
+
+
+"""
+https://github.com/davide-coccomini/Combining-EfficientNet-and-Vision-Transformers-for-Video-Deepfake-Detection/blob/main/cross-efficient-vit/cross_efficient_vit.py
+
+Coccomini, Davide, Nicola Messina, Claudio Gennaro, and Fabrizio Falchi.
+"Combining efficientnet and vision transformers for video deepfake detection."
+arXiv preprint arXiv:2107.02612 (2021).
+
+
+
+"""
+
+
 import torch
 from torch import nn, einsum
 import torch.nn.functional as F
@@ -314,6 +328,7 @@ class CrossEfficientViT(nn.Module):
 
         self.sm_mlp_head = nn.Sequential(nn.LayerNorm(self.sm_dim), nn.Linear(self.sm_dim, self.num_classes))
         self.lg_mlp_head = nn.Sequential(nn.LayerNorm(self.lg_dim), nn.Linear(self.lg_dim, self.num_classes))
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, img):
         sm_tokens = self.sm_image_embedder(img)
@@ -325,8 +340,8 @@ class CrossEfficientViT(nn.Module):
 
         sm_logits = self.sm_mlp_head(sm_cls)
         lg_logits = self.lg_mlp_head(lg_cls)
-
-        return sm_logits + lg_logits
+        x = self.sigmoid(sm_logits + lg_logits)
+        return x
 
 
 

@@ -23,7 +23,7 @@ import re
 import numpy as np
 from torch import einsum
 from random import randint
-
+from pytorch_model.transformer.model_vit import Transformer
 
 class Residual(nn.Module):
     def __init__(self, fn):
@@ -34,77 +34,6 @@ class Residual(nn.Module):
         return self.fn(x, **kwargs) + x
 
 
-class PreNorm(nn.Module):
-    def __init__(self, dim, fn):
-        super().__init__()
-        self.norm = nn.LayerNorm(dim)
-        self.fn = fn
-
-    def forward(self, x, **kwargs):
-        return self.fn(self.norm(x), **kwargs)
-
-
-class FeedForward(nn.Module):
-    def __init__(self, dim, hidden_dim, dropout=0.):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(dim, hidden_dim),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim, dim),
-            nn.Dropout(dropout)
-        )
-
-    def forward(self, x):
-        return self.net(x)
-
-
-class Attention(nn.Module):
-    def __init__(self, dim, heads=8, dim_head=64, dropout=0.1):
-        super().__init__()
-        inner_dim = dim_head * heads
-        project_out = not (heads == 1 and dim_head == dim)
-
-        self.heads = heads
-        self.scale = dim_head ** -0.5
-
-        self.attend = nn.Softmax(dim=-1)
-        self.to_qkv = nn.Linear(dim, inner_dim * 3, bias=False)
-
-        self.to_out = nn.Sequential(
-            nn.Linear(inner_dim, dim),
-            nn.Dropout(dropout)
-        ) if project_out else nn.Identity()
-
-    def forward(self, x):
-        b, n, _, h = *x.shape, self.heads
-        qkv = self.to_qkv(x).chunk(3, dim=-1)
-        q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h=h), qkv)
-
-        dots = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
-
-        attn = self.attend(dots)
-
-        out = einsum('b h i j, b h j d -> b h i d', attn, v)
-        out = rearrange(out, 'b h n d -> b n (h d)')
-        return self.to_out(out)
-
-
-class Transformer(nn.Module):
-    def __init__(self, dim, depth, heads, dim_head, mlp_dim, dropout=0.):
-        super().__init__()
-        self.layers = nn.ModuleList([])
-        for _ in range(depth):
-            self.layers.append(nn.ModuleList([
-                PreNorm(dim, Attention(dim, heads=heads, dim_head=dim_head, dropout=dropout)),
-                PreNorm(dim, FeedForward(dim=dim, hidden_dim=mlp_dim, dropout=0))
-            ]))
-
-    def forward(self, x):
-        for attn, ff in self.layers:
-            x = attn(x) + x
-            x = ff(x) + x
-        return x
 
 
 class EfficientViT(nn.Module):
@@ -151,7 +80,7 @@ class EfficientViT(nn.Module):
         patch_dim = channels * self.patch_size ** 2
 
         self.patch_size = self.patch_size
-        print(patch_dim)
+        # print(patch_dim)
         self.pos_embedding = nn.Parameter(torch.randn(self.emb_dim, 1, self.dim))
         self.patch_to_embedding = nn.Linear(patch_dim, self.dim)
         self.cls_token = nn.Parameter(torch.randn(1, 1, self.dim))
@@ -165,6 +94,7 @@ class EfficientViT(nn.Module):
             nn.ReLU(),
             nn.Linear(self.mlp_dim, self.num_classes)
         )
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, img, mask=None):
         p = self.patch_size
@@ -188,10 +118,10 @@ class EfficientViT(nn.Module):
         '''
 
         # x2 = self.features(img)
-        print(x.size())
+        # print(x.size())
         y = rearrange(x, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=p, p2=p)
         # y2 = rearrange(x2, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = p, p2 = p)
-        print(y.size())
+        # print(y.size())
         y = self.patch_to_embedding(y)
         cls_tokens = self.cls_token.expand(x.shape[0], -1, -1)
         x = torch.cat((cls_tokens, y), 1)
@@ -200,14 +130,15 @@ class EfficientViT(nn.Module):
         x = self.dropout(x)
         x = self.transformer(x)
         x = self.to_cls_token(x[:, 0])
-
-        return self.mlp_head(x)
+        x = self.mlp_head(x)
+        x = self.sigmoid(x)
+        return x
 
 
 if __name__ == "__main__":
-    model = EfficientViT( )
+    model = EfficientViT(image_size=256,patch_size=2 )
     import torchsummary
-    torchsummary.summary(model,(3,224,224))
+    torchsummary.summary(model,(3,256,256))
 
-
+# python train.py --train_set ../df_in_the_wild/image_jpg/train/ --val_set ../df_in_the_wild/image_jpg/test/ --batch_size 24 --niter 20 --image_size 224 --workers 24 --checkpoint efficientvit_df_inthewild_checkpoint --gpu_id 0 --lr 3e-4 --print_every 20000 efficientvit
 

@@ -67,6 +67,11 @@ def parse_args():
     parser_efficientvit = subparsers.add_parser('efficientvit', help='CrossViT transformer Net')
     parser_efficientvit.add_argument("--patch_size",type=int,default=7,help="patch_size in vit")
     parser_cross_efficientvit = subparsers.add_parser('crossefficientvit', help='CrossViT transformer Net')
+    parser_cross_efficientvit.add_argument("--sm_patch_size",type=int,default=7,help="patch_size in cross vit")
+    parser_cross_efficientvit.add_argument("--lg_patch_size",type=int,default=56,help="patch_size in cross vit")
+    parser_waddvit = subparsers.add_parser('waddvit', help='CrossViT transformer and WADD')
+    parser_waddvit.add_argument("--selected_block",type=int,default=5,help="patch_size in cross vit")
+    parser_waddvit.add_argument("--patch_size",type=int,default=4,help="patch_size in cross vit")
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
@@ -421,7 +426,19 @@ if __name__ == "__main__":
         from pytorch_model.transformer.cross_efficient_net import CrossEfficientViT
         from pytorch_model.train_torch import train_cnn
 
-        model = CrossEfficientViT(image_size = args.image_size)
+        model = CrossEfficientViT(image_size = args.image_size,sm_patch_size=args.sm_patch_size,lg_patch_size=args.lg_patch_size)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+        pass
+    elif model == "waddvit":
+        from pytorch_model.transformer.wadd_vit import WADDViT
+        from pytorch_model.train_torch import train_cnn
+
+        model = WADDViT(image_size = args.image_size,selected_block = args.selected_block,patch_size= args.patch_size)
         criterion = get_criterion_torch(args.loss)
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \

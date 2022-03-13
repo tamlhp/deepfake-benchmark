@@ -72,6 +72,11 @@ def parse_args():
     parser_waddvit = subparsers.add_parser('waddvit', help='CrossViT transformer and WADD')
     parser_waddvit.add_argument("--selected_block",type=int,default=5,help="patch_size in cross vit")
     parser_waddvit.add_argument("--patch_size",type=int,default=4,help="patch_size in cross vit")
+    parser_cross_waddvit = subparsers.add_parser('crosswaddvit', help='CrossViT transformer and WADD')
+    parser_cross_waddvit.add_argument("--selected_sm_block",type=int,default=5,help="patch_size in cross vit")
+    parser_cross_waddvit.add_argument("--selected_lg_block",type=int,default=1,help="patch_size in cross vit")
+    parser_cross_waddvit.add_argument("--sm_patch_size",type=int,default=8,help="patch_size in cross vit")
+    parser_cross_waddvit.add_argument("--lg_patch_size",type=int,default=16,help="patch_size in cross vit")
 
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
@@ -446,6 +451,19 @@ if __name__ == "__main__":
                   epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
                   adj_contrast=adj_contrast)
         pass
+    elif model == "crosswaddvit":
+        from pytorch_model.transformer.cross_wadd_net import CrossWADDViT
+        from pytorch_model.train_torch import train_cnn
+
+        model = CrossWADDViT(image_size = args.image_size,selected_sm_block = args.selected_sm_block,selected_lg_block=args.selected_lg_block,sm_patch_size= args.sm_patch_size,lg_patch_size=args.lg_patch_size)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+        pass
+
 # ---------------------------------------------------------------------------------------------
     elif model == "gan":
         from tf_model.train_tf import train_gan

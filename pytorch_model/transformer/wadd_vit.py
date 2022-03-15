@@ -62,7 +62,10 @@ class WADDViT(nn.Module):
 
         self.patch_size = self.patch_size
         # print(patch_dim)
-        self.pos_embedding = nn.Parameter(torch.randn(self.emb_dim, 1, self.dim))
+        # self.pos_embedding = nn.Parameter(torch.randn(self.emb_dim, 1, self.dim))
+        num_patches = (self.image_size // self.patch_size) * (self.image_size // self.patch_size)
+
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, self.dim))
         self.patch_to_embedding = nn.Linear(patch_dim, self.dim)
         self.cls_token = nn.Parameter(torch.randn(1, 1, self.dim))
         self.dropout = nn.Dropout(self.emb_dropout)
@@ -89,8 +92,10 @@ class WADDViT(nn.Module):
         y = self.patch_to_embedding(y)
         cls_tokens = self.cls_token.expand(x.shape[0], -1, -1)
         x = torch.cat((cls_tokens, y), 1)
-        shape = x.shape[0]
-        x += self.pos_embedding[0:shape]
+        # shape = x.shape[0]
+        # x += self.pos_embedding[0:shape]
+        shape = x.shape[1]
+        x += self.pos_embedding[:, 0:shape]
         x = self.dropout(x)
         x = self.transformer(x)
         x = self.to_cls_token(x[:, 0])

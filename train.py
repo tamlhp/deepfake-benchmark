@@ -78,6 +78,8 @@ def parse_args():
     parser_cross_waddvit.add_argument("--sm_patch_size",type=int,default=8,help="patch_size in cross vit")
     parser_cross_waddvit.add_argument("--lg_patch_size",type=int,default=16,help="patch_size in cross vit")
 
+    parser_multires_waddvit = subparsers.add_parser('multireswaddvit', help=' Multires  ViT transformer and WADD')
+
     parser_efficient = subparsers.add_parser('efficient', help='Efficient Net')
     parser_efficient.add_argument("--type",type=str,required=False,default="0",help="Type efficient net 0-8")
     parser_efficientdual = subparsers.add_parser('efficientdual', help='Efficient Net')
@@ -463,7 +465,18 @@ if __name__ == "__main__":
                   epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
                   adj_contrast=adj_contrast)
         pass
+    elif model == "multireswaddvit":
+        from pytorch_model.transformer.multires_wadd_vit import MultiresWADDViT
+        from pytorch_model.train_torch import train_cnn
 
+        model = MultiresWADDViT(image_size = args.image_size)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+        pass
 # ---------------------------------------------------------------------------------------------
     elif model == "gan":
         from tf_model.train_tf import train_gan

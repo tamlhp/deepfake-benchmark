@@ -62,6 +62,19 @@ def parse_args():
     parser_wavelet = subparsers.add_parser('waveletnoatt', help='WaveletNoAtt Net')
     parser_wavelet = subparsers.add_parser('wavelet_res', help='WaveletRes Net')
     parser_normal = subparsers.add_parser('normal', help='Normal Wavelet Net')
+
+
+
+
+    #################################################################
+    ################ VIT
+    #################################################################
+    parser.add_argument('--dim',type=int, default = 1024, help='dim of embeding')
+    parser.add_argument('--depth',type=int, default = 6, help='Number of attention layer in transformer module')
+    parser.add_argument('--heads',type=int, default = 8, help='number of head in attention layer')
+    parser.add_argument('--mlp_dim',type=int, default = 2048, help='dim of hidden layer in transformer layer')
+    parser.add_argument('--dim_head',type=int, default = 64, help='in transformer layer ')
+
     parser_vit = subparsers.add_parser('vit', help='ViT transformer Net')
     parser_crossvit = subparsers.add_parser('crossvit', help='CrossViT transformer Net')
     parser_efficientvit = subparsers.add_parser('efficientvit', help='CrossViT transformer Net')
@@ -77,6 +90,7 @@ def parse_args():
     parser_cross_waddvit.add_argument("--selected_lg_block",type=int,default=1,help="patch_size in cross vit")
     parser_cross_waddvit.add_argument("--sm_patch_size",type=int,default=8,help="patch_size in cross vit")
     parser_cross_waddvit.add_argument("--lg_patch_size",type=int,default=16,help="patch_size in cross vit")
+    parser_swim_vit = subparsers.add_parser('swimvit', help='Swim transformer ')
 
     parser_multires_waddvit = subparsers.add_parser('multireswaddvit', help=' Multires  ViT transformer and WADD')
 
@@ -92,6 +106,8 @@ def parse_args():
     parser_meso = subparsers.add_parser('meso4', help='Mesonet4')
     parser_xception_tf = subparsers.add_parser('xception_tf', help='Xceptionnet tensorflow')
     parser_siamese_tf = subparsers.add_parser('siamese_tf', help='siamese tensorflow')
+
+    parser_srm_twostream = subparsers.add_parser('srm', help='SRM')
 
     ##############  gc
     parser_spectrum = subparsers.add_parser('spectrum', help='siamese tensorflow')
@@ -469,7 +485,33 @@ if __name__ == "__main__":
         from pytorch_model.transformer.multires_wadd_vit import MultiresWADDViT
         from pytorch_model.train_torch import train_cnn
 
-        model = MultiresWADDViT(image_size = args.image_size)
+        model = MultiresWADDViT(image_size = args.image_size,
+                                dim=args.dim,heads=args.heads,depth=args.depth,mlp_dim=args.mlp_dim,
+                                dim_head=args.dim_head)
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+        pass
+    elif model == "swimvit":
+        from pytorch_model.transformer.swim_transformer import swin_t
+        from pytorch_model.train_torch import train_cnn
+
+        model = swin_t()
+        criterion = get_criterion_torch(args.loss)
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+        pass
+    elif model == "srm":
+        from pytorch_model.srm_twostream.twostream import Two_Stream_Net
+        from pytorch_model.train_torch import train_cnn
+
+        model = Two_Stream_Net()
         criterion = get_criterion_torch(args.loss)
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \

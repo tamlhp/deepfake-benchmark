@@ -54,7 +54,18 @@ def parse_args():
     parser_gan = subparsers.add_parser('gan', help='GAN fingerprint')
     parser_gan.add_argument("--total_train_img",type=float,required=False,default=10000,help="Total image in training set")
     parser_gan.add_argument("--total_val_img",type=int,required=False,default=2000,help="Total image in testing set")
+    parser_m2tr = subparsers.add_parser('m2tr', help='')
+    parser_m2tr.add_argument("--backbone", type=str, default="efficientnet-b0", help="")
+    parser_m2tr.add_argument("--texture_layer", type=str, default="b2", help="")
+    parser_m2tr.add_argument("--feature_layer", type=str, default="final", help="")
+    parser_m2tr.add_argument("--depth", type=int, default=0, help="")
+    parser_m2tr.add_argument("--drop_ratio", type=float, default=0.0, help="")
+    parser_m2tr.add_argument("--has_decoder", type=int, default=0, help="")
 
+    parser_f3net = subparsers.add_parser('f3net', help='')
+    parser_f3net.add_argument("--mode", type=str, default="Both", help="[Original, FAD, LFS, Both, Mix]")
+
+    parser_mat = subparsers.add_parser('mat', help='')
     # parser_afd.add_argument('--depth',type=int,default=10, help='AFD depth linit')
     # parser_afd.add_argument('--min',type=float,default=0.1, help='minimum_support')
     parser_xception = subparsers.add_parser('xception', help='Xceptionnet')
@@ -208,6 +219,70 @@ if __name__ == "__main__":
                   batch_size=args.batch_size,lr=args.lr,num_workers=args.workers,checkpoint=args.checkpoint,\
                   epochs=args.niter,print_every=args.print_every,adj_brightness=adj_brightness,adj_contrast=adj_contrast)
         pass
+    elif model == 'm2tr':
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.m2tr.m2tr import M2TR
+
+        model_cfg = {
+            'IMG_SIZE': args.image_size,
+            'BACKBONE': args.backbone,
+            'TEXTURE_LAYER': args.texture_layer,
+            'FEATURE_LAYER': args.feature_layer,
+            'DEPTH': args.depth,
+            'NUM_CLASSES': 1,
+            'DROP_RATIO': args.drop_ratio,
+            'HAS_DECODER': args.has_decoder
+        }
+        model = M2TR(model_cfg)
+        args_txt = "batch{}_lr{}".format(args.batch_size, args.lr)
+        # args_txt += "_drmlp{}_aug{}".format(args.dropout_in_mlp, args.augmentation)
+        criterion = [args.loss]
+        if args.gamma:
+            args_txt += "_gamma{}".format(args.gamma)
+            criterion.append(args.gamma)
+
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+    elif model == 'f3net':
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = False
+        torch.backends.cudnn.allow_tf32 = True
+        torch.cuda.synchronize()
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.f3net.models import F3Net
+
+        model = F3Net(mode=args.mode, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        args_txt = "f3net_batch{}_lr{}-".format(args.batch_size, args.lr)
+        criterion = [args.loss]
+        if args.gamma:
+            args_txt += "_gamma{}".format(args.gamma)
+            criterion.append(args.gamma)
+
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
+    elif model == 'mat':
+        from pytorch_model.train_torch import train_cnn
+        from pytorch_model.mat.models.MAT import MAT
+
+        model = MAT()
+        args_txt = "mat_batch{}_lr{}-".format(args.batch_size, args.lr)
+        criterion = [args.loss]
+        if args.gamma:
+            args_txt += "_gamma{}".format(args.gamma)
+            criterion.append(args.gamma)
+
+        train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
+                  image_size=args.image_size, resume=args.resume, \
+                  batch_size=args.batch_size, lr=args.lr, num_workers=args.workers, checkpoint=args.checkpoint, \
+                  epochs=args.niter, print_every=args.print_every, adj_brightness=adj_brightness,
+                  adj_contrast=adj_contrast)
 
     elif model == "dsp_fwa":
         from pytorch_model.train_torch import train_cnn

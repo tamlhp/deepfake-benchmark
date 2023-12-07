@@ -1,0 +1,1 @@
+python train.py --train_set /hdd/tam/phucnp/Dataset/ff/image/component/NeuralTexture/train/ --val_set  /hdd/tam/phucnp/Dataset/ff/image/component/NeuralTexture/test/ --batch_size 4 --niter 20 --image_size 256 --workers 4   --checkpoint m2tr_ff_NeuralTexture_checkpoint --gpu_id 0 --lr 1e-4   m2tr > m2tr_ff_NeuralTexture.log

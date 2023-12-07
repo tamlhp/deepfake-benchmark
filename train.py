@@ -1,6 +1,7 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 import torch.nn as nn
+import torch
 import argparse
 
 # from pytorch_model.train import *
@@ -236,10 +237,7 @@ if __name__ == "__main__":
         model = M2TR(model_cfg)
         args_txt = "batch{}_lr{}".format(args.batch_size, args.lr)
         # args_txt += "_drmlp{}_aug{}".format(args.dropout_in_mlp, args.augmentation)
-        criterion = [args.loss]
-        if args.gamma:
-            args_txt += "_gamma{}".format(args.gamma)
-            criterion.append(args.gamma)
+        criterion = get_criterion_torch(args.loss)
 
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \
@@ -257,10 +255,7 @@ if __name__ == "__main__":
 
         model = F3Net(mode=args.mode, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         args_txt = "f3net_batch{}_lr{}-".format(args.batch_size, args.lr)
-        criterion = [args.loss]
-        if args.gamma:
-            args_txt += "_gamma{}".format(args.gamma)
-            criterion.append(args.gamma)
+        criterion = get_criterion_torch(args.loss)
 
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \
@@ -273,10 +268,7 @@ if __name__ == "__main__":
 
         model = MAT()
         args_txt = "mat_batch{}_lr{}-".format(args.batch_size, args.lr)
-        criterion = [args.loss]
-        if args.gamma:
-            args_txt += "_gamma{}".format(args.gamma)
-            criterion.append(args.gamma)
+        criterion = get_criterion_torch(args.loss)
 
         train_cnn(model, criterion=criterion, train_set=args.train_set, val_set=args.val_set,
                   image_size=args.image_size, resume=args.resume, \

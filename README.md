@@ -1,5 +1,8 @@
 # A dual benchmarking study of facial forgery and facial forensics
 [![arXiv](https://img.shields.io/badge/arXiv-2111.12912-b31b1b.svg)](https://arxiv.org/abs/2111.12912)
+![GitHub stars](https://img.shields.io/github/stars/tamlhp/deepfake-benchmark?color=yellow&label=Stars)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftamlhp%2Fdeepfake-benchmark%2F&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+<img src="https://img.shields.io/badge/Contributions-Welcome-278ea5" alt="Contrib"/>
 
 ![](paper/attention_zip.png)
 
@@ -149,3 +152,14 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 [14] https://github.com/danmohaha/DSP-FWA
 
 
+
+----------
+**Disclaimer**
+
+Feel free to contact us if you have any queries or exciting news. In addition, we welcome all researchers to contribute to this repository and further contribute to the knowledge of this field.
+
+If you have some other related references, please feel free to create a Github issue with the paper information. We will glady update the repos according to your suggestions. (You can also create pull requests, but it might take some time for us to do the merge)
+
+
+[![HitCount](https://hits.dwyl.com/tamlhp/deepfake-benchmark.svg?style=flat-square)](http://hits.dwyl.com/tamlhp/deepfake-benchmark)
+ ![visitors](https://visitor-badge.laobi.icu/badge?page_id=tamlhp.deepfake-benchmark)

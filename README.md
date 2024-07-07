@@ -25,6 +25,7 @@ This is the official implementation of
 ## Existing Surveys
 | **Paper Title** | **Venue** | **Year** | 
 | --------------- | ---- | ---- | 
+| [A dual benchmarking study of facial forgery and facial forensics](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/cit2.12362) | _TRIT_ | 2024 |
 | [Deep learning for deepfakes creation and detection: A survey](https://www.sciencedirect.com/science/article/abs/pii/S1077314222001114) | _CVIU_ | 2022 |
 
 

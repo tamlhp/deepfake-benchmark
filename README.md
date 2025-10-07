@@ -175,7 +175,11 @@ Feel free to contact us if you have any queries or exciting news. In addition, w
 
 If you have some other related references, please feel free to create a Github issue with the paper information. We will glady update the repos according to your suggestions. (You can also create pull requests, but it might take some time for us to do the merge)
 
+----------
+**Backup Statistics**
 
 [![HitCount](https://hits.dwyl.com/tamlhp/deepfake-benchmark.svg?style=flat-square)](http://hits.dwyl.com/tamlhp/deepfake-benchmark)
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftamlhp%2Fdeepfake-benchmark%2F&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+
+![Visitors](https://margherita-gustatory-zane.ngrok-free.dev/badge/tamlhp%2Fdeepfake-benchmark.svg?ngrok-skip-browser-warning=true)
  

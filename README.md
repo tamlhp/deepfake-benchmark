@@ -33,6 +33,7 @@ This is the official implementation of
 | [Penny-Wise and Pound-Foolish in Deepfake Detection](https://arxiv.org/abs/2408.08412) | _arXiv_ | 2024 |
 | [Cross-Domain Audio Deepfake Detection: Dataset and Analysis](https://aclanthology.org/2024.emnlp-main.286/) | _EMNLP_ | 2024 |
 | [Characterizing the MrDeepFakes Sexual Deepfake Marketplace](https://www.usenix.org/conference/usenixsecurity25/presentation/han) | _USENIX Security_ | 2025 |
+| [FaceShield: Defending Facial Image against Deepfake Threats](https://openaccess.thecvf.com/content/ICCV2025/papers/Jeong_FaceShield_Defending_Facial_Image_against_Deepfake_Threats_ICCV_2025_paper.pdf) | _ICCV_ | 2025 |
 
 
 ----------

@@ -31,6 +31,7 @@ This is the official implementation of
 | [Deep learning for deepfakes creation and detection: A survey](https://www.sciencedirect.com/science/article/abs/pii/S1077314222001114) | _CVIU_ | 2022 |
 | [SONAR: Spectral-Contrastive Audio Residuals for Generalizable Deepfake Detection](https://arxiv.org/abs/2511.21325) | _arXiv_ | 2025 |
 | [Penny-Wise and Pound-Foolish in Deepfake Detection](https://arxiv.org/abs/2408.08412) | _arXiv_ | 2024 |
+| [Cross-Domain Audio Deepfake Detection: Dataset and Analysis](https://aclanthology.org/2024.emnlp-main.286/) | _EMNLP_ | 2024 |
 | [Characterizing the MrDeepFakes Sexual Deepfake Marketplace](https://www.usenix.org/conference/usenixsecurity25/presentation/han) | _USENIX Security_ | 2025 |
 
 

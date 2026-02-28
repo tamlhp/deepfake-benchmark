@@ -167,6 +167,12 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 [14] https://github.com/danmohaha/DSP-FWA
 
 
+## Techniques
+
+| **Title** | **Year** | **Venue** | **Category** | **Code** |
+| -------|------|-------|----------|------|
+| [Towards Sustainable Universal Deepfake Detection with Frequency-Domain Masking](https://doi.org/10.1109/ICASSP48485.2024.10446290) | 2026 | TOMM | frequency-domain masking, universal deepfake detection | [Code](https://github.com/chandlerbing65nm/FakeImageDetection) |
+
 
 ----------
 **Disclaimer**

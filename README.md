@@ -30,6 +30,7 @@ This is the official implementation of
 | [A Comprehensive Survey with Critical Analysis for Deepfake Speech Detection](https://arxiv.org/abs/2409.15180) | _ArXiv_ | 2024 |
 | [Deep learning for deepfakes creation and detection: A survey](https://www.sciencedirect.com/science/article/abs/pii/S1077314222001114) | _CVIU_ | 2022 |
 | [SONAR: Spectral-Contrastive Audio Residuals for Generalizable Deepfake Detection](https://arxiv.org/abs/2511.21325) | _arXiv_ | 2025 |
+| [Penny-Wise and Pound-Foolish in Deepfake Detection](https://arxiv.org/abs/2408.08412) | _arXiv_ | 2024 |
 
 
 ----------

@@ -173,7 +173,7 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 | -------|------|-------|----------|------|
 | [Towards Sustainable Universal Deepfake Detection with Frequency-Domain Masking](https://doi.org/10.1109/ICASSP48485.2024.10446290) | 2026 | TOMM | frequency-domain masking, universal deepfake detection | [Code](https://github.com/chandlerbing65nm/FakeImageDetection) |
 | [Penny-Wise and Pound-Foolish in AI-Generated Image Detection](https://www.computer.org/csdl/journal/tp/5555/01/11395536/2e4wGXfsUNi) | 2026 | TPAMI | AI-generated image detection | [Code](https://github.com/iamwangyabin/PoundNet) |
-
+| [Characterizing the MrDeepFakes Sexual Deepfake Marketplace](https://www.usenix.org/conference/usenixsecurity25/presentation/han) | 2025 | USENIX | sexual deepfake marketplace | - |
 
 ----------
 **Disclaimer**

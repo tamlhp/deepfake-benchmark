@@ -171,6 +171,7 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 
 | **Title** | **Year** | **Venue** | **Category** | **Code** |
 | -------|------|-------|----------|------|
+| <mark>[FractalForensics: Proactive Deepfake Detection and Localization via Fractal Watermarks](https://doi.org/10.1145/3746027.3754544)</mark> | 2025 | MM | deepfake | [Code](https://github.com/wangty1/fractalforensics) |
 | [Towards Sustainable Universal Deepfake Detection with Frequency-Domain Masking](https://doi.org/10.1109/ICASSP48485.2024.10446290) | 2026 | TOMM | frequency-domain masking, universal deepfake detection | [Code](https://github.com/chandlerbing65nm/FakeImageDetection) |
 | [Penny-Wise and Pound-Foolish in AI-Generated Image Detection](https://www.computer.org/csdl/journal/tp/5555/01/11395536/2e4wGXfsUNi) | 2026 | TPAMI | AI-generated image detection | [Code](https://github.com/iamwangyabin/PoundNet) |
 | [FaceShield: Defending Facial Image against Deepfake Threats](https://openaccess.thecvf.com/content/ICCV2025/papers/Jeong_FaceShield_Defending_Facial_Image_against_Deepfake_Threats_ICCV_2025_paper.pdf) | 2025 | ICCV | proactive deepfake defense | [Code](https://github.com/kuai-lab/iccv25_faceshield) |

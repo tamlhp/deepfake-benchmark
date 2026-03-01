@@ -171,6 +171,7 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 
 | **Title** | **Year** | **Venue** | **Category** | **Code** |
 | -------|------|-------|----------|------|
+| <mark>[Generalized Audio Deepfake Detection Using Frame-level Latent Information Entropy](https://doi.org/10.1109/icme59968.2025.11210096)</mark> | 2025 | ICME | audio deepfake, frame, entropy | - |
 | <mark>[ASVspoof 5: Design, collection and validation of resources for spoofing, deepfake, and adversarial attack detection using crowdsourced speech](https://doi.org/10.1016/j.csl.2025.101825)</mark> | 2025 | CSL | deepfake crowdsourcing | - |
 | <mark>[FractalForensics: Proactive Deepfake Detection and Localization via Fractal Watermarks](https://doi.org/10.1145/3746027.3754544)</mark> | 2025 | MM | deepfake watermark | [Code](https://github.com/wangty1/fractalforensics) |
 | [Towards Sustainable Universal Deepfake Detection with Frequency-Domain Masking](https://doi.org/10.1109/ICASSP48485.2024.10446290) | 2026 | TOMM | frequency-domain masking, universal deepfake detection | [Code](https://github.com/chandlerbing65nm/FakeImageDetection) |

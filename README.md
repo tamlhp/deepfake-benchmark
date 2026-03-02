@@ -171,7 +171,7 @@ dataset for deepfake forensics,” arXiv preprint arXiv:1909.12962v3, 2018.
 
 | **Title** | **Year** | **Venue** | **Category** | **Code** |
 | -------|------|-------|----------|------|
-| <mark>[Veritas: Generalizable Deepfake Detection via Pattern-Aware Reasoning](https://openreview.net/forum?id=5VXJPS1HoM)</mark> | 2025 | OpenReview | dataset, deepfake detection | [Code](https://github.com/EricTan7/Veritas) |
+| <mark>[Veritas: Generalizable Deepfake Detection via Pattern-Aware Reasoning](https://openreview.net/forum?id=5VXJPS1HoM)</mark> | 2026 | ICLR | dataset, patter reasoning | [Code](https://github.com/EricTan7/Veritas) |
 | <mark>[Lightweight Deepfake Detection Based on Multi-Feature Fusion](https://doi.org/10.3390/app15041954)</mark> | 2025 | Applied Sciences | feature fusion, lightweight | - |
 | <mark>[Generalized Audio Deepfake Detection Using Frame-level Latent Information Entropy](https://doi.org/10.1109/icme59968.2025.11210096)</mark> | 2025 | ICME | audio deepfake, frame, entropy | - |
 | <mark>[ASVspoof 5: Design, collection and validation of resources for spoofing, deepfake, and adversarial attack detection using crowdsourced speech](https://doi.org/10.1016/j.csl.2025.101825)</mark> | 2025 | CSL | deepfake crowdsourcing | - |
